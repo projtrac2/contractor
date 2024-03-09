@@ -1,0 +1,26 @@
+@charset "utf-8";
+/*
+ Ajatix Advanced CSS Drop Down Menu
+ Copyright (C) 2009-2014 Ajatix. All rights reserved.
+ http://www.ajatix.com
+*/
+.AJXCSSMenuIQDXBbD {position:relative;z-index:100;width:140px;line-height:0;}
+.AJXCSSMenuIQDXBbD ul {position:relative;display:inline-block;margin:0;padding:0;list-style-type:none;background:#f5f5f5 url(ajxmenu_files/menu-bg.gif) repeat-y bottom left;box-shadow:3px 3px 10px rgba(0,0,0,.5);}
+*+html .AJXCSSMenuIQDXBbD ul {display:inline;}
+.AJXCSSMenuIQDXBbD li {float:left;width:140px;margin:0;}
+.AJXCSSMenuIQDXBbD h1 {display:block;width:114px;overflow:hidden;padding:10px 15px 11px 11px;margin:0;font:bold 13px Verdana,Arial,Helvetica,sans-serif;line-height:13px;text-decoration:none;text-align:right;color:#333333;}
+.AJXCSSMenuIQDXBbD li a {display:block;width:125px;height:28px;white-space:nowrap;overflow:hidden;padding:0 0 0 15px;font:12px Verdana,Arial,Helvetica,sans-serif;line-height:28px;text-decoration:none;text-align:left;color:#333333;}
+.AJXCSSMenuIQDXBbD a span {display:block;padding:0 15px 0 0;}
+.AJXCSSMenuIQDXBbD li:hover > a,.AJXCSSMenuIQDXBbD li.ajxover > a {font-weight:bold;background:url(ajxmenu_files/top-mo.gif) no-repeat bottom left;}
+.AJXCSSMenuIQDXBbD li:hover > a span,.AJXCSSMenuIQDXBbD li.ajxover > a span {font-weight:bold;background:url(ajxmenu_files/top-mo.gif) no-repeat bottom right;}
+.AJXCSSMenuIQDXBbD li a.ajxtcur {background-image:url(ajxmenu_files/top-mo.gif);background-position:bottom left;background-repeat:no-repeat;}
+.AJXCSSMenuIQDXBbD li a.ajxtcur span {background-image:url(ajxmenu_files/top-mo.gif);background-position:bottom right;background-repeat:no-repeat;}
+#AJXCSSMenuIQDXBbDitem_0 {background-image:url(ajxmenu_files/indnode53.png);background-repeat:no-repeat;background-position:left center;background-color:#000000;color:#ffffff;}
+@media screen and (max-width:480px) {
+.AJXCSSMenuIQDXBbD {min-width:0;width:100%;cursor:pointer;}
+.AJXCSSMenuIQDXBbD:before {position:absolute;right:10px;content:"\2261";font:bold 28px Arial,Helvetica,sans-serif;line-height:28px;color:#333333;z-index:1;}
+.AJXCSSMenuIQDXBbD > ul {width:100%;height:0;overflow:hidden;background-repeat:repeat-x;background:#f5f5f5;border:solid 1px #d7d7d7;border-radius:2px;box-shadow:none;padding-top:28px;cursor:default;}
+.AJXCSSMenuIQDXBbD:hover ul,.AJXCSSMenuIQDXBbD .ajxover ul {height:auto;}
+.AJXCSSMenuIQDXBbD li {float:none;width:auto;}
+.AJXCSSMenuIQDXBbD li a,.AJXCSSMenuIQDXBbD li h1 {width:auto;}
+}
