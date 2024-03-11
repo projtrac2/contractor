@@ -516,8 +516,8 @@ $data =  get_output_chart($projid);
 <script src="https://code.highcharts.com/gantt/modules/pattern-fill.js"></script>
 <script src="https://code.highcharts.com/gantt/modules/accessibility.js"></script>
 <script>
-    const start_date = `<?= $project_start_date ?>`;
-    const end_date = `<?= $project_end_date ?>`;
+    const start_date = `<?= $start_date ?>`;
+    const end_date = `<?= $end_date ?>`;
     const proj_start_date = new Date(start_date);
     const proj_end_date = new Date(end_date);
     var chart;
@@ -619,12 +619,13 @@ $data =  get_output_chart($projid);
         }
     }
 
+
     $(function() {
         $('.tasks_id_header').each((index, element) => {
             var projid = $("#projid").val();
             $.ajax({
                 type: "get",
-                url: "ajax/programsOfWorks/get-wbs-achieved",
+                url: "ajax/programsOfWorks/get-wbs-achieved.php",
                 data: {
                     projid: projid,
                     site_id: $(element).next().val(),
@@ -634,6 +635,7 @@ $data =  get_output_chart($projid);
                 },
                 dataType: "json",
                 success: function(response) {
+                console.log(response);
                     let tkid = $(element).val();
                     $(`.peter-${tkid}`).html(response.table);
                 }

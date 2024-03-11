@@ -2,9 +2,9 @@
 
 class Connection
 {
-   private $server = "mysql:host=localhost;dbname=mne";
+   private $server = "mysql:host=localhost;dbname=projtrac_webiste";
    private $user = "root";
-   private $pass = "3!&o@8ProjTrack4";
+   private $pass = "";
    private $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ);
    protected $con;
 

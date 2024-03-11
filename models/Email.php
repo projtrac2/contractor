@@ -37,7 +37,7 @@ class Email
         $company_settings = $this->company_settings();
         if ($company_settings) {
             $this->url = $company_settings->main_url;
-            $this->contractor_url = $company_settings->contractor_url;
+            $this->contractor_url = '/contractor';
             $this->org = $company_settings->company_name;
             $this->org_email = $company_settings->email_address;
         }
@@ -460,6 +460,7 @@ class Email
 
     function get_template($token, $recipient_id, $notification_type_id, $notification_group_id, $notification_id, $page_url, $user_type)
     {
+        var_dump('n'.$notification_id);
         $result = false;
         $query_email_templates =  $this->db->prepare("SELECT n.id,  t.title, t.content FROM tbl_notification_types n INNER JOIN tbl_notification_templates t ON t.notification_type_id = n.id WHERE t.notification_group_id=:notification_group_id AND notification_type_id=:notification_type AND n.status=1 LIMIT 1");
         $query_email_templates->execute(array(":notification_group_id" => $notification_group_id, ":notification_type" => $notification_type_id));
@@ -567,7 +568,7 @@ class Email
     public function sendMail($subject, $body, $recipient, $recipient_name, $attachments)
     {
         $results = false;
-        $recipient = 'biwottech@gmail.com';
+        $recipient = 'pwambua25@gmail.com';
         try {
             $mail = new PHPMailer;
             // $mail->SMTPDebug = 2;
@@ -602,6 +603,7 @@ class Email
 
     public function store_notification_status($data)
     {
+        $data[':notification_id'] = 64;
         $sql = $this->db->prepare("INSERT INTO `tbl_notification_status` (notification_type_id,notification_group_id,notification_id,item_id,user_id,title,page_url,content,status,created_at) VALUES(:notification_type_id,:notification_group_id,:notification_id,:item_id,:user_id,:title,:content,:page_url,:status,:created_at)");
         $results = $sql->execute($data);
         return $results;
