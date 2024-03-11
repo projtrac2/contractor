@@ -19,14 +19,14 @@ if (isset($_POST['submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $contractor = $contractor_auth->login($email, $password);
-
+    
     //check if there are 3 attempts already
-    if ($_SESSION['attempt'] == $company_settings->login_attempts) {
-        $_SESSION['errorMessage'] = 'Attempt limit reached';
-        $contractor_auth->suspicious_activity($email);
-        header("location:index.php");
-        return;
-    } else {
+    // if ($_SESSION['attempt'] == $company_settings->login_attempts) {
+    //     $_SESSION['errorMessage'] = 'Attempt limit reached';
+    //     $contractor_auth->suspicious_activity($email);
+    //     header("location:index.php");
+    //     return;
+    // } else {
         if ($contractor) {
             //unset our attempt
             unset($_SESSION['attempt']);
@@ -34,6 +34,7 @@ if (isset($_POST['submit'])) {
             if ($contractor->first_login) {
                 header("location: set-new-password.php");
             } else {
+               
                 $_SESSION['avatar'] = $contractor->avatar;
                 $_SESSION['contractor_name'] = $contractor->fullname;
 
@@ -56,7 +57,7 @@ if (isset($_POST['submit'])) {
             header("location:index.php");
             return;
         }
-    }
+    // }
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

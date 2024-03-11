@@ -348,6 +348,10 @@ function get_quarterly_table($quarterly, $site_id, $task_id, $frequency, $output
 function get_monthly_table($monthly, $site_id, $task_id, $frequency, $output_id)
 {
     global $db;
+    $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
+    $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $task_id));
+    $totalRows_rsTasks = $query_rsTasks->rowCount();
+    $rs = $query_rsTasks->fetch();
     $table =
         '<div class="table-responsive">
             <table class="table table-bordered js-basic-example dataTable" id="direct_table">

@@ -78,13 +78,18 @@ try {
 
     function get_table_body($task_start_date, $task_end_date, $target, $start_date, $end_date, $counter)
     {
+        $contractor_start = '2023-08-01'; // 2023-07-01
+        $contractor_end = '2023-08-31';
         $tr = '';
         if (
             ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
             ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
             ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
         ) {
-            $formated_date_start = date('d M Y', strtotime($start_date));
+            if (
+                ($contractor_start == $start_date && $contractor_end == $end_date)
+            ) {
+                 $formated_date_start = date('d M Y', strtotime($start_date));
             $formated_date_end = date('d M Y', strtotime($end_date));
             $tr .=
                 '<tr>
@@ -97,6 +102,8 @@ try {
                         </td>
                     </tr>';
             $counter++;
+            }
+           
         }
         return array('table_body' => $tr, "counter" => $counter);
     }
