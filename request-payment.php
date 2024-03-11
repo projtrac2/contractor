@@ -6,7 +6,7 @@ $original_projid = $_GET['proj'];
 
 require('includes/head.php');
 if ($permission) {
-    try {
+    try { 
         $query_rsMyP =  $db->prepare("SELECT *, projcost, projstartdate AS sdate, projenddate AS edate, projcategory, progress FROM tbl_projects WHERE deleted='0' AND projid = '$projid'");
         $query_rsMyP->execute();
         $row_rsMyP = $query_rsMyP->fetch();
@@ -18,6 +18,7 @@ if ($permission) {
         $projduration = $row_rsMyP['projduration'];
         $projcat = $row_rsMyP['projcategory'];
         $projstage = $row_rsMyP["projstage"];
+        $payment_plan = $row_rsMyP['payment_plan'];
         $percent2 = number_format(calculate_project_progress($projid, $projcat), 2);
 
         $query_rsOutputs = $db->prepare("SELECT p.output as  output, o.id as opid, p.indicator, o.budget as budget, o.total_target FROM tbl_project_details o INNER JOIN tbl_progdetails p ON p.id = o.outputid WHERE projid = :projid");
@@ -72,6 +73,7 @@ if ($permission) {
             }
             return $task_compliance;
         }
+
     } catch (PDOException $ex) {
         $result = flashMessage("An error occurred: " . $ex->getMessage());
         echo $result;
@@ -92,7 +94,7 @@ if ($permission) {
             <h4 class="contentheader">
                 <i class="fa fa-calendar" aria-hidden="true"></i> Payment Request
                 <div class="btn-group" style="float:right; margin-right:10px">
-                    <input type="button" VALUE="Go Back to Projects Dashboard" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
+                    <input type="button" VALUE="Go Back" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
                 </div>
             </h4>
         </div>
@@ -395,6 +397,178 @@ if ($permission) {
         </div>
     </div>
     <!-- end body  -->
+
+    <!-- add item -->
+    <div class="modal fade" id="addFormModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form class="form-horizontal" id="modal_form_submit" action="" method="POST" enctype="multipart/form-data">
+                    <div class="modal-header" style="background-color:#03A9F4">
+                        <h4 class="modal-title" style="color:#fff" align="center" id="addModal"><i class="fa fa-plus"></i> <span id="modal_info">Payment Request</span></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="row clearfix">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="body" id="add_modal_form">
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
+                                                <i class="fa fa-calendar" aria-hidden="true"></i> Request Details
+                                            </legend>
+                                            <div class="row clearfix" style="margin-top:5px; margin-bottom:5px">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label for="project_name" class="control-label">Project *:</label>
+                                                    <div class="form-line">
+                                                        <input type="text" name="project_name" value="" id="project_name" class="form-control" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                                                    <label for="contractor_number" class="control-label">Contract Number:</label>
+                                                    <div class="form-line">
+                                                        <input type="text" name="contractor_number" value="" id="contractor_number" class="form-control" readonly>
+                                                    </div>
+                                                </div>
+                                                <div id="milestones">
+                                                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                                                        <label for="payment_phase" class="control-label">Payment Phase:</label>
+                                                        <div class="form-line">
+                                                            <select name="payment_phase" id="payment_phase" onchange="get_payment_plan_milestones()" class="form-control show-tick" style="border:1px #CCC thin solid; border-radius:5px" data-live-search="false">
+                                                                <option value="">.... Select from list ....</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                                                        <label for="request_percentage" class="control-label">Percentage:</label>
+                                                        <div class="form-line">
+                                                            <input type="text" name="request_percentage" value="" id="request_percentage" class="form-control" readonly>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                                                        <label for="request_amount" class="control-label">Request Amount:</label>
+                                                        <div class="form-line">
+                                                            <input type="text" name="amount_request" value="" id="amount_request" class="form-control" readonly>
+                                                            <input type="hidden" name="request_amount" value="" id="request_amount" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:5%"># </th>
+                                                                        <th style="width:95%">Milestone</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="milestone_table">
+
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="tasks">
+                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:5%"># </th>
+                                                                        <th style="width:20%">Output</th>
+                                                                        <th style="width:20%">Site</th>
+                                                                        <th style="width:25%">Subtask</th>
+                                                                        <th style="width:10%">Units No.</th>
+                                                                        <th style="width:10%">Unit Cost</th>
+                                                                        <th style="width:10%">Cost</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="tasks_table">
+                                                                    <tr></tr>
+                                                                    <tr id="removeTr" class="text-center">
+                                                                        <td colspan="5">Add Tasks</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot id="tasks_foot">
+                                                                    <tr>
+                                                                        <td colspan="6"><strong>Total</strong></td>
+                                                                        <td id="subtotal"></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="work_measured">
+                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:5%"># </th>
+                                                                        <th style="width:25%">Subtask</th>
+                                                                        <th style="width:10%">Target Units No.</th>
+                                                                        <th style="width:10%">Achieved Units No.</th>
+                                                                        <th style="width:10%">Request Units No.</th>
+                                                                        <th style="width:10%">Unit Cost</th>
+                                                                        <th style="width:10%">Cost</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="work_measured_table">
+                                                                    <tr></tr>
+                                                                    <tr id="removeTr" class="text-center">
+                                                                        <td colspan="5">Add Tasks</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot id="tasks_foot">
+                                                                    <tr>
+                                                                        <td colspan="6"><strong>Total</strong></td>
+                                                                        <td id="subtotal1"></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
+                                                <i class="fa fa-comment" aria-hidden="true"></i> Invoice & Remarks
+                                            </legend>
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="invoice_div">
+                                                <label for="invoice" class="control-label">Invoice Attachment:</label>
+                                                <div class="form-line">
+                                                    <input type="file" name="invoice" value="" id="invoice" class="form-control" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label class="control-label">Remarks *:</label>
+                                                <br>
+                                                <div class="form-line">
+                                                    <textarea name="comments" cols="" rows="7" class="form-control" id="comment" placeholder="Enter Comments if necessary" style="width:98%; color:#000; font-size:12px; font-family:Verdana, Geneva, sans-serif"></textarea>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- /modal-body -->
+                        <div class="modal-footer">
+                            <div class="col-md-12 text-center">
+                                <input type="hidden" name="projid" id="projid" value="">
+                                <input type="hidden" name="payment_plan" id="payment_plan" value="">
+                                <input type="hidden" name="requested_amount" id="requested_amount" value="">
+                                <input type="hidden" name="complete" id="complete" value="">
+                                <input type="hidden" name="user_name" id="username" value="<?= $user_name ?>">
+                                <input type="hidden" name="contractor_payment" id="contractor_payment" value="new">
+                                <button name="save" type="" class="btn btn-primary waves-effect waves-light" id="modal-form-submit" value="">Save</button>
+                                <button type="button" class="btn btn-warning waves-effect waves-light" data-dismiss="modal"> Cancel</button>
+                            </div>
+                        </div> <!-- /modal-footer -->
+                </form> <!-- /.form -->
+            </div> <!-- /modal-content -->
+        </div> <!-- /modal-dailog -->
+    </div>
+    <!-- End add item -->
 <?php
 } else {
     $results =  restriction();

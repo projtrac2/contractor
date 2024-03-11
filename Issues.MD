@@ -19,3 +19,12 @@
    1. Items | Target | Achived  | unit price | Cost
 
 Dashboard | Timelines | Contract | Progress |
+
+
+
+1. Stalled Status
+   1. Projects put on hold for more than 12 months should automatically change status to stalled
+2. Ongoing Projects without budget should change status to onhold and if the duration stays more than 12 months  it changes to stalled.
+3. Projects status should change to completed after inspection and acceptance and inhouse projects should change status to completed after team implementation
+4. Completed projects on dashboard should drill down .. if inhouse should be closed while the contractor projects should check on payment if done then status is closed else status is completed
+5.

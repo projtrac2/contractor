@@ -12,8 +12,22 @@ if ($permission) {
         $row_rsProjects = $query_rsProjects->fetch();
         $totalRows_rsProjects = $query_rsProjects->rowCount();
 
-        $projname = $totalRows_rsProjects > 0 ? $row_rsProjects['projname'] : "";
-        $projcat = $totalRows_rsProjects > 0 ?  $row_rsProjects["projcategory"] : '';
+        $projname = $row_rsProjects['projname'];
+        $projcode = $row_rsProjects['projcode'];
+        $projfscyear = $row_rsProjects['projfscyear'];
+        $projduration = $row_rsProjects['projduration'];
+        $projcat = $row_rsProjects['projcategory'];
+        $projstage = $row_rsProjects["projstage"];
+
+        $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
+        $query_rsTender->execute(array(":projid" => $projid));
+        $row_rsTender = $query_rsTender->fetch();
+        $totalRows_rsTender = $query_rsTender->rowCount();
+        $start_date = $end_date = '';
+        if ($totalRows_rsTender > 0) {
+            $start_date = $row_rsTender['startdate'];
+            $end_date = $row_rsTender['enddate'];
+        }
 
         $percent2 = number_format(calculate_project_progress($projid, $projcat), 2);
 
@@ -89,31 +103,36 @@ if ($permission) {
                     <div class="header" style="padding-bottom:0px">
                         <div class="button-demo" style="margin-top:-15px">
                             <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
-                            <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Dashboard</a>
+                            <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
                             <a href="project-timeline.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
                             <a href="project-progress.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
-                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; padding-left:-5px">Team</a>
+                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
                             <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <h4>
-                        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border:#CDDC39 thin solid; border-radius:5px; margin-bottom:2px; height:25px; padding-top:2px; vertical-align:center">
-                            Project Name: <font color="white"><?php echo $projname; ?></font>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border-radius:5px; height:25px; margin-bottom:2px">
-                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                    <?= $percent2 ?>%
-                                </div>
-                            </div>
-                        </div>
-                    </h4>
-                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
+                    <div class="card-header">
+                        <div class="row clearfix">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                                <ul class="list-group">
+                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
+                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
+                                    <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
+                                    <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
+                                    <li class="list-group-item"><strong>Project Progress: </strong>
+                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
+                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
+                                                <?= $percent2 ?>%
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <div class="body">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover js-basic-example dataTable">

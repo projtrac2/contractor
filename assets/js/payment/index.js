@@ -88,7 +88,7 @@ const get_details = (projid, payment_plan, project_name, contractor_number) => {
                 }
             }
         });
-    }else if (payment_plan == 3) {
+    } else if (payment_plan == 3) {
         // work measured based
         $("#work_measured").show();
         $.ajax({
@@ -187,7 +187,7 @@ function get_more_info(request_id) {
                     $("#comments_div").html(response.comments);
                     $("#attachment_div").html(response.attachment);
                     if (payment_plan == '1') {
-                        $("#milestone_table").html(response.details.milestones);
+                        $("#milestone_table1").html(response.details.milestones);
                         $("#amount_request").val(response.details.request_amount);
                         $("#request_percentage").val(response.details.request_percentage);
                         $("#requested_amount").val(response.details.request_amount);
