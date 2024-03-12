@@ -36,9 +36,6 @@ try {
         return $row_rsProcurement;
     }
 
-
-
-
     if (isset($_GET['get_payment_phases'])) {
         $projid = $_GET['projid'];
         $query_rsPayment_plan = $db->prepare("SELECT * FROM tbl_project_payment_plan WHERE projid=:projid");
@@ -66,7 +63,6 @@ try {
                     if ($total_rsPayement_plan_details > 0) {
                         while ($Rows_rsPayment_plan_details = $query_rsPayement_plan_details->fetch()) {
                             $milestone_id = $Rows_rsPayment_plan_details['milestone_id'];
-
                             $query_rsChecked = $db->prepare("SELECT * FROM tbl_milestone_output_subtasks WHERE milestone_id=:milestone_id  AND complete=0 ");
                             $query_rsChecked->execute(array(":milestone_id" => $milestone_id));
                             $totalRows_rsChecked = $query_rsChecked->rowCount();
@@ -128,6 +124,15 @@ try {
     if (isset($_GET['get_task_based_tasks'])) {
         $projid = $_GET['projid'];
 
+        $query_rsMilestone = $db->prepare("SELECT * FROM tbl_milestone WHERE outputid=:output_id ORDER BY parent ASC");
+        $query_rsMilestone->execute(array(":output_id" => $output_id));
+        $row_rsMilestone = $query_rsMilestone->fetch();
+        $totalRows_rsMilestone = $query_rsMilestone->rowCount();
+
+        if($totalRows_rsMilestone > 0){
+            
+        }
+
         $query_rsTask_Complete = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid AND complete=1");
         $query_rsTask_Complete->execute(array(':projid' => $projid));
         $total_rsTask_Complete = $query_rsTask_Complete->rowCount();
@@ -153,7 +158,7 @@ try {
 
                 if ($task_complete) {
                     $query_rsProcurement =  $db->prepare("SELECT * FROM tbl_project_tender_details WHERE projid=:projid AND site_id=:site_id AND subtask_id=:subtask_id");
-                    $query_rsProcurement->execute(array(":projid" => $projid,":site_id" => $site_id, ":subtask_id"=>$subtask_id));
+                    $query_rsProcurement->execute(array(":projid" => $projid, ":site_id" => $site_id, ":subtask_id" => $subtask_id));
                     $row_rsProcurement = $query_rsProcurement->fetch();
                     $totalRows_rsProcurement = $query_rsProcurement->rowCount();
                     if ($totalRows_rsProcurement > 0) {
@@ -324,14 +329,14 @@ try {
         if ($payment_plan == 1) {
             $item_id = $_POST['payment_phase'];
             $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-            $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => $item_id, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage,":acceptance"=>$complete, ":invoice" => $filepath, ":created_at" => $created_at));
+            $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => $item_id, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
             $payment_request_id = $db->lastInsertId();
             store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
         } else if ($payment_plan == 2) {
             if (isset($_POST['tender_id'])) {
                 $item_id = 0;
                 $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance"=>$complete,":invoice" => $filepath, ":created_at" => $created_at));
+                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
 
                 if ($result) {
                     $payment_request_id = $db->lastInsertId();
@@ -362,7 +367,7 @@ try {
             if (isset($_POST['subtask_id'])) {
                 $item_id = 0;
                 $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage,":acceptance"=>$complete, ":invoice" => $filepath, ":created_at" => $created_at));
+                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
 
                 if ($result) {
                     $payment_request_id = $db->lastInsertId();

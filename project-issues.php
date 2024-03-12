@@ -8,30 +8,44 @@ require('includes/head.php');
 
 if ($permission) {
     try {
-        $query_projdetails = $db->prepare("SELECT * FROM tbl_projects WHERE projid=:projid");
-        $query_projdetails->execute(array(":projid" => $projid));
-        $row_projdetails = $query_projdetails->fetch();
-        $projname = $row_projdetails['projname'];
-        $projcategory = $row_projdetails['projcategory'];
+        $query_rsMyP = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid='$projid'");
+        $query_rsMyP->execute();
+        $row_rsMyP = $query_rsMyP->fetch();
+        $count_rsMyP = $query_rsMyP->rowCount();
+        $projcode = $projname = $projcat = $progname = $projdesc = "";
+        $projlga = $projcommunity = [];
+        $currentdate = date("Y-m-d");
+
+        if ($count_rsMyP > 0) {
+            $projcategory = $row_rsMyP["projcategory"];
+            $projdesc = $row_rsMyP["projdesc"];
+            $projcode = $row_rsMyP["projcode"];
+            $projcommunity = explode(",", $row_rsMyP['projcommunity']);
+            $projlga = explode(",", $row_rsMyP['projlga']);
+            $progname = $row_rsMyP["progname"];
+            $projname = $row_rsMyP['projname'];
+        }
+
         $percent2 = calculate_project_progress($projid, $projcategory);
 
-        $query_issues = $db->prepare("SELECT i.id, i.origin, p.projid, p.projname AS projname,p.projcategory, category, observation, recommendation, status, priority, i.created_by AS monitor, i.date_created AS issuedate, issue_area FROM tbl_projissues i INNER JOIN tbl_projects p ON p.projid=i.projid INNER JOIN tbl_projrisk_categories c ON c.rskid=i.risk_category WHERE p.projid=:projid");
-        $query_issues->execute(array(":projid" => $projid));
-        $count_issues = $query_issues->rowCount();
+        $query_project_issues = $db->prepare("SELECT * FROM tbl_projissues WHERE projid = :projid");
+        $query_project_issues->execute(array(":projid" => $projid));
+        $totalRows_project_issues = $query_project_issues->rowCount();
+
+        function get_inspection_status($status_id)
+        {
+            global $db;
+            $sql = $db->prepare("SELECT * FROM tbl_issue_status WHERE statuskey = :status_id");
+            $sql->execute(array(":status_id" => $status_id));
+            $row = $sql->fetch();
+            $rows_count = $sql->rowCount();
+            return ($rows_count > 0) ? $row['status'] : "";
+        }
     } catch (PDOException $ex) {
         $result = flashMessage("An error occurred: " . $ex->getMessage());
         print($result);
     }
 ?>
-    <!-- JQuery Nestable Css -->
-    <link href="projtrac-dashboard/plugins/nestable/jquery-nestable.css" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/strategicplan/view-strategic-plan-framework.css">
-    <link rel="stylesheet" href="css/highcharts.css">
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
     <div class="container-fluid">
         <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
             <h4 class="contentheader">
@@ -44,82 +58,266 @@ if ($permission) {
         <div class="row clearfix">
             <div class="block-header">
                 <?= $results; ?>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="header" style="padding-bottom:0px">
-                        <div class="button-demo" style="margin-top:-15px">
-                            <a href="project-dashboard.php?proj=<?php echo $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px">Dashboard</a>
-                            <a href="project-timeline.php?proj=<?php echo $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timeline</a>
-                            <a href="project-team.php?proj=<?php echo $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
-                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; margin-left:-9px">Issues</a>
-                            <a href="project-media.php?proj=<?php echo $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Media</a>
-                        </div>
-                    </div>
-                    <h4>
-                        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border:#CDDC39 thin solid; border-radius:5px; margin-bottom:2px; height:25px; padding-top:2px; vertical-align:center">
-                            Project Name: <font color="white"><?php echo $projname; ?></font>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border-radius:5px; height:25px; margin-bottom:2px">
-                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                    <?= $percent2 ?>%
-                                </div>
-                            </div>
-                        </div>
-                    </h4>
-                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
+                    <div class="card-header">
+                        <div class="row clearfix">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                                <ul class="list-group">
+                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
+                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
+                                    <li class="list-group-item"><strong>Project Description: </strong> <?= $projdesc ?> </li>
+                                    <li class="list-group-item"><strong>Program Name: </strong> <?= $progname ?> </li>
+                                    <li class="list-group-item"><strong>Project Progress: </strong>
+                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
+                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
+                                                <?= $percent2 ?>%
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <div class="body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
+                            <table class="table table-bordered table-striped table-hover js-basic-example">
                                 <thead>
-                                    <tr class="bg-orange">
-                                        <th style="width:4%">#</th>
-                                        <th style="width:32%">Issue</th>
-                                        <th style="width:8%">Status</th>
+                                    <tr>
+                                        <th style="width:3%">#</th>
+                                        <th style="width:37%">Issue</th>
+                                        <th style="width:10%">Category</th>
+                                        <th style="width:10%">Issue Area</th>
+                                        <th style="width:10%">Impact</th>
+                                        <th style="width:10%">Priority</th>
+                                        <th style="width:10%">Resolution</th>
+                                        <th style="width:10%">Issue Date</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="previous_issues_table">
                                     <?php
-                                    if ($count_issues > 0) {
-                                        $nm = 0;
+                                    $query_allrisks = $db->prepare("SELECT c.catid, c.category, i.id AS issueid, i.issue_description, i.issue_area, i.issue_impact, i.issue_priority, i.date_created, i.status FROM tbl_projrisk_categories c left join tbl_projissues i on c.catid = i.risk_category WHERE projid = :projid");
+                                    $query_allrisks->execute(array(":projid" => $projid));
+                                    $totalrows_allrisks = $query_allrisks->rowCount();
 
-                                        while ($row_issues = $query_issues->fetch()) {
-                                            $nm = $nm + 1;
-                                            $id = $row_issues['id'];
-                                            $category = $row_issues['category'];
-                                            $observation = $row_issues['observation'];
-                                            $issueareaid = $row_issues['issue_area'];
-                                            $observation = $row_issues['observation'];
-                                            $monitorid = $row_issues['monitor'];
-                                            $recommendation = $row_issues['recommendation'];
-                                            $issuedate = $row_issues['issuedate'];
-                                            $issuestatusid = $row_issues['status'];
-                                            $priorityid = $row_issues['priority'];
+                                    $query_project =  $db->prepare("SELECT projcategory FROM tbl_projects WHERE projid=:projid");
+                                    $query_project->execute(array(":projid" => $projid));
+                                    $row_project = $query_project->fetch();
+                                    $projcategory = $row_project["projcategory"];
 
-                                            if ($issuestatusid == 1) {
-                                                $issuestatus = "Open";
-                                            } elseif ($issuestatusid == 2) {
-                                                $issuestatus = "Analysis";
-                                            } elseif ($issuestatusid == 3) {
-                                                $issuestatus = "Analyzed";
-                                            } elseif ($issuestatusid == 4) {
-                                                $issuestatus = "Escalated";
-                                            } elseif ($issuestatusid == 5) {
-                                                $issuestatus = "Continue";
-                                            } elseif ($issuestatusid == 6) {
-                                                $issuestatus = "On Hold";
-                                            } elseif ($issuestatusid == 7) {
-                                                $issuestatus = "Closed";
+                                    $issues_body = '<input type="hidden" value="0" id="clicked">';
+                                    if ($totalrows_allrisks > 0) {
+                                        $count =  0;
+                                        $success = true;
+
+                                        while ($rows_allrisks = $query_allrisks->fetch()) {
+                                            $count++;
+                                            $issueid = $rows_allrisks["issueid"];
+                                            $issueareaid = $rows_allrisks["issue_area"];
+                                            $category = $rows_allrisks["category"];
+                                            $issue = $rows_allrisks["issue_description"];
+                                            $impactid = $rows_allrisks["issue_impact"];
+                                            $priorityid = $rows_allrisks["issue_priority"];
+                                            $status_id = $rows_allrisks["status"];
+                                            $issuedate = $rows_allrisks["date_created"];
+                                            $status = get_inspection_status($status_id);
+
+                                            $query_risk_impact =  $db->prepare("SELECT * FROM tbl_risk_impact WHERE id=:impactid");
+                                            $query_risk_impact->execute(array(":impactid" => $impactid));
+                                            $row_risk_impact = $query_risk_impact->fetch();
+                                            $impact = $row_risk_impact["description"];
+
+                                            if ($priorityid == 1) {
+                                                $priority = "High";
+                                            } elseif ($priorityid == 2) {
+                                                $priority = "Medium";
+                                            } else {
+                                                $priority = "Low";
                                             }
-                                    ?>
-                                            <tr style="background-color:#fff">
-                                                <td align="center"><?php echo $nm; ?></td>
-                                                <td><?php echo $observation; ?></td>
-                                                <td <?= $styled ?>><?php echo $issuestatus; ?></td>
-                                            </tr>
-                                    <?php
+
+                                            $issues_scope = '';
+                                            $textclass = "";
+                                            if ($issueareaid == 2) {
+                                                $issue_area = "Scope";
+                                                $textclass = "text-primary";
+                                                $leftjoin = $projcategory == 2 ? "left join tbl_project_tender_details c on c.subtask_id=a.sub_task_id" : "left join tbl_project_direct_cost_plan c on c.subtask_id=a.sub_task_id";
+                                                $query_site_id = $db->prepare("SELECT site_id FROM tbl_project_adjustments WHERE issueid=:issueid GROUP BY site_id");
+                                                $query_site_id->execute(array(":issueid" => $issueid));
+                                                $sites = 0;
+                                                while ($rows_site_id = $query_site_id->fetch()) {
+                                                    $sites++;
+                                                    $site_id = $rows_site_id['site_id'];
+                                                    //$allsites = '';
+
+                                                    if ($site_id == 0) {
+                                                        $allsites = '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                    <th colspan="8">Site ' . $sites . ': Way Point Sub Tasks</th>
+                                                                </tr>';
+                                                    } else {
+                                                        $query_site = $db->prepare("SELECT site FROM tbl_project_sites WHERE site_id=:site_id");
+                                                        $query_site->execute(array(":site_id" => $site_id));
+                                                        $row_site = $query_site->fetch();
+                                                        $site = $row_site['site'];
+
+                                                        $allsites = '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                        <th colspan="8">Site ' . $sites . ': ' . $site . '</th>
+                                                                    </tr>';
+                                                    }
+
+                                                    $query_adjustments = $db->prepare("SELECT t.task, a.units, a.timeline, c.unit_cost, u.unit FROM tbl_project_adjustments a left join tbl_projissues i on i.id = a.issueid left join tbl_task t on t.tkid=a.sub_task_id " . $leftjoin . " left join tbl_measurement_units u on u.id=c.unit WHERE i.projid = :projid and issueid = :issueid and a.site_id=:site_id GROUP BY a.id");
+                                                    $query_adjustments->execute(array(":projid" => $projid, ":issueid" => $issueid, ":site_id" => $site_id));
+
+                                                    $issues_scope .= $allsites . '
+                                                            <tr class="adjustments ' . $issueid . '" style="background-color:#cccccc">
+                                                                <th>#</th>
+                                                                <th colspan="3">Sub-Task</th>
+                                                                <th>Requesting Units</th>
+                                                                <th>Additional Days</th>
+                                                                <th colspan="2">Additional Cost</th>
+                                                            </tr>';
+                                                    $scopecount = 0;
+                                                    while ($row_adjustments = $query_adjustments->fetch()) {
+                                                        $scopecount++;
+                                                        $subtask = $row_adjustments["task"];
+                                                        $units =  number_format($row_adjustments["units"]) . " " . $row_adjustments["unit"];
+                                                        $totalcost = $row_adjustments["unit_cost"] * $row_adjustments["units"];
+                                                        $timeline = $row_adjustments["timeline"] . " days";
+                                                        $issues_scope .=
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#e5e5e5">
+                                                                <td>' . $count . '.' . $sites . '.' . $scopecount . '</td>
+                                                                <td colspan="3">' . $subtask . '</td>
+                                                                <td>' . $units . ' </td>
+                                                                <td>' . $timeline . '</td>
+                                                                <td colspan="2">' . number_format($totalcost, 2) . ' </td>
+                                                            </tr>';
+                                                    }
+                                                }
+                                            } elseif ($issueareaid == 3) {
+                                                $issue_area = "Schedule";
+                                                $textclass = "text-primary";
+                                                $leftjoin = $projcategory == 2 ? "left join tbl_project_tender_details c on c.subtask_id=a.sub_task_id" : "left join tbl_project_direct_cost_plan c on c.subtask_id=a.sub_task_id";
+
+                                                $query_site_id = $db->prepare("SELECT site_id FROM tbl_project_adjustments WHERE issueid=:issueid GROUP BY site_id");
+                                                $query_site_id->execute(array(":issueid" => $issueid));
+
+                                                $sites = 0;
+                                                while ($rows_site_id = $query_site_id->fetch()) {
+                                                    $sites++;
+                                                    $site_id = $rows_site_id['site_id'];
+                                                    $allsites = '';
+
+                                                    if ($site_id == 0) {
+                                                        $allsites =
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                <th colspan="8">Site ' . $sites . ': Way Point Sub Tasks</th>
+                                                            </tr>';
+                                                    } else {
+                                                        $query_site = $db->prepare("SELECT site FROM tbl_project_sites WHERE site_id=:site_id");
+                                                        $query_site->execute(array(":site_id" => $site_id));
+                                                        $row_site = $query_site->fetch();
+                                                        $site = $row_site['site'];
+
+                                                        $allsites =
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                <th colspan="8">Site ' . $sites . ': ' . $site . '</th>
+                                                            </tr>';
+                                                    }
+
+                                                    $query_adjustments = $db->prepare("SELECT t.task, a.units, a.timeline, c.unit_cost, u.unit FROM tbl_project_adjustments a left join tbl_projissues i on i.id = a.issueid left join tbl_task t on t.tkid=a.sub_task_id " . $leftjoin . " left join tbl_measurement_units u on u.id=c.unit WHERE i.projid = :projid and issueid = :issueid and a.site_id=:site_id GROUP BY a.id");
+                                                    $query_adjustments->execute(array(":projid" => $projid, ":issueid" => $issueid, ":site_id" => $site_id));
+
+                                                    $issues_scope .= $allsites . '
+                                                            <tr class="adjustments ' . $issueid . '" style="background-color:#cccccc">
+                                                                <th>#</th>
+                                                                <th colspan="5">Sub-Task</th>
+                                                                <th colspan="2">Additional Days</th>
+                                                            </tr>';
+                                                    $scopecount = 0;
+                                                    while ($row_adjustments = $query_adjustments->fetch()) {
+                                                        $scopecount++;
+                                                        $subtask = $row_adjustments["task"];
+                                                        $units =  number_format($row_adjustments["units"]) . " " . $row_adjustments["unit"];
+                                                        $totalcost = $row_adjustments["unit_cost"] * $row_adjustments["units"];
+                                                        $timeline = $row_adjustments["timeline"] . " days";
+                                                        $issues_scope .=
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#e5e5e5">
+                                                                <td>' . $count . '.' . $sites . '.' . $scopecount . '</td>
+                                                                <td colspan="5">' . $subtask . '</td>
+                                                                <td colspan="2">' . $timeline . '</td>
+                                                            </tr>';
+                                                    }
+                                                }
+                                            } else {
+                                                $issue_area = "Cost";
+                                                $textclass = "text-primary";
+                                                $leftjoin = $projcategory == 2 ? "left join tbl_project_tender_details c on c.subtask_id=a.sub_task_id" : "left join tbl_project_direct_cost_plan c on c.subtask_id=a.sub_task_id";
+
+                                                $query_site_id = $db->prepare("SELECT site_id FROM tbl_project_adjustments WHERE issueid=:issueid GROUP BY site_id");
+                                                $query_site_id->execute(array(":issueid" => $issueid));
+
+                                                $sites = 0;
+                                                while ($rows_site_id = $query_site_id->fetch()) {
+                                                    $sites++;
+                                                    $site_id = $rows_site_id['site_id'];
+                                                    //$allsites = '';
+
+                                                    if ($site_id == 0) {
+                                                        $allsites =
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                <th colspan="8">Site ' . $sites . ': Way Point Sub Tasks</th>
+                                                            </tr>';
+                                                    } else {
+                                                        $query_site = $db->prepare("SELECT site FROM tbl_project_sites WHERE site_id=:site_id");
+                                                        $query_site->execute(array(":site_id" => $site_id));
+                                                        $row_site = $query_site->fetch();
+                                                        $site = $row_site['site'];
+
+                                                        $allsites =
+                                                            '<tr class="adjustments ' . $issueid . '" style="background-color:#a9a9a9">
+                                                                <th colspan="8">Site ' . $sites . ': ' . $site . '</th>
+                                                            </tr>';
+                                                    }
+
+                                                    $query_adjustments = $db->prepare("SELECT t.task, a.units, a.timeline, a.cost, u.unit FROM tbl_project_adjustments a left join tbl_projissues i on i.id = a.issueid left join tbl_task t on t.tkid=a.sub_task_id " . $leftjoin . " left join tbl_measurement_units u on u.id=c.unit WHERE i.projid = :projid and issueid = :issueid and a.site_id=:site_id GROUP BY a.id");
+                                                    $query_adjustments->execute(array(":projid" => $projid, ":issueid" => $issueid, ":site_id" => $site_id));
+
+                                                    $issues_scope .= $allsites . '
+                                                        <tr class="adjustments ' . $issueid . '" style="background-color:#cccccc">
+                                                            <th>#</th>
+                                                            <th colspan="3">Sub-Task</th>
+                                                            <th colspan="2">Measurement Unit</th>
+                                                            <th colspan="2">Additional Cost</th>
+                                                        </tr>';
+                                                    $scopecount = 0;
+                                                    while ($row_adjustments = $query_adjustments->fetch()) {
+                                                        $scopecount++;
+                                                        $subtask = $row_adjustments["task"];
+                                                        $unit =  $row_adjustments["unit"];
+                                                        $cost = $row_adjustments["cost"];
+
+                                                        $issues_scope .= '<tr class="adjustments ' . $issueid . '" style="background-color:#e5e5e5">
+                                                            <td>' . $count . '.' . $sites . '.' . $scopecount . '</td>
+                                                            <td colspan="3">' . $subtask . '</td>
+                                                            <td colspan="2">' . $unit . ' </td>
+                                                            <td colspan="2">' . number_format($cost, 2) . ' </td>
+                                                        </tr>';
+                                                    }
+                                                }
+                                            }
+                                            $issues_body .= '
+                                            <tr id="s_row">
+                                                <td>' . $count . '</td>
+                                                <td class="' . $textclass . '"><div onclick="adjustedscopes(' . $issueid . ')">' . $issue . '</div> </td>
+                                                <td>' . $category . '</td>
+                                                <td>' . $issue_area . ' </td>
+                                                <td>' . $impact . '</td>
+                                                <td>' . $priority . ' </td>
+                                                <td>' . $status . ' </td>
+                                                <td>' . date("d-m-Y", strtotime($issuedate)) . ' </td>
+                                            </tr>' . $issues_scope;
+
+                                            echo $issues_body;
                                         }
                                     }
                                     ?>

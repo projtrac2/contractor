@@ -83,6 +83,7 @@ if ($permission) {
                         </div>
                     </div>
                     <div class="body">
+                        <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                         <ul class="nav nav-tabs" style="font-size:14px">
                             <li class="active">
                                 <a data-toggle="tab" href="#menu1"><i class="fa fa-calendar bg-green" aria-hidden="true"></i> Time Schedule &nbsp;<span class="badge bg-green">|</span></a>
@@ -373,7 +374,6 @@ if ($permission) {
                                                     ?>
                                                 </select>
                                             </div>
-                                            <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                                         <?php
                                         }
                                         ?>
@@ -635,7 +635,7 @@ $data =  get_output_chart($projid);
                 },
                 dataType: "json",
                 success: function(response) {
-                console.log(response);
+                    console.log(response);
                     let tkid = $(element).val();
                     $(`.peter-${tkid}`).html(response.table);
                 }

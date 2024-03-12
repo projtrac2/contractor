@@ -15,7 +15,7 @@ if ($permission) {
     $payment_plan = $rows_rsprojects['payment_plan'];
 
     $payment_plan_name = "";
-    if ($payment_plan == 1) {
+    if ($payment_plan == 1) { 
         $payment_plan_name = "Milestone";
     } else if ($payment_plan == 2) {
         $payment_plan_name = "Task";

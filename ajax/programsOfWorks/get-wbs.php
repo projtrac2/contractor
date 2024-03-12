@@ -626,6 +626,7 @@ if (isset($_GET['get_wbs'])) {
         $duration_years = get_duration($min_date, $max_date);
         $currentYear = date('Y', strtotime($min_date));
         $month = date('M', strtotime($min_date));
+        
         $proj_start_year = ($month >= 7 && $month <= 12) ? $currentYear : $currentYear - 1;
 
         $duration_years = ($duration_years == 0) ? $duration_years = 1 : $duration_years;
