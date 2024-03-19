@@ -4,9 +4,9 @@ return [
     'database' => [
         'driver' => 'mysql',
         'host' => 'localhost',
-        'dbname' => 'projtrac_webiste',
+        'dbname' => 'mne',
         'username' => 'root',
-        'password' => ''
+        'password' => '3!&o@8ProjTrack4'
     ],
     'mail' => [
         'transport' => 'smtp',

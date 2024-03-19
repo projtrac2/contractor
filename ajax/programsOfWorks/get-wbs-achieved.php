@@ -1,45 +1,7 @@
-
 <?php
 include '../controller.php';
 
-function get_task_dates($task_id, $site_id)
-{
-    global $db;
-    $query_rsTask_Start_Dates = $db->prepare("SELECT MIN(start_date) AS start_date, MAX(end_date) AS end_date FROM `tbl_program_of_works` WHERE task_id=:task_id AND site_id=:site_id");
-    $query_rsTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id));
-    $Rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
-    return $Rows_rsTask_Start_Dates;
-}
-
-function filter_head($contractor_start, $contractor_end, $start_date, $end_date, $task_id, $site_id)
-{
-    $response = false;
-    $task_details = get_task_dates($task_id, $site_id);
-    $task_start_date = !is_null($task_details['start_date']) ? $task_details['start_date'] : '';
-    $task_end_date =  !is_null($task_details['end_date']) ? $task_details['end_date'] : '';
-
-    if (
-        ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
-        ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
-        ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
-    ) {
-        if ($task_start_date != '' && $task_end_date != '') {
-            if (
-                ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
-                ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
-                ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
-            ) {
-                $response = true;
-            }
-        } else {
-            $response = true;
-        }
-    }
-    return $response;
-}
-
-
-function index($duration, $start_year, $contractor_start, $contractor_end, $task_id, $site_id)
+function index($duration, $start_year)
 {
     $f_start = '07-01';
     $f_end = '06-30';
@@ -132,6 +94,16 @@ function get_achieved($site_id, $task_id, $subtask_id, $start_date, $end_date)
     return $target;
 }
 
+function get_unit_of_measure($unit)
+{
+    global $db;
+    $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
+    $query_rsIndUnit->execute(array(":unit_id" => $unit));
+    $row_rsIndUnit = $query_rsIndUnit->fetch();
+    $totalRows_rsIndUnit = $query_rsIndUnit->rowCount();
+    return $totalRows_rsIndUnit > 0 ? $row_rsIndUnit['unit'] : '';
+}
+
 function getStartAndEndDate($week, $year)
 {
     $dto = new DateTime();
@@ -142,14 +114,40 @@ function getStartAndEndDate($week, $year)
     return $ret;
 }
 
-function get_unit_of_measure($unit)
+function get_task_dates($task_id, $site_id)
 {
     global $db;
-    $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
-    $query_rsIndUnit->execute(array(":unit_id" => $unit));
-    $row_rsIndUnit = $query_rsIndUnit->fetch();
-    $totalRows_rsIndUnit = $query_rsIndUnit->rowCount();
-    return $totalRows_rsIndUnit > 0 ? $row_rsIndUnit['unit'] : '';
+    $query_rsTask_Start_Dates = $db->prepare("SELECT MIN(start_date) AS start_date, MAX(end_date) AS end_date FROM `tbl_program_of_works` WHERE task_id=:task_id AND site_id=:site_id");
+    $query_rsTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id));
+    $Rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
+    return $Rows_rsTask_Start_Dates;
+}
+
+function filter_head($contractor_start, $contractor_end, $start_date, $end_date, $task_id, $site_id)
+{
+    $response = false;
+    $task_details = get_task_dates($task_id, $site_id);
+    $task_start_date = !is_null($task_details['start_date']) ? $task_details['start_date'] : '';
+    $task_end_date =  !is_null($task_details['end_date']) ? $task_details['end_date'] : '';
+
+    if (
+        ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+        ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+        ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+    ) {
+        if ($task_start_date != '' && $task_end_date != '') {
+            if (
+                ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+            ) {
+                $response = true;
+            }
+        } else {
+            $response = true;
+        }
+    }
+    return $response;
 }
 
 function filter_body($contractor_start, $contractor_end, $start_date, $end_date, $target, $achieved, $site_id, $task_id, $subtask_id, $flag)
@@ -622,7 +620,6 @@ if (isset($_GET['get_wbs'])) {
             $annually = $details['annually'];
             $quarterly = $details['quarterly'];
             $monthly = $details['monthly'];
-            $frequency = 3;
             if ($frequency == 6) {
                 $table_details = get_annual_table($startYears, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end);
             } elseif ($frequency == 5) {

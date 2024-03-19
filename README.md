@@ -58,3 +58,5 @@ Dashboard | Timelines | Contract | Progress |
 3. Projects status should change to completed after inspection and acceptance and inhouse projects should change status to completed after team implementation
 4. Completed projects on dashboard should drill down .. if inhouse should be closed while the contractor projects should check on payment if done then status is closed else status is completed
 5.
+
+

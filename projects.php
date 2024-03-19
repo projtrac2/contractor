@@ -116,9 +116,10 @@ if ($permission) {
                                             $proj_progress = calculate_project_progress($projid, $implementation);
                                             $progress = number_format(calculate_project_progress($projid, $implementation), 2);
 
-                                            $query_rsTask_Start_Dates = $db->prepare("SELECT MIN(start_date) as start_date, MAX(end_date) as end_date FROM tbl_program_of_works WHERE projid=:projid LIMIT 1");
+                                            $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid LIMIT 1");
                                             $query_rsTask_Start_Dates->execute(array(':projid' => $projid));
                                             $rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
+                                            $activity = $rows_rsTask_Start_Dates ? "Edit" : "Add";
 
                                             $query_rsTender_start_Date = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid LIMIT 1");
                                             $query_rsTender_start_Date->execute(array(':projid' => $projid));
@@ -127,10 +128,6 @@ if ($permission) {
                                             if ($total_rsTender_start_Date > 0) {
                                                 $project_start_date =  $rows_rsTender_start_Date['startdate'];
                                                 $project_end_date =  $rows_rsTender_start_Date['enddate'];
-                                                if (!is_null($rows_rsTask_Start_Dates['start_date'])) {
-                                                    $project_start_date =  $rows_rsTask_Start_Dates['start_date'];
-                                                    $project_end_date =  $rows_rsTask_Start_Dates['end_date'];
-                                                }
                                             }
 
                                             $filter = false;
@@ -139,7 +136,6 @@ if ($permission) {
                                             $today = date("Y-m-d");
 
                                             if ($projstage == 8) {
-
                                                 if ($sub_stage == 1 || $project_start_date <= $today) {
                                                     $filter = true;
                                                 } else if ($sub_stage == 2) {
@@ -157,7 +153,6 @@ if ($permission) {
                                             $query_rsPayement_reuests =  $db->prepare("SELECT * FROM  tbl_contractor_payment_requests WHERE status <> 3 AND contractor_id=:contractor_id AND projid=:projid");
                                             $query_rsPayement_reuests->execute(array(":contractor_id" => $user_name, ":projid" => $projid));
                                             $total_rsPayement_reuests = $query_rsPayement_reuests->rowCount();
-                                            $activity = '';
                                             if ($filter) {
                                     ?>
                                                 <tr>
@@ -180,15 +175,17 @@ if ($permission) {
                                                             <ul class="dropdown-menu">
                                                                 <?php
                                                                 if ($projstage == 8) {
+                                                                    if ($sub_stage > 0) {
                                                                 ?>
-                                                                    <li>
-                                                                        <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                            <i class="fa fa-plus-square-o"></i> <?= $activity ?> Program of Works
-                                                                        </a>
-                                                                    </li>
-                                                                <?php
+                                                                        <li>
+                                                                            <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                                <i class="fa fa-plus-square-o"></i> <?= $activity ?> Program of Works
+                                                                            </a>
+                                                                        </li>
+                                                                    <?php
+                                                                    }
                                                                 } else {
-                                                                ?>
+                                                                    ?>
                                                                     <li>
                                                                         <a type="button" href="project-issues.php?proj=<?= $projid_hashed ?>" id="addFormModalBtn">
                                                                             <i class="fa fa-plus-square-o"></i> Issues

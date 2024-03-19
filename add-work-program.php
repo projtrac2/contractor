@@ -11,8 +11,8 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
         $query_rsProjects->execute(array(":projid" => $projid));
         $row_rsProjects = $query_rsProjects->fetch();
         $totalRows_rsProjects = $query_rsProjects->rowCount();
-
         $approve_details = "";
+
         if ($totalRows_rsProjects > 0) {
             $projname = $row_rsProjects['projname'];
             $projcode = $row_rsProjects['projcode'];
@@ -38,9 +38,8 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                 $end_date = $row_rsTender['enddate'];
             }
 
-            $approval_stage = $project_sub_stage == 2 ? true : false;
+            $approval_stage = $project_sub_stage > 2 ? true : false;
 ?>
-
             <!-- start body  -->
             <div class="container-fluid">
                 <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
@@ -255,9 +254,10 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             <ul class="list-group">
                                                 <li class="list-group-item list-group-item list-group-item-action active">Subtask: <span id="subtask_name"></span> </li>
                                                 <li class="list-group-item"><strong>Start Date: </strong> <span id="subtask_start_date"></span> </li>
-                                                <li class="list-group-item"><strong>Duration: </strong> <span id="subtask_duration"></span> </li>
+                                                <li class="list-group-item"><strong>Duration: </strong> <span id="subtask_duration"></span> days</li>
                                                 <li class="list-group-item"><strong>End Date: </strong> <span id="subtask_end_date"></span> </li>
                                                 <li class="list-group-item"><strong>Target: </strong> <span id="subtask_target"></span> </li>
+                                                <input type="hidden" name="total_target" id="total_target" value="">
                                             </ul>
                                         </div>
                                     </div>
