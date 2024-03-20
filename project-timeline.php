@@ -7,70 +7,26 @@ $original_projid = $_GET['proj'];
 require('includes/head.php');
 if ($permission) {
     try {
-        $query_rsMyP =  $db->prepare("SELECT *, projcost, projstartdate AS sdate, projenddate AS edate, projcategory, progress FROM tbl_projects WHERE deleted='0' AND projid = '$projid'");
+        $query_rsMyP =  $db->prepare("SELECT *, projstartdate AS sdate, projenddate AS edate, projcategory, progress FROM tbl_projects WHERE deleted='0' AND projid = '$projid'");
         $query_rsMyP->execute();
         $row_rsMyP = $query_rsMyP->fetch();
-        $implementation_type = $row_rsMyP["projcategory"];
         $projname = $row_rsMyP['projname'];
         $projcode = $row_rsMyP['projcode'];
-        $projcost = $row_rsMyP['projcost'];
         $projfscyear = $row_rsMyP['projfscyear'];
         $projduration = $row_rsMyP['projduration'];
         $projcat = $row_rsMyP['projcategory'];
         $projstage = $row_rsMyP["projstage"];
         $percent2 = number_format(calculate_project_progress($projid, $projcat), 2);
 
-        $query_rsOutputs = $db->prepare("SELECT p.output as  output, o.id as opid, p.indicator, o.budget as budget, o.total_target FROM tbl_project_details o INNER JOIN tbl_progdetails p ON p.id = o.outputid WHERE projid = :projid");
-        $query_rsOutputs->execute(array(":projid" => $projid));
-        $row_rsOutputs = $query_rsOutputs->fetch();
-        $totalRows_rsOutputs = $query_rsOutputs->rowCount();
 
-        $query_rsYear =  $db->prepare("SELECT * FROM tbl_fiscal_year where id ='$projfscyear'");
-        $query_rsYear->execute();
-        $row_rsYear = $query_rsYear->fetch();
-
-        $starting_year = $row_rsYear ? $row_rsYear['yr'] : false;
-        $start_date = $starting_year . "-07-01";
-        $end_date = date('Y-m-d', strtotime($start_date . ' + ' . $projduration . ' days'));
-        if ($projcat == 2) {
-            $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
-            $query_rsTender->execute(array(":projid" => $projid));
-            $row_rsTender = $query_rsTender->fetch();
-            $totalRows_rsTender = $query_rsTender->rowCount();
-            if ($totalRows_rsTender > 0) {
-                $start_date = $row_rsTender['startdate'];
-                $end_date = $row_rsTender['enddate'];
-            }
-        }
-
-
-        function get_task_compliance($state_id, $site_id, $task_id)
-        {
-            global $db;
-            $compliance = [];
-            $query_rsSpecifions = $db->prepare("SELECT * FROM tbl_project_specifications WHERE task_id=:task_id");
-            $query_rsSpecifions->execute(array(":task_id" => $task_id));
-            $totalRows_rsSpecifions = $query_rsSpecifions->rowCount();
-            if ($totalRows_rsSpecifions > 0) {
-                while ($row_rsSpecifions = $query_rsSpecifions->fetch()) {
-                    $specification_id = $row_rsSpecifions['id'];
-                    $query_rsCompliance = $db->prepare("SELECT * FROM tbl_project_inspection_specification_compliance WHERE state_id=:state_id AND site_id=:site_id AND specification_id=:specification_id  ORDER BY id DESC LIMIT 1");
-                    $query_rsCompliance->execute(array(":state_id" => $state_id, ":site_id" => $site_id, ":specification_id" => $specification_id));
-                    $Rows_rsCompliance = $query_rsCompliance->fetch();
-                    $totalRows_rsCompliance = $query_rsCompliance->rowCount();
-                    $compliance[] = ($totalRows_rsCompliance > 0) ? $Rows_rsCompliance['compliance'] : 0;
-                }
-            }
-
-            $task_compliance = "";
-            if (in_array(1, $compliance)) {
-                $task_compliance = "Compliant";
-            } else if (in_array(2, $compliance)) {
-                $task_compliance = "Non-Compliant";
-            } else if (in_array(2, $compliance)) {
-                $task_compliance = "On-Track";
-            }
-            return $task_compliance;
+        $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
+        $query_rsTender->execute(array(":projid" => $projid));
+        $row_rsTender = $query_rsTender->fetch();
+        $totalRows_rsTender = $query_rsTender->rowCount();
+        $start_date = $end_date = '';
+        if ($totalRows_rsTender > 0) {
+            $start_date = $row_rsTender['startdate'];
+            $end_date = $row_rsTender['enddate'];
         }
     } catch (PDOException $ex) {
         $result = flashMessage("An error occurred: " . $ex->getMessage());
@@ -80,13 +36,6 @@ if ($permission) {
     <style>
         @import "https://code.highcharts.com/dashboards/css/dashboards.css";
     </style>
-    <link href="projtrac-dashboard/plugins/nestable/jquery-nestable.css" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/strategicplan/view-strategic-plan-framework.css">
-    <script src="https://code.highcharts.com/gantt/highcharts-gantt.js"></script>
-    <script src="https://code.highcharts.com/gantt/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/gantt/modules/pattern-fill.js"></script>
-    <script src="https://code.highcharts.com/gantt/modules/accessibility.js"></script>
-
     <div class="container-fluid">
         <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
             <h4 class="contentheader">
@@ -103,43 +52,38 @@ if ($permission) {
                     <div class="header" style="padding-bottom:0px">
                         <div class="button-demo" style="margin-top:-15px">
                             <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
-                            <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Dashboard</a>
-                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; padding-left:-5px">Timelines</a>
+                            <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
+                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
                             <a href="project-progress.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
                             <a href="project-team.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
                             <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <h4>
-                        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border:#CDDC39 thin solid; border-radius:5px; margin-bottom:2px; height:25px; padding-top:2px; vertical-align:center">
-                            Project Name: <font color="white"><?php echo $projname; ?></font>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" style="font-size:15px; background-color:#CDDC39; border-radius:5px; height:25px; margin-bottom:2px">
-                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                    <?= $percent2 ?>%
-                                </div>
-                            </div>
-                        </div>
-                    </h4>
-                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
-                    <div class="row clearfix" style="border:1px solid #f0f0f0; border-radius:3px; margin-left:3px; margin-right:3px">
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="margin-top:15px; margin-bottom:15px">
-                            <strong>Project Code: </strong> <?= $projcode ?>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="margin-top:15px; margin-bottom:15px">
-                            <strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?>
-                        </div>
-                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="margin-top:15px; margin-bottom:15px">
-                            <strong>Project End Date: </strong> <?= date('d M Y', strtotime($end_date)); ?>
+                    <div class="card-header">
+                        <div class="row clearfix">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                                <ul class="list-group">
+                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
+                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
+                                    <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
+                                    <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
+                                    <li class="list-group-item"><strong>Project Progress: </strong>
+                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
+                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
+                                                <?= $percent2 ?>%
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="body">
+                        <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                         <ul class="nav nav-tabs" style="font-size:14px">
                             <li class="active">
                                 <a data-toggle="tab" href="#menu1"><i class="fa fa-calendar bg-green" aria-hidden="true"></i> Time Schedule &nbsp;<span class="badge bg-green">|</span></a>
@@ -430,7 +374,6 @@ if ($permission) {
                                                     ?>
                                                 </select>
                                             </div>
-                                            <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                                         <?php
                                         }
                                         ?>
@@ -566,10 +509,12 @@ function get_output_chart($projid)
 
     return $series_arr;
 }
-
-
 $data =  get_output_chart($projid);
 ?>
+<script src="https://code.highcharts.com/gantt/highcharts-gantt.js"></script>
+<script src="https://code.highcharts.com/gantt/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/gantt/modules/pattern-fill.js"></script>
+<script src="https://code.highcharts.com/gantt/modules/accessibility.js"></script>
 <script>
     const start_date = `<?= $start_date ?>`;
     const end_date = `<?= $end_date ?>`;
@@ -690,7 +635,7 @@ $data =  get_output_chart($projid);
                 },
                 dataType: "json",
                 success: function(response) {
-                console.log(response);
+                    console.log(response);
                     let tkid = $(element).val();
                     $(`.peter-${tkid}`).html(response.table);
                 }

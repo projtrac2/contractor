@@ -67,27 +67,8 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <?php
-                                                    $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
-                                                    $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $msid));
-                                                    $totalRows_rsTasks = $query_rsTasks->rowCount();
-                                                    if ($totalRows_rsTasks > 0) {
-                                                        $tcounter = 0;
-                                                        while ($row_rsTasks = $query_rsTasks->fetch()) {
-                                                            $tcounter++;
-                                                            $row_rsTasks['output_id'] = $output_id;
-                                                            $row_rsTasks['site_id'] = $site_id;
-                                                            $row_rsTasks['task_id'] = $msid;
-                                                            $task_name = $row_rsTasks['task'];
-                                                            $task_id = $row_rsTasks['tkid'];
-                                                    ?>
-                                                            <input type="hidden" value="<?php echo $site_id ?>" class="site_id_header" />
-                                                            <input type="hidden" value="<?php echo $task_id ?>" class="subtask_id_header" />
-                                                            <input type="hidden" value="<?php echo $msid  ?>" class="task_id_header" />
-                                                    <?php }
-                                                    } ?>
                                                     <input type="hidden" value="<?php echo $output_id ?>" class="output_id_header" />
-                                                    <div class="peter-<?php echo $msid ?>"></div>
+                                                    <div class="peter-<?php echo $site_id . $msid ?>"></div>
                                                     <div class="table-responsive">
                                                     </div>
                                                 </div>
@@ -153,31 +134,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <?php
-                                        $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
-                                        $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $msid));
-                                        $totalRows_rsTasks = $query_rsTasks->rowCount();
-                                        if ($totalRows_rsTasks > 0) {
-                                            $tcounter = 0;
-                                            while ($row_rsTasks = $query_rsTasks->fetch()) {
-                                                $row_rsTasks['output_id'] = $output_id;
-                                                $row_rsTasks['site_id'] = $site_id;
-                                                $row_rsTasks['task_id'] = $msid;
-                                                $task_name = $row_rsTasks['task'];
-                                                $task_id = $row_rsTasks['tkid'];
-
-                                                $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
-                                                $query_rsTask_Start_Dates->execute(array(':task_id' => $msid, ':site_id' => 0, ":subtask_id" => $task_id));
-                                                $row_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
-                                                $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
-                                        ?>
-                                                <input type="hidden" value="<?php echo $site_id ?>" class="site_id_header" />
-                                                <input type="hidden" value="<?php echo $task_id ?>" class="subtask_id_header" />
-                                                <input type="hidden" value="<?php echo $msid  ?>" class="task_id_header" />
-                                        <?php }
-                                        } ?>
                                         <input type="hidden" value="<?php echo $output_id ?>" class="output_id_header" />
-                                        <div class="peter-<?php echo $msid ?>"></div>
+                                        <div class="peter-<?php echo $site_id . $msid ?>"></div>
                                     </div>
                                 </div>
                         <?php

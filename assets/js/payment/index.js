@@ -1,7 +1,6 @@
 const ajax_url = 'ajax/payment/index';
 $(document).ready(function () {
     $("#invoice_div").hide();
-
     $("#modal_form_submit").submit(function (e) {
         e.preventDefault();
         var form = $('#modal_form_submit')[0];
@@ -88,7 +87,7 @@ const get_details = (projid, payment_plan, project_name, contractor_number) => {
                 }
             }
         });
-    }else if (payment_plan == 3) {
+    } else if (payment_plan == 3) {
         // work measured based
         $("#work_measured").show();
         $.ajax({
@@ -172,7 +171,7 @@ function set_details(details) {
 function get_more_info(request_id) {
     $("#project_approve_div").hide();
     $("#modal-form-submit").hide();
-    var payment_plan = $("#payment_plan").val();
+    var payment_plan = $("#payment_plan1").val();
     if (request_id != "") {
         $.ajax({
             type: "get",
@@ -183,15 +182,16 @@ function get_more_info(request_id) {
             },
             dataType: "json",
             success: function (response) {
+                console.log(response)
                 if (response.details.success) {
                     $("#comments_div").html(response.comments);
                     $("#attachment_div").html(response.attachment);
                     if (payment_plan == '1') {
-                        $("#milestone_table").html(response.details.milestones);
-                        $("#amount_request").val(response.details.request_amount);
-                        $("#request_percentage").val(response.details.request_percentage);
-                        $("#requested_amount").val(response.details.request_amount);
-                        $("#payment_phase").val(response.details.payment_plan);
+                        $("#milestone_table1").html(response.details.milestones);
+                        $("#amount_request_more").val(response.details.request_amount);
+                        $("#request_percentage_more").val(response.details.request_percentage);
+                        $("#requested_amount_more").val(response.details.request_amount);
+                        $("#payment_phase_more").val(response.details.payment_plan);
                     } else {
                         $("#tasks_table").html(response.details.tasks);
                         $("#subtotal").html(response.details.task_amount);

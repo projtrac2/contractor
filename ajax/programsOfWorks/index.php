@@ -1,6 +1,16 @@
 <?php
 include '../controller.php';
 try {
+    if (isset($_GET['compare_dates'])) {
+        $project_end_date = date('Y-m-d', strtotime($_GET["project_end_date"]));
+        $start_date = date('Y-m-d', strtotime($_GET["start_date"]));
+        $duration = $_GET["duration"];
+        $end_date = date('Y-m-d', strtotime($start_date . ' + ' . $duration . ' days'));
+        $success = $project_end_date >= $end_date ? true : false;
+        echo json_encode(array("success" => $success, "subtask_end_date" => $end_date));
+    }
+
+
     if (isset($_GET['get_tasks'])) {
         $site_id = $_GET['site_id'];
         $projid = $_GET['projid'];
@@ -106,15 +116,13 @@ try {
             $stmt = $db->prepare("DELETE FROM `tbl_project_target_breakdown` WHERE projid=:projid AND output_id=:output_id AND site_id=:site_id AND task_id=:task_id AND subtask_id=:subtask_id ");
             $results = $stmt->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $tkid));
         }
-
-
         echo json_encode(array("success" => true));
     }
 
     if (isset($_POST['approve_stage'])) {
         $projid = $_POST['projid'];
         $sql = $db->prepare("UPDATE tbl_projects SET proj_substage=:proj_substage WHERE  projid=:projid");
-        $result  = $sql->execute(array(":proj_substage" => 2, ":projid" => $projid));
+        $result  = $sql->execute(array(":proj_substage" => 3, ":projid" => $projid));
         $results =  $mail->send_master_data_email($projid, 6, '');
         echo json_encode(array('success' => $result));
     }

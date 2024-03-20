@@ -625,7 +625,7 @@ class Email
     public function sendMail($subject, $body, $recipient, $recipient_name, $attachments)
     {
         $results = false;
-        $recipient = 'biwottech@gmail.com';
+        $recipient = 'pwambua25@gmail.com';
         try {
             $mail = new PHPMailer;
             // $mail->SMTPDebug = 2;
