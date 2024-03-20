@@ -48,14 +48,11 @@ try {
                 $payment_plan_id = $Rows_rsPayment_plan['id'];
                 $payment_plan = $Rows_rsPayment_plan['payment_plan'];
 
-
-                $query_rsPayement_requests =  $db->prepare("SELECT * FROM tbl_contractor_payment_requests WHERE item_id=:item_id AND status=6");
+                $query_rsPayement_requests =  $db->prepare("SELECT * FROM tbl_contractor_payment_requests WHERE item_id=:item_id");
                 $query_rsPayement_requests->execute(array(":item_id" => $payment_plan_id));
                 $total_rsPayement_requests = $query_rsPayement_requests->rowCount();
 
-                if ($total_rsPayement_requests > 0) {
-                    $options .= '<option value="' . $payment_plan_id . '">' . $payment_plan . '</option>';
-                } else {
+                if ($total_rsPayement_requests == 0) {
                     $query_rsPayement_plan_details =  $db->prepare("SELECT * FROM tbl_project_payment_plan_details WHERE payment_plan_id =:payment_plan_id");
                     $query_rsPayement_plan_details->execute(array('payment_plan_id' => $payment_plan_id));
                     $total_rsPayement_plan_details = $query_rsPayement_plan_details->rowCount();
@@ -123,14 +120,12 @@ try {
 
     if (isset($_GET['get_task_based_tasks'])) {
         $projid = $_GET['projid'];
-
         $query_rsMilestone = $db->prepare("SELECT * FROM tbl_milestone WHERE outputid=:output_id ORDER BY parent ASC");
         $query_rsMilestone->execute(array(":output_id" => $output_id));
         $row_rsMilestone = $query_rsMilestone->fetch();
         $totalRows_rsMilestone = $query_rsMilestone->rowCount();
 
-        if($totalRows_rsMilestone > 0){
-            
+        if ($totalRows_rsMilestone > 0) {
         }
 
         $query_rsTask_Complete = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid AND complete=1");
@@ -327,6 +322,7 @@ try {
 
 
         if ($payment_plan == 1) {
+            $complete = 0;
             $item_id = $_POST['payment_phase'];
             $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
             $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => $item_id, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
@@ -388,6 +384,7 @@ try {
                 }
             }
         }
+        return;
         echo json_encode(array("success" => true));
     }
 

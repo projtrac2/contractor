@@ -15,7 +15,7 @@ if ($permission) {
     $payment_plan = $rows_rsprojects['payment_plan'];
 
     $payment_plan_name = "";
-    if ($payment_plan == 1) { 
+    if ($payment_plan == 1) {
         $payment_plan_name = "Milestone";
     } else if ($payment_plan == 2) {
         $payment_plan_name = "Task";
@@ -136,13 +136,12 @@ if ($permission) {
         if ($totalRows_rsPayment_plan > 0) {
             while ($Rows_rsPayment_plan = $query_rsPayment_plan->fetch()) {
                 $payment_plan_id = $Rows_rsPayment_plan['id'];
-
-                $query_rsPayement_requests =  $db->prepare("SELECT * FROM tbl_contractor_payment_requests WHERE item_id=:item_id AND status=6");
+                $query_rsPayement_requests =  $db->prepare("SELECT * FROM tbl_contractor_payment_requests WHERE item_id=:item_id");
                 $query_rsPayement_requests->execute(array(":item_id" => $payment_plan_id));
                 $total_rsPayement_requests = $query_rsPayement_requests->rowCount();
 
                 if ($total_rsPayement_requests > 0) {
-                    $request_payment[] =  true;
+                    $request_payment[] =  false;
                 } else {
                     $query_rsPayement_plan_details =  $db->prepare("SELECT * FROM tbl_project_payment_plan_details WHERE payment_plan_id =:payment_plan_id");
                     $query_rsPayement_plan_details->execute(array('payment_plan_id' => $payment_plan_id));
@@ -151,7 +150,6 @@ if ($permission) {
                     if ($total_rsPayement_plan_details > 0) {
                         while ($Rows_rsPayment_plan_details = $query_rsPayement_plan_details->fetch()) {
                             $milestone_id = $Rows_rsPayment_plan_details['milestone_id'];
-
                             $query_rsChecked = $db->prepare("SELECT * FROM tbl_milestone_output_subtasks WHERE milestone_id=:milestone_id  AND complete=0 ");
                             $query_rsChecked->execute(array(":milestone_id" => $milestone_id));
                             $totalRows_rsChecked = $query_rsChecked->rowCount();
@@ -162,7 +160,9 @@ if ($permission) {
                 }
             }
         }
-        return in_array(true, $request_payment) ? true : false;
+
+        var_dump($request_payment);
+        return !empty($request_payment) && in_array(true, $request_payment) ? true : false;
     }
 
     function tasks_based($projid)
@@ -225,11 +225,17 @@ if ($permission) {
                 <div class="btn-group" style="float:right; margin-right:10px">
                     <?php
                     $request_payment = check_value_statuses($projid, $payment_plan);
-                    // if ($request_payment) {
+                    if ($request_payment) {
+                        if ($payment_plan == 1) {
                     ?>
-                    <input type="button" VALUE="Request Payment" class="btn btn-warning pull-right" data-toggle="modal" data-target="#addFormModal" onclick="get_details(<?= $projid ?>, <?= $payment_plan ?>, '<?= htmlspecialchars($project_name) ?>', '<?= $contractor_number ?>', '<?= $complete ?>')" id="btnback">
+                            <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" data-target="#addFormModal" onclick="get_details(<?= $projid ?>, <?= $payment_plan ?>, '<?= htmlspecialchars($project_name) ?>', '<?= $contractor_number ?>', '<?= $complete ?>')" id="btnback">
+                        <?php
+                        } else {
+                        ?>
+                            <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" data-target="#addFormModal" onclick="request_payment(<?= $projid ?>)" id="btnback">
                     <?php
-                    // }
+                        }
+                    }
                     ?>
                     <input type="button" VALUE="Go Back" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback" style="margin-right:30px; padding-left:15px;">
                 </div>
@@ -246,7 +252,8 @@ if ($permission) {
                                     <li class="list-group-item"><strong>Contract Number: </strong> <?= $contract_no ?> </li>
                                     <li class="list-group-item"><strong>Contract Cost: </strong> Ksh. <?php echo number_format($amount, 2); ?> </li>
                                     <li class="list-group-item"><strong>Payment Plan: </strong><?= $payment_plan_name; ?> </li>
-                                    <input type="hidden" name="payment_plan" id="payment_plan" value="<?= $payment_plan ?>">
+                                    <input type="hidden" name="payment_plan" id="payment_plan1" value="<?= $payment_plan ?>">
+                                    <input type="hidden" name="project_id" id="project_id" value="<?= $projid ?>">
                                 </ul>
                             </div>
                         </div>
@@ -283,9 +290,9 @@ if ($permission) {
                                         <thead>
                                             <tr class="bg-deep-purple">
                                                 <th style="width:5%">#</th>
-                                                <th style="width:45%">Project Name</th>
                                                 <th style="width:20%">Requested Amount</th>
                                                 <th style="width:20%">Date Requested</th>
+                                                <th style="width:45%">Status</th>
                                                 <th style="width:10%">Details</th>
                                             </tr>
                                         </thead>
@@ -308,7 +315,9 @@ if ($permission) {
 
                                                     $stage = "";
                                                     $status  = "Pending";
-                                                    if ($payment_stage == 1) {
+                                                    if ($payment_stage == 0) {
+                                                        $status  = "Draft";
+                                                    } else if ($payment_stage == 1) {
                                                         $stage = "Team Leader";
                                                     } else if ($payment_stage == 1) {
                                                         $status  = $payment_status == 1 ? "Pending" : "Rejected";
@@ -323,9 +332,9 @@ if ($permission) {
                                             ?>
                                                     <tr class="">
                                                         <td style="width:5%"><?= $counter ?></td>
-                                                        <td style="width:45%"><?= $project_name ?></td>
                                                         <td style="width:20%"><?= number_format($amount_paid, 2) ?></td>
                                                         <td style="width:20%"><?= date("d M Y", strtotime($payment_requested_date)) ?></td>
+                                                        <td style="width:45%"><?= $status ?></td>
                                                         <td style="width:10%">
                                                             <div class="btn-group">
                                                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -337,6 +346,13 @@ if ($permission) {
                                                                             <i class="fa fa-info"></i>More Info
                                                                         </a>
                                                                     </li>
+                                                                    <?php
+                                                                    if ($payment_stage == 0) {
+                                                                    ?>
+
+                                                                    <?php
+                                                                    }
+                                                                    ?>
                                                                 </ul>
                                                             </div>
                                                         </td>
@@ -358,7 +374,6 @@ if ($permission) {
                                         <thead>
                                             <tr class="bg-indigo">
                                                 <th style="width:5%">#</th>
-                                                <th style="width:45%">Project Name</th>
                                                 <th style="width:10%">Amount Paid</th>
                                                 <th style="width:10%">Date Requested</th>
                                                 <th style="width:10%">Paid By</th>
@@ -414,7 +429,6 @@ if ($permission) {
                                             ?>
                                                     <tr class="">
                                                         <td style="width:5%"><?= $counter ?></td>
-                                                        <td style="width:45%"><?= $project_name ?></td>
                                                         <td style="width:10%"><?= number_format($amount_paid, 2) ?></td>
                                                         <td style="width:10%"><?= date("Y-m-d", strtotime($date_requested)) ?></td>
                                                         <td style="width:10%"><?= $officer ?></td>
@@ -463,7 +477,7 @@ if ($permission) {
     <div class="modal fade" id="moreItemModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form class="form-horizontal" id="modal_form_submit" action="" method="POST" enctype="multipart/form-data">
+                <form class="form-horizontal" id="modal_form_submit1" action="" method="POST" enctype="multipart/form-data">
                     <div class="modal-header" style="background-color:#03A9F4">
                         <h4 class="modal-title" style="color:#fff" align="center" id="addModal"><i class="fa fa-plus"></i> <span id="modal_info">Payment Request</span></h4>
                     </div>
@@ -483,20 +497,20 @@ if ($permission) {
                                                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                                                         <label for="payment_phase" class="control-label">Payment Phase:</label>
                                                         <div class="form-line">
-                                                            <input type="text" name="payment_phase" value="" id="payment_phase" class="form-control" readonly>
+                                                            <input type="text" name="payment_phase_more" value="" id="payment_phase_more" class="form-control" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                                                         <label for="request_percentage" class="control-label">Percentage:</label>
                                                         <div class="form-line">
-                                                            <input type="text" name="request_percentage" value="" id="request_percentage" class="form-control" readonly>
+                                                            <input type="text" name="request_percentage_more" value="" id="request_percentage_more" class="form-control" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
                                                         <label for="request_amount" class="control-label">Request Amount:</label>
                                                         <div class="form-line">
-                                                            <input type="text" name="amount_request" value="" id="amount_request" class="form-control" readonly>
-                                                            <input type="hidden" name="request_amount" value="" id="request_amount" class="form-control">
+                                                            <input type="text" name="amount_request_more" value="" id="amount_request_more" class="form-control" readonly>
+                                                            <input type="hidden" name="request_amount_more" value="" id="request_amount_more" class="form-control">
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 30px;">
@@ -777,7 +791,7 @@ if ($permission) {
                     <div class="modal-footer">
                         <div class="col-md-12 text-center">
                             <input type="hidden" name="projid" id="projid" value="">
-                            <input type="hidden" name="payment_plan" id="payment_plan" value="">
+                            <input type="hidden" name="payment_plan" id="payment_plan" value="<?= $payment_plan ?>">
                             <input type="hidden" name="requested_amount" id="requested_amount" value="">
                             <input type="hidden" name="complete" id="complete" value="">
                             <input type="hidden" name="user_name" id="username" value="<?= $user_name ?>">
