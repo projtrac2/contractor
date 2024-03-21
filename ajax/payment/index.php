@@ -554,6 +554,107 @@ try {
         return array("success" => true, "tasks" => $tasks, "task_amount" => number_format($task_amount, 2));
     }
 
+
+    function create_request($projid, $payment_plan)
+    {
+        global $db, $user_name;
+        $status = $stage = $complete = $requested_amount = $request_id = 0;
+        $filepath = '';
+        $created_at = date('Y-m-d');
+        $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
+        $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
+        return $result ? $db->lastInsertId() : false;
+    }
+
+    function create_request_details($projid, $output_id, $site_id, $task_id, $subtask_id, $payment_request_id, $request_id, $unit_cost, $request_units)
+    {
+        global $db;
+        $tender_id = 0;
+        $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_details (projid,output_id,site_id,task_id,subtask_id,tender_item_id,payment_request_id,request_id,unit_cost,units_no) VALUES(:projid,:output_id,:site_id,:task_id,:subtask_id,:tender_item_id,:payment_request_id,:request_id,:unit_cost,:units_no)");
+        $result = $sql->execute(array(":projid" => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":tender_item_id" => $tender_id, ":payment_request_id" => $payment_request_id, ":request_id" => $request_id, ":unit_cost" => $unit_cost, ":units_no" => $request_units));
+        return $result;
+    }
+
+    function get_achieved($site_id, $subtask_id)
+    {
+        global $db;
+        $query_rsMilestone_cummulative =  $db->prepare("SELECT SUM(achieved) AS cummulative FROM tbl_project_monitoring_checklist_score WHERE subtask_id=:subtask_id AND site_id=:site_id ");
+        $query_rsMilestone_cummulative->execute(array(":subtask_id" => $subtask_id, ':site_id' => $site_id));
+        $row_rsMilestone_cummulative = $query_rsMilestone_cummulative->fetch();
+        return (!is_null($row_rsMilestone_cummulative['cummulative']))  ?  $row_rsMilestone_cummulative['cummulative'] : 0;
+    }
+
+    function get_unit_cost($projid, $site_id, $subtask_id)
+    {
+        global $db;
+        $query_rsProcurement =  $db->prepare("SELECT * FROM tbl_project_tender_details WHERE projid=:projid AND subtask_id=:subtask_id AND site_id=:site_id ");
+        $query_rsProcurement->execute(array(":projid" => $projid, ":site_id" => $site_id, ":subtask_id" => $subtask_id));
+        $row_rsProcurement = $query_rsProcurement->fetch();
+        $totalRows_rsProcurement = $query_rsProcurement->rowCount();
+        return ($totalRows_rsProcurement > 0) ?  $row_rsProcurement['unit_cost'] : 0;
+    }
+
+    function get_requested_units($projid, $site_id, $subtask_id)
+    {
+        global $db;
+        $query_rsPayment =  $db->prepare("SELECT SUM(d.units_no) AS requested_units FROM tbl_contractor_payment_requests r INNER JOIN tbl_contractor_payment_request_details d ON d.request_id=r.request_id WHERE d.projid=:projid AND d.site_id=:site_id AND d.subtask_id=:subtask_id  AND r.status<>6");
+        $query_rsPayment->execute(array(":projid" => $projid, ":site_id" => $site_id, ":subtask_id" => $subtask_id));
+        $Rows_rsPayment = $query_rsPayment->fetch();
+        return !is_null($Rows_rsPayment['requested_units']) ?   $Rows_rsPayment['requested_units'] : 0;
+    }
+
+    if (isset($_GET['create_request'])) {
+        $projid = $_GET['projid'];
+        $payment_plan = $_GET['payment_plan'];
+        $payment_request_id = create_request($projid, $payment_plan);
+        if ($payment_request_id) {
+            if ($payment_plan == 2) {
+                $query_rsTask_Complete = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid ");
+                $query_rsTask_Complete->execute(array(':projid' => $projid));
+                $total_rsTask_Complete = $query_rsTask_Complete->rowCount();
+                if ($total_rsTask_Complete > 0) {
+                    while ($rows_rsTask_Complete = $query_rsTask_Complete->fetch()) {
+                        $subtask_id = $rows_rsTask_Complete['subtask_id'];
+                        $site_id = $rows_rsTask_Complete['site_id'];
+                        $output_id = $rows_rsTask_Complete['output_id'];
+                        $site_id = $rows_rsTask_Complete['site_id'];
+                        $task_id = $rows_rsTask_Complete['task_id'];
+                        $achieved = get_achieved($site_id, $subtask_id);
+                        $requested_units = get_requested_units($projid, $site_id, $subtask_id);
+                        $target_units = $achieved - $requested_units;
+                        if ($target_units > 0) {
+                            $request_id = 0;
+                            $unit_cost = get_unit_cost($projid, $site_id, $subtask_id);
+                            $response = create_request_details($projid, $output_id, $site_id, $task_id, $subtask_id, $payment_request_id, $request_id, $unit_cost, $request_units);
+                        }
+                    }
+                }
+            } else {
+                $query_rsTask_Complete = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid  AND complete=1");
+                $query_rsTask_Complete->execute(array(':projid' => $projid));
+                $total_rsTask_Complete = $query_rsTask_Complete->rowCount();
+                if ($total_rsTask_Complete > 0) {
+                    while ($rows_rsTask_Complete = $query_rsTask_Complete->fetch()) {
+                        $subtask_id = $rows_rsTask_Complete['subtask_id'];
+                        $site_id = $rows_rsTask_Complete['site_id'];
+                        $output_id = $rows_rsTask_Complete['output_id'];
+                        $site_id = $rows_rsTask_Complete['site_id'];
+                        $task_id = $rows_rsTask_Complete['task_id'];
+                        $requested_units = get_requested_units($projid, $site_id, $subtask_id);
+                        if ($requested_units == 0) {
+                            $request_id = 0;
+                            $unit_cost = get_unit_cost($projid, $site_id, $subtask_id);
+                            $request_units = get_achieved($site_id, $subtask_id);
+                            $response = create_request_details($projid, $output_id, $site_id, $task_id, $subtask_id, $payment_request_id, $request_id, $unit_cost, $request_units);
+                        }
+                    }
+                }
+            }
+        }
+        $request_id_hashed = base64_encode("projid54321{$payment_request_id}");
+        echo json_encode(array("success" => true, "redirect_url" =>  "request-payment?request_id=" . $request_id_hashed));
+    }
+
     if (isset($_GET['get_more_info'])) {
         $request_id = $_GET['request_id'];
         $query_rsPayement_reuests =  $db->prepare("SELECT * FROM  tbl_contractor_payment_requests WHERE id=:request_id");

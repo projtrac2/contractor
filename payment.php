@@ -160,8 +160,6 @@ if ($permission) {
                 }
             }
         }
-
-        var_dump($request_payment);
         return !empty($request_payment) && in_array(true, $request_payment) ? true : false;
     }
 
@@ -232,7 +230,7 @@ if ($permission) {
                         <?php
                         } else {
                         ?>
-                            <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" data-target="#addFormModal" onclick="request_payment(<?= $projid ?>)" id="btnback">
+                            <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" onclick="request_payment(<?= $projid ?>, '<?= htmlspecialchars($project_name) ?>', <?= $payment_plan ?>)" id="btnback">
                     <?php
                         }
                     }
