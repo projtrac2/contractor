@@ -707,7 +707,7 @@ try {
                 $formated_head_start = date('Y', strtotime($task_start_date_f));
                 $formated_head_end = date('Y', strtotime($task_end_date_f));
                 $spans++;
-                $tr .= '<tr ><td rowspan=' . $spans . '>'.$h.'</td><td rowspan=' . $spans . '>' . $formated_head_start . ' - ' . $formated_head_end . '</td></tr>';
+                $tr .= '<tr ><td rowspan=' . $spans . '>'.$h.'</td><td rowspan=' . $spans . '>' . $formated_head_start . ' / ' . $formated_head_end . '</td></tr>';
                 $h++;
                 for ($b=0; $b < count($inner_years); $b++) { 
                     $start_date = $inner_years[$b][0];
