@@ -1,4 +1,4 @@
-const ajax_url = "ajax/programsOfWorks/index";
+const ajax_url = "ajax/programsOfWorks/index.php";
 
 $(document).ready(function () {
     $("#add_output").submit(function (e) {
@@ -38,7 +38,7 @@ $(document).ready(function () {
             $("#tag-form-submit-frequency").prop("disabled", true);
             $.ajax({
                 type: "post",
-                url: "ajax/programsOfWorks/wbs",
+                url: "ajax/programsOfWorks/wbs.php",
                 data: form_data,
                 dataType: "json",
                 success: function (response) {
@@ -69,7 +69,7 @@ $(document).ready(function () {
         if (projid != '') {
             $.ajax({
                 type: "get",
-                url: "ajax/programsOfWorks/get-wbs",
+                url: "ajax/programsOfWorks/get-wbs.php",
                 data: {
                     projid: projid,
                     site_id: site_id,
@@ -108,7 +108,7 @@ function get_subtasks_wbs(output_id, site_id, task_id, subtask_id) {
     // if (subtask_id != '' && site_id != '') {
     $.ajax({
         type: "get",
-        url: "ajax/programsOfWorks/wbs",
+        url: "ajax/programsOfWorks/wbs.php",
         data: {
             get_wbs: "get_wbs",
             projid: $("#projid").val(),

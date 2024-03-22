@@ -26,32 +26,33 @@ try {
         }
 
         $quarterly = [];
-        for ($i = 0; $i < count($annually); $i++) {
-            for ($t = 0; $t < count($annually[$i]); $t++) {
-                $startFinancial = $annually[$i][$t][0];
-                $endFinancial = $annually[$i][$t][1];
-                $startFinancialMidPoint = strtotime('+3 months -1 day', strtotime($startFinancial));
-                $date = date('Y-m-d', $startFinancialMidPoint);
-                $endFinancialMidPoint = strtotime('-3 months ', strtotime($endFinancial));
-                $datetwo = date('Y-m-d', $endFinancialMidPoint);
-                $quarterly[] = [[$startFinancial, $date], [$datetwo, $endFinancial]];
-            }
+        
+        // get end date
+        $l = $annually[count($annually) - 1][1][1];
+        // get start date
+        $s = $annually[0][0][0];
+        $sInc = $s;
+        while ($sInc <= $l) {
+            $start = $sInc;
+            $startFinancialMidPoint = strtotime('+3 months -1 day', strtotime($sInc));
+            $date = date('Y-m-d', $startFinancialMidPoint);
+            $quarterly[] = [$start, $date];
+            $sInc = date('Y-m-d', strtotime('+3 months', strtotime($sInc)));
         }
 
+
+        $startFinancial = $quarterly[0][0];
+        $endFinancial = $quarterly[count($quarterly) - 1][1];
         $monthly = [];
-        for ($i = 0; $i < count($quarterly); $i++) {
-            for ($t = 0; $t < count($quarterly[$i]); $t++) {
-                $startFinancial = $quarterly[$i][$t][0];
-                $endFinancial = $quarterly[$i][1][1];
-                while ($startFinancial <= $endFinancial) {
-                    $startFinancialMidPoint = strtotime('+1 month -1 day', strtotime($startFinancial));
-                    $date = date('Y-m-d', $startFinancialMidPoint);
-                    $monthly[] = [$startFinancial, $date];
-                    $startFinancial = date('Y-m-d', strtotime('+1 day', strtotime($date)));
-                }
-                break;
-            }
+        while ($startFinancial <= $endFinancial) {
+            $startFinancialMidPoint = strtotime('+1 month -1 day', strtotime($startFinancial));
+            $date = date('Y-m-d', $startFinancialMidPoint);
+            $monthly[] = [$startFinancial, $date];
+            $startFinancial = date('Y-m-d', strtotime('+1 day', strtotime($date)));
         }
+
+        
+
         return array("startYears" => $startYears, "annually" => $annually, "quarterly" => $quarterly, "monthly" => $monthly);
     }
 
@@ -76,7 +77,7 @@ try {
         return $target;
     }
 
-    function get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter)
+    function get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter, $extension_bool, $extension_start)
     {
         $tr = '';
         if (
@@ -91,87 +92,748 @@ try {
             ) {
                 $formated_date_start = date('d M Y', strtotime($start_date));
                 $formated_date_end = date('d M Y', strtotime($end_date));
-                $tr .=
+                if ($extension_bool) {
+                    if ($start_date >= $extension_start) {
+                        $tr .=
+                        '<tr>
+                            <td>' . $counter . '</td>
+                            <td>' . $formated_date_start . ' - ' .  $formated_date_end . '</td>
+                            <td>
+                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                            </td>
+                        </tr>';
+                        $counter++;
+                    }
+                } else {
+                    $tr .=
                     '<tr>
                         <td>' . $counter . '</td>
-                        <td>' . $formated_date_start . ' - ' . $formated_date_end . '</td>
+                        <td>' . $formated_date_start . ' - ' .  $formated_date_end . '</td>
                         <td>
                             <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
                             <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
                             <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
                         </td>
                     </tr>';
-                $counter++;
+                    
+                    $counter++;
+                }
             }
         }
         return array('table_body' => $tr, "counter" => $counter);
     }
 
-    function get_annual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startYears, $subtask_id, $site_id, $task_id, $frequency)
+    function get_annual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startYears, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start)
     {
-        $table_body = '';
+        $tr = '';
         $counter = 1;
-        for ($i = 0; $i < count($startYears); $i++) {
+        $hash = 1;
+        $input_array = [];
+
+        for ($i = 0; $i < count($startYears); $i++) { 
             $start_date = $startYears[$i][0];
             $end_date = $startYears[$i][1];
             $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
-            $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter);
-            $counter = $table_details['counter'];
-            $table_body .= $table_details['table_body'];
+            if (
+                ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+            ) {
+                if (
+                    ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                    ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                    ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                ) {
+                    $input_array[] = [$start_date, $end_date];
+                }
+            }
         }
-        return $table_body;
+
+        for ($i = 0; $i < count($input_array); $i++) { 
+            $start_date = $input_array[$i][0];
+            $end_date = $input_array[$i][1];
+            $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
+            if (
+                ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+            ) {
+                if (
+                    ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                    ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                    ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                ) {
+                    $formated_date_start = date('d M Y', strtotime($start_date));
+                    $formated_date_end = date('d M Y', strtotime($end_date));
+                    if ($extension_bool) {
+                        if ($start_date >= $extension_start) {
+                            if (count($input_array) == 1) {
+                                $tr .=
+                                '<tr>
+                                    <td>' . $counter . '</td>
+                                    <td> Annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                    <td>
+                                        <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                        <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                        <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                    </td>
+                                </tr>';
+                            } else { 
+                                if ($start_date <= $task_start_date) {
+                                $tr .=
+                                    '<tr>
+                                        <td>' . $counter . '</td>
+                                        <td> Annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                        <td>
+                                            <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                            <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                            <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                        </td>
+                                    </tr>';
+                                } else if ($end_date >= $task_end_date) {
+                                    $tr .=
+                                    '<tr>
+                                        <td>' . $counter . '</td>
+                                        <td> Annual '. $hash .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                        <td>
+                                            <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                            <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                            <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                        </td>
+                                    </tr>';
+                                } else {
+                                    $tr .=
+                                    '<tr>
+                                        <td>' . $counter . '</td>
+                                        <td> Annual '. $hash .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                        <td>
+                                            <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                            <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                            <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                        </td>
+                                    </tr>';
+                                }
+                            }
+                            $counter++;
+                            $hash++;
+
+                        }
+                    } else {
+                        if (count($input_array) == 1) {
+                            $tr .=
+                            '<tr>
+                                <td>' . $counter . '</td>
+                                <td> Annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                <td>
+                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                </td>
+                            </tr>';
+                        } else {
+                            if ($start_date <= $task_start_date) {
+                                $tr .=
+                                '<tr>
+                                    <td>' . $counter . '</td>
+                                    <td> Annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                    <td>
+                                        <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                        <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                        <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                    </td>
+                                </tr>';
+                            } else if ($end_date >= $task_end_date) {
+                                $tr .=
+                                '<tr>
+                                    <td>' . $counter . '</td>
+                                    <td> Annual '. $hash .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                    <td>
+                                        <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                        <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                        <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                    </td>
+                                </tr>';
+                            } else  {
+                                $tr .=
+                                '<tr>
+                                    <td>' . $counter . '</td>
+                                    <td> Annual '. $hash .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                    <td>
+                                        <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                        <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                        <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                    </td>
+                                </tr>';
+                            }
+                        }
+                        
+                        $hash++;
+                        
+                        $counter++;
+                    }
+                }
+            }
+        }
+        return $tr;
     }
 
-    function get_semiannual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $annually, $subtask_id, $site_id, $task_id, $frequency)
+    function get_semiannual_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $annually, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start)
     {
         $counter = 1;
-        $table_body = '';
+        $hash = 1;
+        $tr = '';
+        $input_array = [];
+
         for ($i = 0; $i < count($annually); $i++) {
             for ($t = 0; $t < count($annually[$i]); $t++) {
                 $start_date = $annually[$i][$t][0];
                 $end_date = $annually[$i][$t][1];
                 $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
-                $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter);
-                $counter = $table_details['counter'];
-                $table_body .= $table_details['table_body'];
+                if (
+                    ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                    ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                    ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+                ) {
+                    if (
+                        ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                        ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                        ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                    ) {
+                        $formated_date_start = date('d M Y', strtotime($start_date));
+                        $formated_date_end = date('d M Y', strtotime($end_date));
+
+                        $input_array[] = [$start_date, $end_date];
+                    }
+                }
             }
         }
-        return $table_body;
+
+        $h = 1;
+        for ($i=0; $i < count($startYears); $i++) { 
+            $inner_years = [];
+
+            $spans = 0;
+            $task_start_date_f = $startYears[$i][0];
+            $task_end_date_f = $startYears[$i][1];
+
+            for ($t = 0; $t < count($input_array); $t++) {
+                $start_date = $input_array[$t][0];
+                $end_date = $input_array[$t][1];
+                if (
+                    ($task_start_date_f >= $start_date && $task_start_date_f <= $end_date) ||
+                    ($task_end_date_f >= $start_date && $task_end_date_f <= $end_date) ||
+                    ($task_start_date_f <= $start_date && $task_end_date_f >= $start_date && $task_end_date_f >= $end_date)
+                ) {
+                    $spans++;
+                    $inner_years[] = [$start_date, $end_date];
+                }
+            }
+
+
+            if ($spans != 0) {
+                $spans++;
+                $formated_head_start = date('Y', strtotime($task_start_date_f));
+                $formated_head_end = date('Y', strtotime($task_end_date_f));
+                $tr .= '<tr ><td rowspan=' . $spans . '>'.$h.'</td><td rowspan=' . $spans . '>' . $formated_head_start . ' / ' . $formated_head_end . '</td></tr>';
+                $h++;
+
+                for ($b = 0; $b < count($inner_years); $b++) {
+                    $start_date = $inner_years[$b][0];
+                    $end_date = $inner_years[$b][1];
+                    $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
+                    if (
+                        ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                        ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                        ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+                    ) {
+                        if (
+                            ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                            ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                            ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                        ) {
+                            $formated_date_start = date('d M Y', strtotime($start_date));
+                            $formated_date_end = date('d M Y', strtotime($end_date));
+                            if ($extension_bool) {
+                                if ($start_date >= $extension_start) {
+                                    if (count($input_array) == 1) {
+                                        $tr .=
+                                            '<tr>
+                                                <td> Semi annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                    } else {
+                                        if ($start_date <= $task_start_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> Semi annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else if ($end_date >= $task_end_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> Semi annual '. $hash .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else {
+                                            $tr .=
+                                            '<tr>
+                                                <td> Semi annual '. $hash .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        }
+                                    }
+                                
+                                    $counter++;
+                                }
+                            } else {
+                                if (count($input_array) == 1) {
+                                    $tr .=
+                                        '<tr>
+                                            <td> Semi annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                } else {
+                                    if ($start_date <= $task_start_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> Semi annual '. $hash .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else if ($end_date >= $task_end_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> Semi annual '. $hash .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else {
+                                        $tr .=
+                                        '<tr>
+                                            <td> Semi annual '. $hash .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    }
+                                }
+                                
+                                $counter++;
+                            }
+                        }
+                    }
+                    $hash++;
+                    
+                }
+            }
+        }
+
+        return $tr;
     }
 
-    function get_quarterly_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $quarterly, $subtask_id, $site_id, $task_id, $frequency)
+    function get_quarterly_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $quarterly, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start)
     {
         $table_body = '';
         $counter = 1;
+        $hash = 1;
+        $tr = '';
+
+        $input_array = [];
+
+
         for ($i = 0; $i < count($quarterly); $i++) {
-            for ($t = 0; $t < count($quarterly[$i]); $t++) {
-                $start_date = $quarterly[$i][$t][0];
-                $end_date = $quarterly[$i][$t][1];
-                $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
-                $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter);
-                $counter = $table_details['counter'];
-                $table_body .= $table_details['table_body'];
+            $start_date = $quarterly[$i][0];
+            $end_date = $quarterly[$i][1];
+            
+            if (
+                ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+            ) {
+                if (
+                    ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                    ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                    ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                ) {
+                    $formated_date_start = date('d M Y', strtotime($start_date));
+                    $formated_date_end = date('d M Y', strtotime($end_date));
+
+                    $input_array[] = [$start_date, $end_date];
+                }
             }
         }
-        return $table_body;
+
+        $h = 1;
+
+        for ($i=0; $i < count($startYears); $i++) { 
+            $inner_years = [];
+
+            $spans = 0;
+
+            $task_start_date_f = $startYears[$i][0];
+            $task_end_date_f = $startYears[$i][1];
+
+            for ($t = 0; $t < count($input_array); $t++) {
+                $start_date = $input_array[$t][0];
+                $end_date = $input_array[$t][1];
+                if (
+                    ($task_start_date_f >= $start_date && $task_start_date_f <= $end_date) ||
+                    ($task_end_date_f >= $start_date && $task_end_date_f <= $end_date) ||
+                    ($task_start_date_f <= $start_date && $task_end_date_f >= $start_date && $task_end_date_f >= $end_date)
+                ) {
+                    $spans++;
+                    $inner_years[] = [$start_date, $end_date];
+                }
+            }
+
+            if ($spans != 0) {
+                $formated_head_start = date('Y', strtotime($task_start_date_f));
+                $formated_head_end = date('Y', strtotime($task_end_date_f));
+                $spans++;
+                $tr .= '<tr ><td rowspan=' . $spans . '>'.$h.'</td><td rowspan=' . $spans . '>' . $formated_head_start . ' / ' . $formated_head_end . '</td></tr>';
+                $h++;
+
+                for ($b=0; $b < count($inner_years); $b++) { 
+                    $start_date = $inner_years[$b][0];
+                    $end_date = $inner_years[$b][1];
+                    $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
+                    
+                    if (
+                        ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                        ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                        ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+                    ) {
+                        if (
+                            ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                            ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                            ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                        ) {
+                            $formated_date_start = date('d M Y', strtotime($start_date));
+                            $formated_date_end = date('d M Y', strtotime($end_date));
+        
+                            if ($extension_bool) {
+                                if ($start_date >= $extension_start) {
+                                    if (count($input_array) == 1) {
+                                        $tr .=
+                                            '<tr>
+                                                <td> Q'.$counter.' (' . date('d M Y', strtotime($task_start_date)) . ' - ' .  date('d M Y', strtotime($task_end_date)) . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                    } else {
+                                        if ($start_date <= $task_start_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> Q'.$counter.' (' . date('d M Y', strtotime($task_start_date)) . ' - ' .  date('d M Y', strtotime($task_end_date)) . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else if ($end_date >= $task_end_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> Q'.$counter.' (' . $formated_date_start . ' - ' .  date('d M Y', strtotime($task_end_date)) . ') </td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else {
+                                            $tr .=
+                                            '<tr>
+                                                <td>Q'.$counter.' (' . $formated_date_start . ' - ' .  $formated_date_end . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        }
+                                    }
+                                    $hash++;
+                                }
+                            } else {
+                                if (count($input_array) == 1) {
+                                    $tr .=
+                                        '<tr>
+                                            <td> Q'.$counter.' (' . date('d M Y', strtotime($task_start_date)) . ' - ' .  date('d M Y', strtotime($task_end_date)) . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                } else {
+                                    if ($start_date <= $task_start_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> Q'.$counter.' (' . date('d M Y', strtotime($task_start_date)) . ' - ' .  $formated_date_end . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else if ($end_date >= $task_end_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> Q'.$counter.' (' . $formated_date_start . ' - ' .  date('d M Y', strtotime($task_end_date)) . ') </td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else {
+                                        $tr .=
+                                        '<tr>
+                                            <td>Q'.$counter.' (' . $formated_date_start . ' - ' .  $formated_date_end . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $hash . '" onchange="calculate_total(' . $hash . ')" onkeyup="calculate_total(' . $hash . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    }
+                                }
+                               
+                                $hash++;
+                            }
+                        }
+                    }
+                    $counter++;
+                }
+               
+            }
+            
+        }
+
+        
+       
+        return $tr;
     }
 
-    function get_monthly_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $monthly, $subtask_id, $site_id, $task_id, $frequency)
+    function get_monthly_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $monthly, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start)
     {
         $table_body = '';
         $counter = 1;
-        for ($i = 0; $i < count($monthly); $i++) {
+        $count_months = count($monthly);
+        $tr = '';
+
+        $input_array = [];
+
+
+        for ($i = 0; $i < $count_months; $i++) {
             $start_date = $monthly[$i][0];
             $end_date = $monthly[$i][1];
-            $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
-            $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter);
-            $counter = $table_details['counter'];
-            $table_body .= $table_details['table_body'];
+            if (
+                ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+            ) {
+                if (
+                    ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                    ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                    ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                ) {
+                    $formated_date_start = date('d M Y', strtotime($start_date));
+                    $formated_date_end = date('d M Y', strtotime($end_date));
+
+                    $input_array[] = [$start_date, $end_date];
+                }
+            }
         }
-        return $table_body;
+
+        $tr_years = '';
+        $h = 1;
+
+        for ($i=0; $i < count($startYears); $i++) { 
+            $inner_years = [];
+
+            $spans = 0;
+            $task_start_date_f = $startYears[$i][0];
+            $task_end_date_f = $startYears[$i][1];
+            for ($t = 0; $t < count($input_array); $t++) {
+                $start_date = $input_array[$t][0];
+                $end_date = $input_array[$t][1];
+                if (
+                    ($task_start_date_f >= $start_date && $task_start_date_f <= $end_date) ||
+                    ($task_end_date_f >= $start_date && $task_end_date_f <= $end_date) ||
+                    ($task_start_date_f <= $start_date && $task_end_date_f >= $start_date && $task_end_date_f >= $end_date)
+                ) {
+                    $spans++;
+                    $inner_years[] = [$start_date, $end_date];
+                }
+
+            }
+
+            if ($spans != 0) {
+                $formated_head_start = date('Y', strtotime($task_start_date_f));
+                $formated_head_end = date('Y', strtotime($task_end_date_f));
+                $spans++;
+                $tr .= '<tr ><td rowspan=' . $spans . '>'.$h.'</td><td rowspan=' . $spans . '>' . $formated_head_start . ' - ' . $formated_head_end . '</td></tr>';
+                $h++;
+                for ($b=0; $b < count($inner_years); $b++) { 
+                    $start_date = $inner_years[$b][0];
+                    $end_date = $inner_years[$b][1];
+               
+                    $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
+                    if (
+                        ($contractor_start >= $start_date && $contractor_start <= $end_date) ||
+                        ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
+                        ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
+                    ) {
+                        if (
+                            ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
+                            ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
+                            ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
+                        ) {
+                            $formated_date_start = date('d M Y', strtotime($start_date));
+                            $formated_date_end = date('d M Y', strtotime($end_date));
+                            //2024-06-30
+                            if ($extension_bool) {
+                                if ($start_date >= $extension_start) {
+                                    if (count($input_array) == 1) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> '. date('M', strtotime($task_start_date)) .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else {
+                                        if ($start_date <= $task_start_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> '. date('M', strtotime($task_start_date)) .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else if ($end_date >= $task_end_date) {
+                                            $tr .=
+                                            '<tr>
+                                                <td> '. date('M', strtotime($start_date)) .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        } else {
+                                            $tr .=
+                                            '<tr>
+                                                <td>'. date('M', strtotime($start_date)) .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                                <td>
+                                                    <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                    <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                    <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                                </td>
+                                            </tr>';
+                                        }
+                                    }
+        
+                                    $counter++;
+                                }
+                            } else {
+                                if (count($input_array) == 1) {
+                                    $tr .=
+                                    '<tr>
+                                        <td> '. date('M', strtotime($task_start_date)) .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . date('d M Y', strtotime($task_end_date)) . ')</td>
+                                        <td>
+                                            <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                            <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                            <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                        </td>
+                                    </tr>';
+                                } else {
+                                    if ($start_date <= $task_start_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> '. date('M', strtotime($task_start_date)) .' (' . date('d M Y', strtotime($task_start_date)) . ' - ' . $formated_date_end . ')</td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else if ($end_date >= $task_end_date) {
+                                        $tr .=
+                                        '<tr>
+                                            <td> '. date('M', strtotime($start_date)) .' (' . $formated_date_start . ' - ' . date('d M Y', strtotime($task_end_date)) . ') </td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    } else {
+                                        $tr .=
+                                        '<tr>
+                                            <td>'. date('M', strtotime($start_date)) .' (' . $formated_date_start . ' - ' . $formated_date_end . ') </td>
+                                            <td>
+                                                <input type="hidden" value="' . $start_date . '" id="start_date" name="start_date[]" />
+                                                <input type="hidden" value="' . $end_date . '" id="end_date" name="end_date[]" />
+                                                <input type="number" value="' . $target . '" class="form-control target_breakdown  targets" placeholder="Enter Target" name="target[]" id="direct_cost_id' . $counter . '" onchange="calculate_total(' . $counter . ')" onkeyup="calculate_total(' . $counter . ')" min="0" step="0.01" required/>
+                                            </td>
+                                        </tr>';
+                                    }
+                                
+                                    $counter++;
+                                }
+        
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        
+        return $tr;
     }
 
-    function get_weekly_table($contractor_start, $contractor_end, $project_start_date, $project_end_date, $task_start_date, $task_end_date, $site_id, $task_id, $subtask_id, $frequency)
+    function get_weekly_table($contractor_start, $contractor_end, $project_start_date, $project_end_date, $task_start_date, $task_end_date, $site_id, $task_id, $subtask_id, $frequency, $extension_bool, $extension_start)
     {
         $table_body = '';
         $start_year = date('Y', strtotime($project_start_date));
@@ -187,7 +849,7 @@ try {
                 $start_date =  date('Y-m-d', strtotime($week_array['week_start']));
                 $end_date =  date('Y-m-d', strtotime($week_array['week_end']));
                 $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
-                $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter);
+                $table_details = get_table_body($contractor_start, $contractor_end, $task_start_date, $task_end_date, $target, $start_date, $end_date, $counter, $extension_bool, $extension_start);
                 $counter = $table_details['counter'];
                 $table_body .= $table_details['table_body'];
             }
@@ -199,7 +861,7 @@ try {
 
 
 
-    function get_daily_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $subtask_id, $site_id, $task_id, $frequency)
+    function get_daily_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start)
     {
         $hash = 1;
         $tr = '';
@@ -207,9 +869,25 @@ try {
         while ($daily_task_start_date <= $task_end_date) {
             $date = date('Y-m-d', strtotime($daily_task_start_date));
             $date_show = date('d M Y', strtotime($daily_task_start_date));
-            $daily_task_start_date = date('Y-m-d', strtotime('+1 day', strtotime($date)));
+            
             $target = get_target($site_id, $task_id, $subtask_id, $daily_task_start_date, $daily_task_start_date, $frequency);
-            $tr .= '<tr>
+            if ($extension_bool) {
+                $daily_task_start_date = date('Y-m-d', strtotime('+1 day', strtotime($date)));
+                if ($daily_task_start_date >= $extension_start) {
+                    $tr .= '<tr>
+                        <td>' . $hash . '</td>
+                        <td>' . $date_show . '</td>
+                        <td>
+                            <input type="number" placeholder="Enter Target" value="' . $target . '" class="form-control yearly-target" name="yearly-target[]"  min="0" step="0.01"/>
+                            <input type="hidden" value="' . $date . '" class="year" name="year[]" />
+                        </td>
+                    </tr>';
+                    $hash++;
+                }
+            } else {
+
+                $daily_task_start_date = date('Y-m-d', strtotime('+1 day', strtotime($date)));
+                $tr .= '<tr>
                     <td>' . $hash . '</td>
                     <td>' . $date_show . '</td>
                     <td>
@@ -217,7 +895,8 @@ try {
                         <input type="hidden" value="' . $date . '" class="year" name="year[]" />
                     </td>
                 </tr>';
-            $hash++;
+                $hash++;
+            }
         }
         return $tr;
     }
@@ -247,8 +926,12 @@ try {
         $row_rsProjects = $query_rsProjects->fetch();
         $totalRows_rsProjects = $query_rsProjects->rowCount();
         if ($totalRows_rsProjects > 0) {
-            $min_date = $row_rsProjects['projstartdate'];
-            $max_date = $row_rsProjects['projenddate'];
+            $query_rsWorkBreakdown = $db->prepare("SELECT MIN(start_date) AS startdate,MAX(end_date) AS enddate FROM tbl_program_of_works WHERE projid=:projid");
+            $query_rsWorkBreakdown->execute(array(':projid' => $projid));
+            $row_rsWorkBreakdown = $query_rsWorkBreakdown->fetch();
+
+            $min_date = $row_rsWorkBreakdown['startdate'];
+            $max_date = $row_rsWorkBreakdown['enddate'];
             $frequency =  $row_rsProjects['activity_monitoring_frequency'];
 
             $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
@@ -257,8 +940,8 @@ try {
             $totalRows_rsTender = $query_rsTender->rowCount();
             $contractor_start = $end_date = '';
             if ($totalRows_rsTender > 0) {
-                $contractor_start = $row_rsTender['startdate'];
-                $contractor_end = $row_rsTender['enddate'];
+                $contractor_start = $row_rsWorkBreakdown['startdate'];
+                $contractor_end = $row_rsWorkBreakdown['enddate'];
                 $date_details = get_duration($min_date, $max_date);
                 $details = index($date_details['duration'], $date_details['start_year'], $contractor_start, $contractor_end, $task_id, $site_id);
                 $startYears = $details['startYears'];
@@ -274,23 +957,31 @@ try {
                     $task_start_date = $row_rsTask_Start_Dates['start_date'];
                     $task_end_date = $row_rsTask_Start_Dates['end_date'];
                     $duration = $row_rsTask_Start_Dates['duration'];
+                    $extension_bool = false;
+                    $frequency = 2;
                     if ($frequency == 6) { // yearly
-                        $structure = get_annual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startYears, $subtask_id, $site_id, $task_id, $frequency);
+                        $extension_start = date('Y');
+                        $structure = get_annual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startYears, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Year';
                     } else if ($frequency == 5) { // semi annual
-                        $structure = get_semiannual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $annually, $subtask_id, $site_id, $task_id, $frequency);
+                        $extension_start = date('Y');
+                        $structure = get_semiannual_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $annually, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Semi Annual';
                     } else if ($frequency == 4) { // quarterly
-                        $structure = get_quarterly_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $quarterly, $subtask_id, $site_id, $task_id, $frequency);
+                        $extension_start = date('Y');
+                        $structure = get_quarterly_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $quarterly, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Quarter';
                     } else if ($frequency == 3) { // monthly
-                        $structure = get_monthly_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $monthly, $subtask_id, $site_id, $task_id, $frequency);
+                        $extension_start = date('Y-m');
+                        $structure = get_monthly_table($startYears, $contractor_start, $contractor_end, $task_start_date, $task_end_date, $monthly, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Month';
                     } else if ($frequency == 2) { // weekly
-                        $structure =  get_weekly_table($contractor_start, $contractor_end, $min_date, $max_date, $task_start_date, $task_end_date, $site_id, $task_id, $subtask_id, $frequency);
+                        $extension_start = date('Y-m-d');
+                        $structure =  get_weekly_table($contractor_start, $contractor_end, $min_date, $max_date, $task_start_date, $task_end_date, $site_id, $task_id, $subtask_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Week';
                     } else if ($frequency == 1) { // daily
-                        $structure = get_daily_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $subtask_id, $site_id, $task_id, $frequency);
+                        $extension_start = date('Y-m-d');
+                        $structure = get_daily_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);
                         $title = 'Day';
                     }
                 }
@@ -300,19 +991,37 @@ try {
         $query_rsTask = $db->prepare("SELECT t.task, c.units_no, m.unit FROM tbl_task t INNER JOIN tbl_project_direct_cost_plan c ON t.tkid=c.subtask_id INNER JOIN tbl_measurement_units m ON m.id=t.unit_of_measure WHERE t.msid=:task_id AND c.site_id=:site_id AND t.tkid=:subtask_id ");
         $query_rsTask->execute(array(':task_id' => $task_id, ':site_id' => $site_id, ":subtask_id" => $subtask_id));
         $row_rsTask = $query_rsTask->fetch();
-        $table = '
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>' . $title . '</th>
-                    <th>Target</th>
-                </tr>
-            </thead>
-            <tbody>
-            ' . $structure . '
-            </tbody>
-        </table>';
+        if ($frequency == 1 || $frequency == 6) {
+            $table = '
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>' . $title . '</th>
+                        <th>Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                ' . $structure . '
+                </tbody>
+            </table>';
+        } else {
+
+            $table = '
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Year</th>
+                        <th>' . $title . '</th>
+                        <th>Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                ' . $structure . '
+                </tbody>
+            </table>';
+        }
 
         echo json_encode(array("success" => true, "structure" => $table, 'task' => $row_rsTask, "start_date" => $task_start_date, "end_date" => $task_end_date, "duration" => $duration));
     }
@@ -336,7 +1045,8 @@ try {
             $target = $targets[$i];
             $start_date = $start_dates[$i];
             $end_date = $end_dates[$i];
-
+            // avoid deleting find the record and update and if there is no record insert 
+            // this is due to the recent changes 
             $stmt = $db->prepare("DELETE FROM `tbl_project_target_breakdown` WHERE projid=:projid AND output_id=:output_id AND site_id=:site_id AND task_id=:task_id AND subtask_id=:subtask_id AND start_date=:start_date  AND end_date=:end_date ");
             $results = $stmt->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":start_date" => $start_date, ":end_date" => $end_date));
 
