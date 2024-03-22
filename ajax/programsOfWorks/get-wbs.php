@@ -832,7 +832,7 @@ if (isset($_GET['get_wbs'])) {
             $annually = $details['annually'];
             $quarterly = $details['quarterly'];
             $monthly = $details['monthly'];
-            $frequency = 5;
+            $frequency = 3;
             if ($frequency == 6) {
                 $table_details = get_annual_table($startYears, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end);
             } elseif ($frequency == 5) {
