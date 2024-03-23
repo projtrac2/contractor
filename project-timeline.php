@@ -623,12 +623,13 @@ $data =  get_output_chart($projid);
     $(function() {
         $('.tasks_id_header').each((index, element) => {
             var projid = $("#projid").val();
+            var site_id = $(element).next().val();
             $.ajax({
                 type: "get",
                 url: "ajax/programsOfWorks/get-wbs-achieved.php",
                 data: {
                     projid: projid,
-                    site_id: $(element).next().val(),
+                    site_id: site_id,
                     output_id: $(element).next().next().val(),
                     task_id: $(element).val(),
                     get_wbs: 'get_wbs'
@@ -637,7 +638,11 @@ $data =  get_output_chart($projid);
                 success: function(response) {
                     console.log(response);
                     let tkid = $(element).val();
-                    $(`.peter-${tkid}`).html(response.table);
+                    $(`.peter-${site_id + tkid}`).html(response.table);
+                    $(`.tables-${site_id + tkid}`).dataTable();
+                    // $('.tables').each((index, element) => {
+                    //     $(element).dataTable();
+                    // });
                 }
             });
         });

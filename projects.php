@@ -173,6 +173,11 @@ if ($permission) {
                                                                 Options <span class="caret"></span>
                                                             </button>
                                                             <ul class="dropdown-menu">
+                                                            <li>
+                                                                            <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                                <i class="fa fa-plus-square-o"></i> <?= $activity ?> Program of Works
+                                                                            </a>
+                                                                        </li>
                                                                 <?php
                                                                 if ($projstage == 8) {
                                                                     if ($sub_stage > 0) {
