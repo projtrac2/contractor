@@ -229,7 +229,6 @@ const request_payment = (projid, project_name, payment_plan) => {
                     dataType: "json",
                     success: function (response) {
                         if (response.success) {
-                            success_alert("Successfully created request");
                             setTimeout(() => {
                                 window.location.href = response.redirect_url;
                             }, 3000);

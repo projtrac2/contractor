@@ -4,7 +4,6 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
-
 if ($permission) {
     try {
         function get_unit_of_measure($unit)
@@ -17,30 +16,64 @@ if ($permission) {
             return $totalRows_rsIndUnit > 0 ? $row_rsIndUnit['unit'] : '';
         }
 
-        function get_unit_requested($request_id, $direct_cost_id)
+        function get_payment_details($site_id, $subtask_id, $request_id)
         {
             global $db;
-            $query_rsRequestDetails = $db->prepare("SELECT * FROM  tbl_payments_request_details WHERE request_id=:request_id AND  direct_cost_id = :direct_cost_id");
-            $query_rsRequestDetails->execute(array(":request_id" => $request_id, ":direct_cost_id" => $direct_cost_id));
-            $row_rsRequestDetails = $query_rsRequestDetails->fetch();
-            $totalRows_rsRequestDetails = $query_rsRequestDetails->rowCount();
-            return  $totalRows_rsRequestDetails > 0 ? $row_rsRequestDetails['no_of_units'] : '';
+            $query_rsPayment_Requests = $db->prepare("SELECT * FROM tbl_contractor_payment_request_details WHERE site_id=:site_id AND subtask_id=:subtask_id AND payment_request_id=:payment_request_id");
+            $query_rsPayment_Requests->execute(array(":site_id" => $site_id, ":subtask_id" => $subtask_id, ":payment_request_id" => $request_id));
+            $totalRows_rsPayment_Requests = $query_rsPayment_Requests->rowCount();
+            $row_rsPayment_Requests = $query_rsPayment_Requests->fetch();
+            $units_no = $unit_cost = $total_cost = 0;
+            if ($totalRows_rsPayment_Requests > 0) {
+                $units_no = $row_rsPayment_Requests['units_no'];
+                $unit_cost = $row_rsPayment_Requests['unit_cost'];
+                $total_cost = $units_no * $unit_cost;
+            }
+
+            return array("units_no" => $units_no, "unit_cost" => $unit_cost, "total_cost" => $total_cost);
         }
 
         if (isset($_POST['store_remarks'])) {
-            $due_date = date("Y-m-d", strtotime($_POST['due_date']));
             $request_id = $_POST['request_id'];
             $comments = $_POST['comments'];
+            $projid = $_POST['projid'];
             $status = 1;
             $stage = 1;
+            $invoice_path = '';
             $date_requested = date("Y-m-d");
-            $sql = $db->prepare("UPDATE tbl_payments_request  SET due_date=:due_date, date_requested=:date_requested, status=:status, stage=:stage WHERE id=:request_id");
-            $result = $sql->execute(array(":due_date" => $due_date, ":date_requested" => $date_requested, ":status" => $status, ":stage" => $stage, ":request_id" => $request_id));
-
-            $sql = $db->prepare("INSERT INTO tbl_payment_request_comments (request_id,stage,status,comments,role,created_by,created_at) VALUES (:request_id,:stage,:status,:comments,:role,:created_by,:created_at)");
-            $result  = $sql->execute(array(":request_id" => $request_id, ":stage" => $stage, ":status" => 2, ":comments" => $comments, ":role" => "Request Owner", ":created_by" => $user_name, ":created_at" => $date_requested));
-
             $msg = "Request created successfully";
+            if (!empty($_FILES['invoice']['name'])) {
+                $filename = basename($_FILES['invoice']['name']);
+                $ext = substr($filename, strrpos($filename, '.') + 1);
+                if (($ext != "exe") && ($_FILES["invoice"]["type"] != "application/x-msdownload")) {
+                    $newname = time() . '_' . $projid . "_" . $stage . "_" . $filename;
+                    $filepath = "./uploads/payments/" . $newname;
+                    if (!file_exists($filepath)) {
+                        if (move_uploaded_file($_FILES['invoice']['tmp_name'], $filepath)) {
+                            $invoice_path = $newname;
+                        } else {
+                            $msg =  "file culd not be  allowed";
+                        }
+                    } else {
+                        $msg = 'File you are uploading already exists, try another file!!';
+                    }
+                } else {
+                    $msg = 'This file type is not allowed, try another file!!';
+                }
+            }
+
+            $query_rsRequestDetails = $db->prepare("SELECT  SUM(units_no * unit_cost) as requested_amount FROM  tbl_contractor_payment_request_details WHERE payment_request_id=:request_id");
+            $query_rsRequestDetails->execute(array(":request_id" => $request_id));
+            $row_rsRequestDetails = $query_rsRequestDetails->fetch();
+            $requested_amount = !is_null($row_rsRequestDetails['requested_amount']) ?  $row_rsRequestDetails['requested_amount'] : 0;
+
+            $sql = $db->prepare("UPDATE tbl_contractor_payment_requests  SET requested_amount=:requested_amount,  status=1, stage=1, invoice=:invoice_path WHERE id=:request_id");
+            $result = $sql->execute(array(":requested_amount" => $requested_amount, ":invoice_path" => $invoice_path, ":request_id" => $request_id));
+
+            $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_comments (request_id,stage,status,comments,created_by,created_at) VALUES (:request_id,:stage,:status,:comments,:created_by,:created_at)");
+            $result  = $sql->execute(array(":request_id" => $request_id, ":stage" => $stage, ":status" => $status, ":comments" => $comments, ":created_by" => $user_name, ":created_at" => $date_requested));
+
+            $url = "payment?projid=" . base64_encode("projid54321{$projid}");
             $results = "<script type=\"text/javascript\">
             swal({
                     title: \"Success!\",
@@ -50,28 +83,24 @@ if ($permission) {
                     'icon':'success',
                 showConfirmButton: false });
                 setTimeout(function(){
-                    window.location.href = 'inhouse-payment-requests.php';
+                    window.location.href = '$url';
                 }, 2000);
             </script>";
         }
-        $cost_type  = 1;
-        $remarks = $due_date = '';
+
         if (isset($_GET['request_id'])) {
             $encoded_request_id = $_GET['request_id'];
             $decode_request_id = base64_decode($encoded_request_id);
             $request_id_array = explode("projid54321", $decode_request_id);
             $request_id = $request_id_array[1];
 
-            $query_rsPayement_requests =  $db->prepare("SELECT * FROM  tbl_payments_request WHERE id=:request_id LIMIT 1");
+            $query_rsPayement_requests =  $db->prepare("SELECT * FROM  tbl_contractor_payment_requests WHERE id=:request_id LIMIT 1");
             $query_rsPayement_requests->execute(array("request_id" => $request_id));
             $rows_rsPayement_requests = $query_rsPayement_requests->fetch();
             $total_rsPayement_requests = $query_rsPayement_requests->rowCount();
 
             if ($total_rsPayement_requests > 0) {
                 $projid = $rows_rsPayement_requests['projid'];
-                $purpose = $rows_rsPayement_requests['purpose'];
-                $request_id = $rows_rsPayement_requests['id'];
-                $due_date = $rows_rsPayement_requests['due_date'];
 
                 $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid = :projid");
                 $query_rsProjects->execute(array(":projid" => $projid));
@@ -82,15 +111,17 @@ if ($permission) {
                     $projname = $row_rsProjects['projname'];
                     $projcode = $row_rsProjects['projcode'];
                     $projcost = $row_rsProjects['projcost'];
+
+                    $redirect_url = 'payment.php?projid=' . base64_encode("projid54321{$projid}");
 ?>
                     <!-- start body  -->
                     <div class="container-fluid">
-                        <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:10px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+                        <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
                             <h4 class="contentheader">
                                 <i class="fa fa-money" style="color:white"></i> Payment
                                 <div class="btn-group" style="float:right">
                                     <div class="btn-group" style="float:right">
-                                        <a type="button" id="outputItemModalBtnrow" onclick="history.back()" class="btn btn-warning pull-right">
+                                        <a type="button" id="outputItemModalBtnrow" href="<?= $redirect_url ?>" class="btn btn-warning pull-right">
                                             Go Back
                                         </a>
                                     </div>
@@ -185,6 +216,7 @@ if ($permission) {
                                                                                             <th style="width:10%">No. of Units</th>
                                                                                             <th style="width:10%">Unit Cost (Ksh)</th>
                                                                                             <th style="width:10%">Total Cost (Ksh)</th>
+                                                                                            <th>Action</th>
                                                                                         </tr>
                                                                                     </thead>
                                                                                     <tbody>
@@ -197,30 +229,38 @@ if ($permission) {
                                                                                             while ($row_rsOther_cost_plan = $query_rsOther_cost_plan->fetch()) {
                                                                                                 $table_counter++;
                                                                                                 $direct_cost_id = $row_rsOther_cost_plan['id'];
+                                                                                                $subtask_id = $row_rsOther_cost_plan['subtask_id'];
                                                                                                 $description = $row_rsOther_cost_plan['description'];
                                                                                                 $unit = $row_rsOther_cost_plan['unit'];
                                                                                                 $unit_of_measure = get_unit_of_measure($unit);
 
-                                                                                                $query_rsPayment_Requests = $db->prepare("SELECT * FROM tbl_contractor_payment_request_details WHERE site_id=:site_id AND subtask_id=:subtask_id AND payment_request_id=:payment_request_id");
-                                                                                                $query_rsPayment_Requests->execute(array(":site_id" => $site_id, ":subtask_id" => $subtask_id, ":payment_request_id" => $request_id));
-                                                                                                $totalRows_rsPayment_Requests = $query_rsPayment_Requests->rowCount();
-                                                                                                $row_rsPayment_Requests = $query_rsPayment_Requests->fetch();
-                                                                                                $units_no = $unit_cost = $total_cost = 0;
-                                                                                                if ($totalRows_rsPayment_Requests > 0) {
-                                                                                                    $units_no = $row_rsPayment_Requests['units_no'];
-                                                                                                    $unit_cost = $row_rsPayment_Requests['unit_cost'];
-                                                                                                    $total_cost = $units_no * $unit_cost;
-                                                                                                }
+                                                                                                $request_details = get_payment_details($site_id, $subtask_id, $request_id);
+                                                                                                $units_no = $request_details['units_no'];
+                                                                                                $unit_cost = $request_details['unit_cost'];
+                                                                                                $total_cost = $request_details['total_cost'];
+                                                                                                if ($subtask_id == 0 || $units_no > 0) {
                                                                                         ?>
-                                                                                                <tr id="row">
-                                                                                                    <td style="width:5%"><?= $table_counter ?></td>
-                                                                                                    <td style="width:40%"><?= $description ?></td>
-                                                                                                    <td style="width:25%"><?= $unit_of_measure ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($units_no) ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($total_cost, 2) ?></td>
-                                                                                                </tr>
+                                                                                                    <tr id="row">
+                                                                                                        <td style="width:5%"><?= $table_counter ?></td>
+                                                                                                        <td style="width:40%"><?= $description ?></td>
+                                                                                                        <td style="width:25%"><?= $unit_of_measure . " " . $request_id ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($units_no) ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($total_cost, 2) ?></td>
+                                                                                                        <td style="width:10%">
+                                                                                                            <?php
+                                                                                                            if ($subtask_id == 0) {
+                                                                                                            ?>
+                                                                                                                <button type="button" data-toggle="modal" data-target="#addFormModal" data-backdrop="static" data-keyboard="false" onclick="add_budgetline(<?= $direct_cost_id ?>)" class="btn btn-success btn-sm" style="float:right; margin-top:-5px">
+                                                                                                                    <?php echo $totalRows_rsPayment_Requests > 0 ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>' ?>
+                                                                                                                </button>
+                                                                                                            <?php
+                                                                                                            }
+                                                                                                            ?>
+                                                                                                        </td>
+                                                                                                    </tr>
                                                                                         <?php
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                         ?>
@@ -240,85 +280,79 @@ if ($permission) {
                                             }
                                             ?>
                                         </fieldset>
-                                        <?php
+                                    <?php
                                     }
                                 }
 
                                 $query_Output = $db->prepare("SELECT * FROM tbl_project_details d INNER JOIN tbl_indicator i ON i.indid = d.indicator WHERE indicator_mapping_type<>1 AND projid = :projid");
                                 $query_Output->execute(array(":projid" => $projid));
                                 $total_Output = $query_Output->rowCount();
-                                $outputs = '';
+
                                 if ($total_Output > 0) {
-                                    $outputs = '';
-                                    if ($total_Output > 0) {
-                                        $counter = 0;
-                                        while ($row_rsOutput = $query_Output->fetch()) {
-                                            $output_id = $row_rsOutput['id'];
-                                            $output = $row_rsOutput['indicator_name'];
-                                            $counter++;
-                                        ?>
-                                            <fieldset class="scheduler-border">
-                                                <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                    <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> : <?= $output ?>
-                                                </legend>
-                                                <?php
-                                                $query_rsMilestone = $db->prepare("SELECT * FROM tbl_milestone WHERE outputid=:output_id ORDER BY parent ASC");
-                                                $query_rsMilestone->execute(array(":output_id" => $output_id));
-                                                $totalRows_rsMilestone = $query_rsMilestone->rowCount();
-                                                if ($totalRows_rsMilestone > 0) {
-                                                    while ($row_rsMilestone = $query_rsMilestone->fetch()) {
-                                                        $milestone = $row_rsMilestone['milestone'];
-                                                        $msid = $row_rsMilestone['msid'];
-                                                        $site_id = 0;
-                                                ?>
-                                                        <div class="row clearfix">
-                                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                <div class="card-header">
-                                                                    <div class="row clearfix">
-                                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                            <ul class="list-group">
-                                                                                <li class="list-group-item list-group-item list-group-item-action active">Task: <?= $milestone ?></li>
-                                                                            </ul>
-                                                                        </div>
+                                    $counter = 0;
+                                    while ($row_rsOutput = $query_Output->fetch()) {
+                                        $output_id = $row_rsOutput['id'];
+                                        $output = $row_rsOutput['indicator_name'];
+                                        $counter++;
+                                    ?>
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
+                                                <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> : <?= $output ?>
+                                            </legend>
+                                            <?php
+                                            $query_rsMilestone = $db->prepare("SELECT * FROM tbl_milestone WHERE outputid=:output_id ORDER BY parent ASC");
+                                            $query_rsMilestone->execute(array(":output_id" => $output_id));
+                                            $totalRows_rsMilestone = $query_rsMilestone->rowCount();
+                                            if ($totalRows_rsMilestone > 0) {
+                                                while ($row_rsMilestone = $query_rsMilestone->fetch()) {
+                                                    $milestone = $row_rsMilestone['milestone'];
+                                                    $msid = $row_rsMilestone['msid'];
+                                                    $site_id = 0;
+                                            ?>
+                                                    <div class="row clearfix">
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <div class="card-header">
+                                                                <div class="row clearfix">
+                                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                        <ul class="list-group">
+                                                                            <li class="list-group-item list-group-item list-group-item-action active">Task: <?= $milestone ?></li>
+                                                                        </ul>
                                                                     </div>
                                                                 </div>
-                                                                <div class="table-responsive">
-                                                                    <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th style="width:5%">#</th>
-                                                                                <th style="width:40%">Item</th>
-                                                                                <th style="width:25%">Unit of Measure</th>
-                                                                                <th style="width:10%">No. of Units</th>
-                                                                                <th style="width:10%">Unit Cost (Ksh)</th>
-                                                                                <th style="width:10%">Total Cost (Ksh)</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <?php
-                                                                            $query_rsOther_cost_plan =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE tasks=:task_id AND site_id=:site_id ");
-                                                                            $query_rsOther_cost_plan->execute(array(":task_id" => $msid, ':site_id' => $site_id));
-                                                                            $totalRows_rsOther_cost_plan = $query_rsOther_cost_plan->rowCount();
-                                                                            if ($totalRows_rsOther_cost_plan > 0) {
-                                                                                $table_counter = 0;
-                                                                                while ($row_rsOther_cost_plan = $query_rsOther_cost_plan->fetch()) {
-                                                                                    $table_counter++;
-                                                                                    $direct_cost_id = $row_rsOther_cost_plan['id'];
-                                                                                    $description = $row_rsOther_cost_plan['description'];
-                                                                                    $unit = $row_rsOther_cost_plan['unit'];
-                                                                                    $unit_of_measure = get_unit_of_measure($unit);
-
-                                                                                    $query_rsPayment_Requests = $db->prepare("SELECT * FROM tbl_contractor_payment_request_details WHERE site_id=:site_id AND subtask_id=:subtask_id AND payment_request_id=:payment_request_id");
-                                                                                    $query_rsPayment_Requests->execute(array(":site_id" => $site_id, ":subtask_id" => $subtask_id, ":payment_request_id" => $request_id));
-                                                                                    $totalRows_rsPayment_Requests = $query_rsPayment_Requests->rowCount();
-                                                                                    $row_rsPayment_Requests = $query_rsPayment_Requests->fetch();
-                                                                                    $units_no = $unit_cost = $total_cost = 0;
-                                                                                    if ($totalRows_rsPayment_Requests > 0) {
-                                                                                        $units_no = $row_rsPayment_Requests['units_no'];
-                                                                                        $unit_cost = $row_rsPayment_Requests['unit_cost'];
-                                                                                        $total_cost = $units_no * $unit_cost;
-                                                                                    }
-                                                                            ?>
+                                                            </div>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width:5%">#</th>
+                                                                            <th style="width:40%">Item</th>
+                                                                            <th style="width:25%">Unit of Measure</th>
+                                                                            <th style="width:10%">No. of Units</th>
+                                                                            <th style="width:10%">Unit Cost (Ksh)</th>
+                                                                            <th style="width:10%">Total Cost (Ksh)</th>
+                                                                            <th style="width:10%">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php
+                                                                        $query_rsOther_cost_plan =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE tasks=:task_id AND site_id=:site_id ");
+                                                                        $query_rsOther_cost_plan->execute(array(":task_id" => $msid, ':site_id' => $site_id));
+                                                                        $totalRows_rsOther_cost_plan = $query_rsOther_cost_plan->rowCount();
+                                                                        if ($totalRows_rsOther_cost_plan > 0) {
+                                                                            $table_counter = 0;
+                                                                            while ($row_rsOther_cost_plan = $query_rsOther_cost_plan->fetch()) {
+                                                                                $table_counter++;
+                                                                                $direct_cost_id = $row_rsOther_cost_plan['id'];
+                                                                                $subtask_id = $row_rsOther_cost_plan['subtask_id'];
+                                                                                $description = $row_rsOther_cost_plan['description'];
+                                                                                $unit = $row_rsOther_cost_plan['unit'];
+                                                                                $unit_of_measure = get_unit_of_measure($unit);
+                                                                                $request_details = get_payment_details($site_id, $subtask_id, $request_id);
+                                                                                $units_no = $request_details['units_no'];
+                                                                                $unit_cost = $request_details['unit_cost'];
+                                                                                $total_cost = $request_details['total_cost'];
+                                                                                if ($subtask_id == 0 || $units_no > 0) {
+                                                                        ?>
                                                                                     <tr id="row">
                                                                                         <td style="width:5%"><?= $table_counter ?></td>
                                                                                         <td style="width:40%"><?= $description ?></td>
@@ -326,41 +360,46 @@ if ($permission) {
                                                                                         <td style="width:10%"><?= number_format($units_no) ?></td>
                                                                                         <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
                                                                                         <td style="width:10%"><?= number_format($total_cost, 2) ?></td>
+                                                                                        <td style="width:10%">
+                                                                                            <?php
+                                                                                            if ($subtask_id == 0) {
+                                                                                            ?>
+                                                                                                <button type="button" data-toggle="modal" data-target="#addFormModal" data-backdrop="static" data-keyboard="false" onclick="add_budgetline(<?= $direct_cost_id ?>)" class="btn btn-success btn-sm" style="float:right; margin-top:-5px">
+                                                                                                    <?php echo $totalRows_rsPayment_Requests > 0 ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>' ?>
+                                                                                                </button>
+                                                                                            <?php
+                                                                                            }
+                                                                                            ?>
+                                                                                        </td>
                                                                                     </tr>
-                                                                            <?php
+                                                                        <?php
                                                                                 }
                                                                             }
-                                                                            ?>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
+                                                                        }
+                                                                        ?>
+                                                                    </tbody>
+                                                                </table>
                                                             </div>
                                                         </div>
-                                                <?php
-                                                    }
+                                                    </div>
+                                            <?php
                                                 }
-                                                ?>
-                                            </fieldset>
+                                            }
+                                            ?>
+                                        </fieldset>
                                 <?php
-                                        }
                                     }
                                 }
-
-                                $query_rsComments = $db->prepare("SELECT * FROM tbl_payment_request_comments WHERE request_id=:request_id and created_by=:created_by");
-                                $query_rsComments->execute(array(":request_id" => $request_id, ":created_by" => $user_name));
-                                $totalRows_rsComments = $query_rsComments->rowCount();
-                                $Rows_rsComments = $query_rsComments->fetch();
-                                $remarks = $totalRows_rsComments > 0 ? $Rows_rsComments['comments'] : '';
                                 ?>
                                 <fieldset class="scheduler-border" id="direct_cost">
                                     <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
                                         <i class="fa fa-calendar" aria-hidden="true"></i> Request Details
                                     </legend>
                                     <form role="form" id="form" action="" method="post" autocomplete="off" enctype="multipart/form-data">
-                                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                            <label class="control-label">Due Date <span id="impunit"></span>*:</label>
-                                            <div class="form-input">
-                                                <input type="date" name="due_date" id="due_date" class="form-control" value="<?= $due_date ?>" required="required">
+                                        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                                            <label for="invoice" class="control-label">Invoice Attachment:</label>
+                                            <div class="form-line">
+                                                <input type="file" name="invoice" value="" id="invoice" class="form-control" required>
                                             </div>
                                         </div>
                                         <div id="comment_section">
@@ -368,12 +407,13 @@ if ($permission) {
                                                 <label class="control-label">Remarks *:</label>
                                                 <br>
                                                 <div class="form-line">
-                                                    <textarea name="comments" cols="" rows="7" class="form-control" id="comment" placeholder="Enter Comments if necessary" style="width:98%; color:#000; font-size:12px; font-family:Verdana, Geneva, sans-serif"><?= $remarks ?></textarea>
+                                                    <textarea name="comments" cols="" rows="7" class="form-control" id="comment" placeholder="Enter Comments if necessary" style="width:98%; color:#000; font-size:12px; font-family:Verdana, Geneva, sans-serif"></textarea>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row clearfix" style="margin-top:5px; margin-bottom:5px">
                                             <div class="col-md-12 text-center">
+                                                <input type="hidden" name="projid" value="<?= $projid ?>">
                                                 <input type="hidden" name="request_id" value="<?= $request_id ?>">
                                                 <input type="hidden" name="store_remarks" value="store_remarks">
                                                 <button type="submit" class="btn btn-success">Request</button>
@@ -456,7 +496,6 @@ if ($permission) {
                                                 <input type="hidden" name="task_id" id="task_id" value="">
                                                 <input type="hidden" name="amount_requested" id="amount_requested" value="">
                                                 <input type="hidden" name="request_id" id="request_id" value="<?= $request_id ?>">
-                                                <input type="hidden" name="cost_type" id="cost_type" value="<?= $purpose ?>">
                                                 <input type="hidden" name="implementation_type" id="implementation_type" value="">
                                                 <input type="hidden" name="store" id="store" value="new">
                                                 <button name="save" type="" class="btn btn-primary waves-effect waves-light" id="modal-form-submit" value="">

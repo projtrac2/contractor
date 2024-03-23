@@ -383,8 +383,7 @@ try {
                     }
                 }
             }
-        }
-        return;
+        } 
         echo json_encode(array("success" => true));
     }
 
