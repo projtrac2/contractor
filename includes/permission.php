@@ -38,7 +38,7 @@ if (isset($_SESSION['last_timestamp']) && (time() - $_SESSION['last_timestamp'])
 	// Update the last timestamp
 	$_SESSION['last_timestamp'] = time();
 }
-
+// var_dump($_SESSION['MM_Contractor']);
 (!isset($_SESSION['MM_Contractor'])) ? header("location: index.php") : "";
 
 $user_name = $_SESSION['MM_Contractor'];

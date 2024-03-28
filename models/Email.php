@@ -526,7 +526,8 @@ class Email
         if ($count > 0) {
             $content = strtr($row_email_templates->content, $token);
             $subject = strtr($row_email_templates->title, $token);
-            $main_url = $user_type == 1 ? $this->url . $page_url : $this->contractor_url . $page_url;
+            // $main_url = $user_type == 1 ? $this->url . $page_url : $this->contractor_url . $page_url;
+            $main_url = 'http://localhost:8000/' . $page_url;
             $details_link =  '<a href="' . $main_url . '" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Click Here</a>';
             $body = $this->email_body_template($subject, $content, $details_link);
             if ($recipient_id != '') {
@@ -625,7 +626,7 @@ class Email
     public function sendMail($subject, $body, $recipient, $recipient_name, $attachments)
     {
         $results = false;
-        $recipient = 'biwottech@gmail.com';
+        $recipient = 'pwambua25@gmail.com';
         try {
             $mail = new PHPMailer;
             // $mail->SMTPDebug = 2;
@@ -648,6 +649,43 @@ class Email
             $mail->isHTML(True);
             $mail->Subject = $subject;
             $mail->Body = $body;
+            $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+            $results = $mail->send();
+        } catch (Exception $e) {
+            $results = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        }
+
+
+        return $results;
+    }
+
+
+    public function sendMailOtp($subject, $otp, $recipient, $recipient_name, $attachments)
+    {
+        $results = false;
+        $recipient = 'pwambua25@gmail.com';
+        try {
+            $mail = new PHPMailer;
+            // $mail->SMTPDebug = 2;
+            $mail->isSMTP();
+            $mail->Host       = $this->host;
+            $mail->SMTPAuth   = $this->smtp_auth;
+            $mail->Username   = $this->username;
+            $mail->Password   = $this->password;
+            $mail->SMTPSecure = $this->smtp_secure;
+            $mail->Port       = $this->port;
+            $mail->setFrom($this->username, $this->org);
+            $mail->addAddress($recipient, $recipient_name);
+
+            if (count($attachments) > 0) {
+                for ($i = 0; $i < count($attachments); $i++) {
+                    $mail->addStringAttachment($attachments[$i], $attachments[$i]);
+                }
+            }
+
+            $mail->isHTML(True);
+            $mail->Subject = $subject;
+            $mail->Body = "<h1>otp is $otp</h1>";
             $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
             $results = $mail->send();
         } catch (Exception $e) {
