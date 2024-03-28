@@ -139,7 +139,6 @@ function filter_head($contractor_start, $contractor_end, $start_date, $end_date,
                         $response = true;
                     }
                 }
-                
             }
         } else {
             $response = true;
@@ -154,8 +153,8 @@ function filter_body($contractor_start, $contractor_end, $start_date, $end_date,
     $task_start_date = $work_program ? $work_program['start_date'] : '';
     $task_end_date = $work_program ?  $work_program['end_date'] : '';
     $table = '';
-   
-    
+
+
     if ($flag == 2) {
         if (
             ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
@@ -627,7 +626,7 @@ if (isset($_GET['get_wbs'])) {
 
         $min_date = $row_rsWorkBreakdown['startdate'];
         $max_date = $row_rsWorkBreakdown['enddate'];
-        
+
         $frequency = $row_rsProjects['activity_monitoring_frequency'];
         $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
         $query_rsTender->execute(array(":projid" => $projid));

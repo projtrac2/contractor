@@ -383,7 +383,7 @@ try {
                     }
                 }
             }
-        } 
+        }
         echo json_encode(array("success" => true));
     }
 
@@ -667,7 +667,6 @@ try {
             $project_plan = $rows_rsPayement_reuests['project_plan'];
             $projid = $rows_rsPayement_reuests['projid'];
             $invoice =  $rows_rsPayement_reuests['invoice'];
-
             $attachment = $invoice != '' ? '<a href="' . $invoice . '" download><i class="fa fa-download" aria-hidden="true"></i>Download</a>' : '';
 
             $query_rsPayement_reuests_comments =  $db->prepare("SELECT * FROM  tbl_contractor_payment_request_comments WHERE request_id=:request_id AND stage=1 LIMIT 1");

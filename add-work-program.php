@@ -37,8 +37,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                 $start_date = $row_rsTender['startdate'];
                 $end_date = $row_rsTender['enddate'];
             }
-
-            $approval_stage = $project_sub_stage > 2 ? true : false;
 ?>
             <!-- start body  -->
             <div class="container-fluid">
@@ -158,7 +156,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             }
 
                                             $proceed = validate_tasks();
-                                            if ($proceed && !$approval_stage) {
+                                            if ($proceed) {
                                                 $approve_details = "{projid:$projid,project_name:'$projname',}";
                                             ?>
                                                 <input type="hidden" name="projid" value="<?= $projid ?>">

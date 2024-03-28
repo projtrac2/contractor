@@ -153,6 +153,7 @@ if ($permission) {
                                             $query_rsPayement_reuests =  $db->prepare("SELECT * FROM  tbl_contractor_payment_requests WHERE status <> 3 AND contractor_id=:contractor_id AND projid=:projid");
                                             $query_rsPayement_reuests->execute(array(":contractor_id" => $user_name, ":projid" => $projid));
                                             $total_rsPayement_reuests = $query_rsPayement_reuests->rowCount();
+                                            $issue = true;
                                             if ($filter) {
                                     ?>
                                                 <tr>
@@ -173,18 +174,13 @@ if ($permission) {
                                                                 Options <span class="caret"></span>
                                                             </button>
                                                             <ul class="dropdown-menu">
-                                                            <li>
-                                                                            <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                <i class="fa fa-plus-square-o"></i> <?= $activity ?> Program of Works
-                                                                            </a>
-                                                                        </li>
                                                                 <?php
                                                                 if ($projstage == 8) {
                                                                     if ($sub_stage > 0) {
                                                                 ?>
                                                                         <li>
                                                                             <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                <i class="fa fa-plus-square-o"></i> <?= $activity ?> Program of Works
+                                                                                <i class="fa fa-plus-square-o"></i> <?= $activity ?> Work Program
                                                                             </a>
                                                                         </li>
                                                                     <?php
@@ -192,13 +188,24 @@ if ($permission) {
                                                                 } else {
                                                                     ?>
                                                                     <li>
-                                                                        <a type="button" href="project-issues.php?proj=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                            <i class="fa fa-plus-square-o"></i> Issues
+                                                                        <a type="button" href="payment.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                            <i class="fa fa-money text-warning"></i> Payment Requests
                                                                         </a>
                                                                     </li>
+                                                                <?php
+                                                                }
+                                                                ?>
+                                                                <li>
+                                                                    <a type="button" href="project-issues.php?proj=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                        <i class="fa fa-exclamation-triangle text-danger"></i> Project Issues
+                                                                    </a>
+                                                                </li>
+                                                                <?php
+                                                                if ($issue) {
+                                                                ?>
                                                                     <li>
-                                                                        <a type="button" href="payment.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                            <i class="fa fa-plus-square-o"></i> Payment Requests
+                                                                        <a type="button" href="adjust-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                            <i class="fa fa-exclamation-triangle text-danger"></i> Adjust Work Program
                                                                         </a>
                                                                     </li>
                                                                 <?php
