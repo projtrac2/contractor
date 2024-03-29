@@ -10,7 +10,7 @@ if (isset($_SESSION['attempt_again'])) {
     }
 }
 
-if (isset($_POST['submit'])) {
+if (isset($_POST['sign-in'])) {
     //set login attempt if not set
     if (!isset($_SESSION['attempt'])) {
         $_SESSION['attempt'] = 0;
@@ -19,6 +19,7 @@ if (isset($_POST['submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $contractor = $contractor_auth->login($email, $password);
+
 
     //check if there are 3 attempts already
     // if ($_SESSION['attempt'] == $company_settings->login_attempts) {
@@ -34,28 +35,33 @@ if (isset($_POST['submit'])) {
             if ($contractor->first_login) {
                 header("location: set-new-password.php");
             } else {
+
                 $_SESSION['avatar'] = $contractor->avatar;
                 $_SESSION['contractor_name'] = $contractor->fullname;
 
-                if (isset($_GET['action'])) {
-                    $page_url = $_GET['action'];
-                    header("location: $page_url");
-                } else {
-                    header("location: projects.php");
+            if (isset($_GET['action'])) {
+                $page_url = $_GET['action'];
+                header("location: $page_url");
+            } else {
+                // send mail then redirect
+                $mail_otp_code = $contractor_auth->otp($email);
+                if ($mail_otp_code) {
+                    header("location: otp.php?email=$email");
                 }
             }
-        } else {
-            $_SESSION["errorMessage"] =  "Your login attempt failed. You may have entered a wrong username or wrong password.";
-            //this is where we put our 3 attempt limit
-            $_SESSION['attempt'] += 1;
-            //set the time to allow login if third attempt is reach
-            if ($_SESSION['attempt'] == 3) {
-                $_SESSION['attempt_again'] = time() + (5 * 60);
-                //note 5*60 = 5mins, 60*60 = 1hr, to set to 2hrs change it to 2*60*60
-            }
-            header("location:index.php");
-            return;
         }
+    } else {
+        $_SESSION["errorMessage"] =  "Your login attempt failed. You may have entered a wrong username or wrong password.";
+        //this is where we put our 3 attempt limit
+        $_SESSION['attempt'] += 1;
+        //set the time to allow login if third attempt is reach
+        if ($_SESSION['attempt'] == 3) {
+            $_SESSION['attempt_again'] = time() + (5 * 60);
+            //note 5*60 = 5mins, 60*60 = 1hr, to set to 2hrs change it to 2*60*60
+        }
+        header("location:index.php");
+        return;
+    }
     // }
 }
 ?>
@@ -70,180 +76,160 @@ if (isset($_POST['submit'])) {
     <meta http-equiv="Cache-Control" content="no-cache">
     <title>Result-Based Monitoring &amp; Evaluation System</title>
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
-    <style media="screen">
+    <style>
         body {
-            background-color: #036;
-        }
-
-        #loginuser {
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 1px solid #999;
-            border-radius: 5px;
-            box-shadow: 5px 5px 5px #888888;
-            max-width: 100%;
-            min-width: 50%;
-        }
-
-        .form-signin {
-            max-width: 350px;
-            padding: 19px 29px 29px;
-            margin: 0 auto 20px;
-            background-color: #E8E8E8;
-            border: 1px solid #e5e5e5;
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-            -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-            -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-            box-shadow: 5px 5px 5px #CCCCCC;
-            margin-top: 20px;
-        }
-
-        .form-signin .form-signin-heading,
-        .form-signin .checkbox {
-            margin-bottom: 10px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
-
-        .form-signin input[type="email"] {
-            font-size: 14px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-            background-image: url(images/email.png);
+            background-image: url('./images/back-14.jpg');
             background-repeat: no-repeat;
-            background-position: 98%;
-            font-family: Verdana, Geneva, sans-serif;
-            color: #000;
+            background-size: 100% 100%;
+            min-height: 100vh;
         }
 
-        .form-signin input[type="text"] {
-            font-size: 14px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-            background-image: url(images/user.png);
-            background-repeat: no-repeat;
-            background-position: 98%;
-            font-family: Verdana, Geneva, sans-serif;
-            color: #000;
-        }
-
-        .form-signin input[type="password"] {
-            font-size: 14px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-            background-image: url(images/pwd.png);
-            background-repeat: no-repeat;
-            background-position: 98%;
-            font-family: Verdana, Geneva, sans-serif;
-            color: #000;
-        }
-
-        .loginbutton {
-            width: 130px;
-            height: 40px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 14px;
-            color: #FFF;
-            background-color: #06C;
-            border: 5px solid #06C;
-            border-radius: 3px;
-            cursor: pointer;
-            -webkit-appearance: button;
-            font-weight: bold;
-        }
-
-        .errormsg {
-            width: 80%;
-            height: 30%;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            border: #930 1px solid;
-            padding-left: 10px;
-            padding-right: 10px;
-            color: #000;
-            padding-top: 10px;
-            background-color: #F9B6AC;
+        .m-footer {
             text-align: center;
-            margin-left: 10px;
-            padding-bottom: 10px;
+            background-color: black;
+            color: white;
+            position: absolute;
+            bottom: 0px;
+            width: 100%;
+        }
+
+        .m-alert {
+            padding: 0.6vw;
+            background-color: rgba(254, 242, 241, 0.7);
+            border: 1px solid #ef4444;
+            display: flex;
+            gap: 1vw;
+            align-content: center;
+            align-items: center;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
         }
 
 
-        .loginbutton {
-            width: 200px;
-            height: 40px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 14px;
-            color: #FFF;
-            background-color: #06C;
-            border: 5px solid #06C;
-            border-radius: 3px;
-            cursor: pointer;
-            -webkit-appearance: button;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: 10px;
-        }
-
-        #contentleft {
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            float: left;
-            width: 800px;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-
-        #footer {
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            color: #999;
-            height: 20px;
-        }
-
-        .row {
-            margin-left: 0px;
-            margin-top: 10px;
-        }
-
-        #content_area_cell {
-            max-width: 100%;
-            min-width: 70%;
-            margin-left: 0px;
-            background-color: #fff;
-            padding-left: 5px;
-        }
-
-        .container-fluid1 {
-            outline: 1px dashed #999;
-        }
-
-        .contenttitles {
-            font-family: Candara;
-            font-size: 28px;
-            font-weight: bold;
-            color: #036;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-            border-bottom-width: thin;
-            border-bottom-style: dashed;
-            border-bottom-color: #999;
-            padding-left: 5px;
-            padding-right: 5px;
+        .m-alert-danger {
+            padding: 0.6vw;
+            background-color: rgba(220, 252, 231, 0.7);
+            border: 1px solid #16a34a;
+            display: flex;
+            gap: 1vw;
+            align-content: center;
+            align-items: center;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
         }
     </style>
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-responsive.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+    <script src="https://kit.fontawesome.com/6557f5a19c.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <p>&nbsp;</p>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4" style="padding-top: 10vh;">
+                <div style="margin-bottom: 8vh;">
+                    <img src="./images/logo-proj.png" alt="" srcset="" width="500">
+                </div>
+
+
+                <form method="POST" id="loginusers">
+                    <div style="margin-bottom: 4vh;">
+                        <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
+                        <p style="color: #dc2626;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 4vh;">
+                        <input name="password" type="password" id="password" placeholder="Password" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
+                        <p style="color: #dc2626;"></p>
+                    </div>
+
+                    <input type="hidden" name="sign-in" value="sign-in">
+
+                    <div style="display: flex; gap: 2vw;">
+                        <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Sign In</button>
+                        <a href="forgot-password.php"><button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button></a>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-8">
+
+            </div>
+        </div>
+    </div>
+    <div class="m-footer">
+        <p>ProjTrac M&E - Your Best Result-Based Monitoring & Evaluation System .</p>
+        <p>Copyright @ 2017 - 2024. ProjTrac Systems Ltd .</p>
+    </div>
+
+    <?php
+    if (isset($_SESSION["errorMessage"])) {
+    ?>
+        <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
+            <div class="m-alert">
+                <i class="fa-solid fa-circle-exclamation" style="font-size: 26px; color: #dc2626; padding-left: 1vw"></i>
+                <div>
+                    <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #7f1d1d;">Danger Alert</p>
+                    <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["errorMessage"] ?></p>
+                </div>
+            </div>
+        </div>
+    <?php
+    }
+    unset($_SESSION["errorMessage"]);
+    ?>
+
+
+    <?php
+    if (isset($_SESSION["successMessage"])) {
+    ?>
+    <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
+        <div class="m-alert-danger">
+            <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
+            <div>
+                <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
+                <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+            </div>
+        </div>
+    </div>
+    <?php
+    }
+    unset($_SESSION["successMessage"]);
+    ?>
+
+    <script>
+        $(function() {
+            console.log($('#email'));
+
+            $('#submit-btn').on('click', (e) => {
+                e.preventDefault();
+
+                if (!$('#email').val()) {
+                    $('#email').next().text('field required');
+                    return;
+                } else {
+                    $('#email').next().text('');
+                }
+
+                if (!$('#password').val()) {
+                    $('#password').next().text('field required');
+                    return;
+                } else {
+                    $('#password').next().text('');
+                }
+                console.log($('#loginusers').submit());
+                $('#loginusers').submit();
+            })
+        })
+    </script>
+</body>
+
+</html>
+
+ <!-- <p>&nbsp;</p>
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span12">
@@ -287,8 +273,5 @@ if (isset($_POST['submit'])) {
         </div>
     </div>
     <?php
-    include_once "includes/login-footer.php";
-    ?>
-</body>
-
-</html>
+    // include_once "includes/login-footer.php";
+    ?> -->

@@ -1,29 +1,38 @@
 <?php
-require 'vendor/autoload.php';
-require 'models/Connection.php';
-include "models/Auth.php";
-include "models/Company.php";
-require 'models/Email.php';
+include_once('./includes/controller.php');
 
-$company_details = new Company();
-$company_settings = $company_details->get_company_details();
-session_start();
+$email = $_GET['email'];
 
-if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Password") {
-    $email = $_POST['email'];
-    $contractor_auth = new Auth();
-    $contractor = $contractor_auth->get_contractor($email);
-    if ($contractor) {
-        $forgot = $contractor_auth->forgot_password($email);
-        $_SESSION["successMessage"] =  "Reset link has been sent to your email please use it to reset you password.";
-        header("location:forgot-password.php");
-        return;
+if (isset($_POST['sign-in'])) {
+    // check if password has expired
+    $otp_code = $_POST['otp_code'];
+    $checkIfOtpExpired =  $contractor_auth->checkIfOptExpired($email, $otp_code);
+    if ($checkIfOtpExpired) {
+        // weka sessions
+        $contractor = $contractor_auth->get_contractor($email);
+        if ($contractor) {
+            # code...
+            $_SESSION['MM_Contractor'] = $contractor->contrid;
+            $_SESSION['avatar'] = $contractor->avatar;
+            $_SESSION['contractor_name'] = $contractor->contractor_name;
+            header("location: projects.php");
+            return;
+        }
     } else {
-        $_SESSION["errorMessage"] =  "Your login attempt failed. You may have entered a wrong email address.";
-        header("location:forgot-password.php");
+        header("location: otp.php?email=$email");
         return;
     }
 }
+
+if (isset($_POST['resend']) && $_POST['resend'] == "resend otp") {
+    $mail_otp_code = $contractor_auth->otp($email);
+    if ($mail_otp_code) {
+        $_SESSION["successMessage"] = "Otp code has been resent to your email!";
+        header("location: otp.php?email=$email");
+        return;
+    }
+}
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -79,40 +88,84 @@ if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Passw
             width: 100%;
             font-size: 16px;
         }
+
+
+        #resend-btn:hover {
+            cursor: pointer;
+        }
+
+        @media only screen and (max-height: 600px) {
+
+            /* CSS rules for extra small devices */
+            .m-padding {
+                padding-top: 4vh;
+            }
+        }
+
+
+        /* Small devices (portrait tablets and large phones, 600px and up) */
+        @media only screen and (min-height: 601px) and (max-height: 900px) {
+
+            /* CSS rules for small devices */
+            .m-padding {
+                padding-top: 10vh;
+            }
+        }
+
+        /* Medium devices (landscape tablets, 900px and up) */
+        @media only screen and (min-height: 901px) and (max-height: 1200px) {
+            .m-padding {
+                padding-top: 10vh;
+            }
+        }
+
+        /* Large devices (laptops/desktops, 1200px and up) */
+        @media only screen and (min-height: 1201px) {
+
+            /* CSS rules for large devices */
+            .m-padding {
+                padding-top: 10vh;
+            }
+        }
     </style>
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-responsive.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
     <script src="https://kit.fontawesome.com/6557f5a19c.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body>
     <div class="container">
         <div class="row">
-            <div class="col-md-4" style="padding-top: 8vh;">
-                <div style="margin-bottom: 6vh;">
-                    <img src="./images/logo-proj.png" alt="" srcset="" width="400">
+            <div class="col-md-4 m-padding">
+                <div style="margin-bottom: 8vh;">
+                    <img src="./images/logo-proj.png" alt="" srcset="" width="500">
                 </div>
 
 
-
                 <div style="margin-bottom: 4vh;">
-                    <h4 style="color: #003366;">Forgot your password ?</h4>
-                    <p style="color: #808080;">Enter your email to reset it!</p>
+                    <h4 style="color: #003366;">OTP Verification</h4>
+                    <p style="color: black;">Check email for otp code!</p>
                 </div>
                 <!-- inputs -->
                 <form method="POST" id="loginusers">
                     <div style="margin-bottom: 4vh;">
-                        <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
+                        <input name="otp_code" type="text" id="otp_code" placeholder="OTP Code" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px; margin-bottom: 0px" required>
                         <p style="color: #dc2626;"></p>
                     </div>
 
-                    <input type="hidden" name="forgotpassword" value="Forgot Password">
+                    <input type="hidden" name="sign-in" value="sign-in">
+
+
 
                     <div style="display: flex; gap: 2vw;">
-                        <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; border-radius: 5px;">Forgot Password</button>
-                        <a href="index.php"><button type="button" style="background-color: transparent; color: white; border: 1.5px solid #003366; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; border-radius: 5px;">Go To Login</button></a>
+                        <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 16px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Sign In</button>
                     </div>
+                </form>
+                <form method="post" id="resend-form">
+                    <input type="hidden" name="resend" value="resend otp">
+                    <p style="color: black;">Didn't receive otp? <a type="button" id="resend-btn" style="color:#003366;">resend</a></p>
                 </form>
             </div>
             <div class="col-md-8">
@@ -146,15 +199,15 @@ if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Passw
     <?php
     if (isset($_SESSION["successMessage"])) {
     ?>
-    <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
-        <div class="m-alert-danger">
-            <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
-            <div>
-                <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
-                <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+        <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
+            <div class="m-alert-danger">
+                <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
+                <div>
+                    <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
+                    <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+                </div>
             </div>
         </div>
-    </div>
     <?php
     }
     unset($_SESSION["successMessage"]);
@@ -162,25 +215,33 @@ if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Passw
 
     <script>
         $(function() {
-            console.log($('#email'));
 
             $('#submit-btn').on('click', (e) => {
                 e.preventDefault();
 
-                if (!$('#email').val()) {
-                    $('#email').next().text('field required');
+                if (!$('#otp_code').val()) {
+                    $('#otp_code').next().text('field required');
                     return;
                 } else {
-                    $('#email').next().text('');
+                    $('#otp_code').next().text('');
                 }
 
+
                 $('#loginusers').submit();
+            });
+
+
+            $('#resend-btn').on('click', (e) => {
+                e.preventDefault();
+
+                $('#resend-form').submit();
             })
         })
     </script>
 </body>
 
 </html>
+
 
 <!-- <p>&nbsp;</p>
     <div class="container-fluid">
@@ -196,40 +257,13 @@ if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Passw
                                                 ?>" style="height:100px; width:230px; margin-top:10px" class="imgdim" /></p>
                             </div>
                             <br />
-                            <?php
-                            // if (isset($_SESSION["errorMessage"])) {
-                            //     $type = $_SESSION['type'];
-                            //     if ($type == "error") {
-                            ?>
-                                    <div class='alert alert-error'>
-                                        <p class="errormsg">
-                                            <img src="images/error.png" alt="success_msg" />
-                                            <?php //$_SESSION["errorMessage"] 
-                                            ?>
-                                        </p>
-                                    </div>
-                                <?php
-                                // } else {
-                                ?>
-                                    <div class='alert alert-success'>
-                                        <p class="success_msg">
-                                            <img src="assets/images/apply.gif" alt="success" />
-                                            <?php //$_SESSION["errorMessage"] 
-                                            ?>
-                                        </p>
-                                    </div>
-                            <?php
-                            //     }
-                            // }
-                            // unset($_SESSION["errorMessage"]);
-                            ?>
                             <p>
-                                <input name="email" type="email" class="input-block-level" id="username" placeholder="Enter your email address" required />
+                                <label for="password">Opt</label>
+                                <input name="otp_code" type="text" class="input-block-level" id="password" placeholder="Enter otp code" required />
                             </p>
                             <p>
-                                <input name="forgotpassword" type="submit" class="loginbutton" id="submit" value="Forgot Password" />
+                                <input name="submit" type="submit" class="loginbutton" id="submit" value="Sign In" />
                             </p>
-                            <a href="index.php">Go to login</a>
                         </form>
                         <p>&nbsp;</p>
                     </div>
