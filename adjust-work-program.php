@@ -1,13 +1,13 @@
 <?php
 require('includes/head.php');
+include_once('workplan-structure.php');
+
 if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
     try {
         $encoded_projid = $_GET['projid'];
         $decode_projid = base64_decode($encoded_projid);
         $projid_array = explode("projid54321", $decode_projid);
         $projid = $projid_array[1];
-
-        $projid = 18;
 
         $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid = :projid");
         $query_rsProjects->execute(array(":projid" => $projid));
@@ -23,8 +23,12 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
             $end_date = $row_rsProjects['projenddate'];
             $project_sub_stage = $row_rsProjects['proj_substage'];
             $workflow_stage = $row_rsProjects['projstage'];
-
+            $frequency = $row_rsProjects['activity_monitoring_frequency'];
+            $implementation_type = $row_rsProjects['projcategory'];
+            $project_start_date = $row_rsProjects['projstartdate'];
+            $project_end_date = $row_rsProjects['projenddate'];
             $monitoring_frequency_id = $row_rsProjects['activity_monitoring_frequency'];
+
             $query_frequency = $db->prepare("SELECT * FROM tbl_datacollectionfreq WHERE status=1 AND fqid=:monitoring_frequency_id ");
             $query_frequency->execute(array(":monitoring_frequency_id" => $monitoring_frequency_id));
             $totalRows_frequency = $query_frequency->rowCount();
@@ -40,31 +44,29 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                 $end_date = $row_rsTender['enddate'];
             }
 
-            $query_Issues = $db->prepare("SELECT * FROM tbl_projissues WHERE projid=:projid AND (issue_area=2 || issue_area=3) ");
+            $contractor_start = $project_start_date;
+            $contractor_end = $project_end_date;
+            $contractor_details = get_contract_dates($projid);
+            if ($implementation_type == 2) {
+                $contractor_details =  get_contract_dates($projid);
+                if ($contractor_details) {
+                    $contractor_start = $contractor_details['contractor_start'];
+                    $contractor_end = $contractor_details['contractor_end'];
+                }
+            }
+
+            $duration_details = get_duration($project_start_date, $project_end_date);
+            $duration = $duration_details['duration'];
+            $start_year = $duration_details['start_year'];
+
+            $query_Issues = $db->prepare("SELECT * FROM tbl_projissues WHERE projid=:projid AND (issue_area=2 OR issue_area=3) ORDER BY id DESC LIMIT 1");
             $query_Issues->execute(array(":projid" => $projid));
             $totalRows_Issues = $query_Issues->rowCount();
             $row_Issues = $query_Issues->fetch();
             $issue_id =  ($totalRows_Issues > 0) ? $row_Issues['id'] : '';
-
-            function get_issue_adjustments($site_id, $output_id, $subtask_id, $type)
-            {
-                global $db, $issue_id;
-                $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments WHERE issue_id=:issue_id AND site_id=:site_id and subtask_id=:subtask_id");
-                $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":subtask_id" => $subtask_id));
-                if ($type == 1) {
-                    $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments WHERE issue_id=:issue_id AND site_id=:site_id ");
-                    $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id));
-                } else if ($type == 2) {
-                    $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.subtask_id WHERE issue_id=:issue_id AND site_id=:site_id and outputid=:output_id");
-                    $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id));
-                }
-                $totalRows_Issues = $query_Issues->rowCount();
-                $row_Issues = $query_Issues->fetch();
-                return $totalRows_Issues ? $row_Issues : false;
-            }
 ?>
             <div class="container-fluid">
-                <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:10px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+                <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
                     <h4 class="contentheader">
                         <i class="fa fa-columns" style="color:white"></i> Adjust Work Program
                         <div class="btn-group" style="float:right">
@@ -105,12 +107,15 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                         while ($row_Sites = $query_Sites->fetch()) {
                                             $site_id = $row_Sites['site_id'];
                                             $site = $row_Sites['site'];
-                                            if (get_issue_adjustments($site_id, '', '', 1)) {
+                                            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments WHERE issueid=:issue_id AND site_id=:site_id");
+                                            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id));
+                                            $totalRows_Issues = $query_Issues->rowCount();
+                                            if ($totalRows_Issues > 0) {
                                                 $counter++;
                                     ?>
                                                 <fieldset class="scheduler-border">
                                                     <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                        SITE <?= $counter ?> : <?= $site ?>
+                                                        SITE <?= $counter ?> : <?= $site . " " . $site_id ?>
                                                     </legend>
                                                     <?php
                                                     $query_Site_Output = $db->prepare("SELECT * FROM tbl_output_disaggregation  WHERE output_site=:site_id");
@@ -127,7 +132,11 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                             $row_Output = $query_Output->fetch();
                                                             $total_Output = $query_Output->rowCount();
 
-                                                            if ($total_Output && get_issue_adjustments($site_id, $output_id, '', 2)) {
+
+                                                            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id");
+                                                            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id));
+                                                            $totalRows_Issues = $query_Issues->rowCount();
+                                                            if ($total_Output && $totalRows_Issues > 0) {
                                                                 $output_id = $row_Output['id'];
                                                                 $output = $row_Output['indicator_name'];
                                                     ?>
@@ -143,37 +152,37 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                                         $task_counter = 0;
                                                                         while ($row_rsMilestone = $query_rsMilestone->fetch()) {
                                                                             $milestone = $row_rsMilestone['milestone'];
-                                                                            $msid = $row_rsMilestone['msid'];
-                                                                            $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id ");
-                                                                            $query_rsTask_Start_Dates->execute(array(':task_id' => $msid, ':site_id' => $site_id));
-                                                                            $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
-                                                                            $edit = $totalRows_rsTask_Start_Dates > 1 ? 1 : 0;
-                                                                            $details = array("output_id" => $output_id, "site_id" => $site_id, 'task_id' => $msid, 'edit' => $edit);
-                                                                            $task_counter++;
+                                                                            $task_id = $row_rsMilestone['msid'];
+
+                                                                            $task_details = get_task_dates($task_id, $site_id);
+                                                                            $task_start_date = $task_details['task_start_date'];
+                                                                            $task_end_date = $task_details['task_end_date'];
+
+                                                                            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id AND msid=:task_id");
+                                                                            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id, ":task_id" => $task_id));
+                                                                            $totalRows_Issues = $query_Issues->rowCount();
+
+                                                                            if ($totalRows_Issues) {
+                                                                                $table =  get_structure($site_id, $output_id, $task_id, $issue_id, $frequency, $duration, $start_year, $task_start_date, $task_end_date);
                                                                     ?>
-                                                                            <input type="hidden" name="task_id" value="<?php echo $msid ?>" class="tasks_id_header" />
-                                                                            <input type="hidden" name="site_id" value="<?php echo $site_id ?>" class="sites_id_header" />
-                                                                            <input type="hidden" name="outputs_id" value="<?php echo $output_id ?>" class="outputs_id_header" />
-                                                                            <div class="row clearfix">
-                                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                                    <div class="card-header">
-                                                                                        <div class="row clearfix">
-                                                                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                                                <h5>
-                                                                                                    <u>
-                                                                                                        TASK <?= $task_counter ?>: <?= $milestone ?>
-                                                                                                    </u>
-                                                                                                </h5>
+                                                                                <div class="row clearfix">
+                                                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                                        <div class="card-header">
+                                                                                            <div class="row clearfix">
+                                                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                                                    <h5>
+                                                                                                        <li> TASK <?= $task_counter ?>: <?= $milestone ?></li>
+                                                                                                    </h5>
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                    <input type="hidden" value="<?php echo $output_id ?>" class="output_id_header" />
-                                                                                    <div class="peter-<?php echo $site_id . $msid ?>"></div>
-                                                                                    <div class="table-responsive">
+                                                                                        <div class="table-responsive">
+                                                                                            <?= $table ?>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
                                                                     <?php
+                                                                            }
                                                                         }
                                                                     }
                                                                     ?>
@@ -194,13 +203,15 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                     $total_Output = $query_Output->rowCount();
                                     $outputs = '';
                                     if ($total_Output > 0) {
-                                        $outputs = '';
-                                        if ($total_Output > 0) {
-                                            $counter = 0;
-
-                                            while ($row_rsOutput = $query_Output->fetch()) {
-                                                $output_id = $row_rsOutput['id'];
-                                                $output = $row_rsOutput['indicator_name'];
+                                        $counter = 0;
+                                        $site_id = 0;
+                                        while ($row_rsOutput = $query_Output->fetch()) {
+                                            $output_id = $row_rsOutput['id'];
+                                            $output = $row_rsOutput['indicator_name'];
+                                            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id");
+                                            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id));
+                                            $totalRows_Issues = $query_Issues->rowCount();
+                                            if ($totalRows_Issues > 0) {
                                                 $counter++;
                                                 $site_id = 0;
                                             ?>
@@ -216,30 +227,41 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                         $task_counter = 0;
                                                         while ($row_rsMilestone = $query_rsMilestone->fetch()) {
                                                             $milestone = $row_rsMilestone['milestone'];
-                                                            $msid = $row_rsMilestone['msid'];
-                                                            $task_counter++;
+                                                            $task_id = $row_rsMilestone['msid'];
+                                                            $task_details = get_task_dates($task_id, $site_id);
+                                                            $task_start_date = $task_details['task_start_date'];
+                                                            $task_end_date = $task_details['task_end_date'];
+                                                            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id AND msid=:task_id");
+                                                            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id, ":task_id" => $task_id));
+                                                            $totalRows_Issues = $query_Issues->rowCount();
+
+                                                            if ($totalRows_Issues) {
+                                                                $table = get_structure($site_id, $output_id, $task_id, $issue_id, $frequency, $duration, $start_year, $task_start_date, $task_end_date);
+                                                                $task_counter++;
                                                     ?>
-                                                            <input type="hidden" name="task_id" value="<?php echo $msid ?>" class="tasks_id_header" />
-                                                            <input type="hidden" name="site_id" value="<?php echo $site_id ?>" class="sites_id_header" />
-                                                            <input type="hidden" name="outputs_id" value="<?php echo $output_id ?>" class="outputs_id_header" />
-                                                            <div class="row clearfix">
-                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                    <div class="card-header">
-                                                                        <div class="row clearfix">
-                                                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                                <h5>
-                                                                                    <u>
-                                                                                        TASK <?= $task_counter ?>: <?= $milestone ?>
-                                                                                    </u>
-                                                                                </h5>
+                                                                <input type="hidden" name="task_id" value="<?php echo $msid ?>" class="tasks_id_header" />
+                                                                <input type="hidden" name="site_id" value="<?php echo $site_id ?>" class="sites_id_header" />
+                                                                <input type="hidden" name="outputs_id" value="<?php echo $output_id ?>" class="outputs_id_header" />
+                                                                <div class="row clearfix">
+                                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                        <div class="card-header">
+                                                                            <div class="row clearfix">
+                                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                                    <h5>
+                                                                                        <ul>
+                                                                                            TASK <?= $task_counter ?>: <?= $milestone ?>
+                                                                                        </ul>
+                                                                                    </h5>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
+                                                                        <div class="table-responsive">
+                                                                            <?= $table ?>
+                                                                        </div>
                                                                     </div>
-                                                                    <input type="hidden" value="<?php echo $output_id ?>" class="output_id_header" />
-                                                                    <div class="peter-<?php echo $site_id . $msid ?>"></div>
                                                                 </div>
-                                                            </div>
                                                     <?php
+                                                            }
                                                         }
                                                     }
                                                     ?>
@@ -254,6 +276,67 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- Start Modal Item Edit -->
+            <div class="modal fade" id="outputItemModals" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color:#03A9F4">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" style="color:#fff" align="center" id="modal-title">Add Program of Works Structure</h4>
+                        </div>
+                        <div class="modal-body" style="max-height:450px; overflow:auto;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="row clearfix">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <ul class="list-group">
+                                                <li class="list-group-item list-group-item list-group-item-action active">Subtask: <span id="subtask_name"></span> </li>
+                                                <li class="list-group-item"><strong>Start Date: </strong> <span id="subtask_start_date"></span> </li>
+                                                <li class="list-group-item"><strong>Duration: </strong> <span id="subtask_duration"></span> days</li>
+                                                <li class="list-group-item"><strong>End Date: </strong> <span id="subtask_end_date"></span> </li>
+                                                <li class="list-group-item"><strong>Target: </strong> <span id="subtask_target"></span> </li>
+                                                <input type="hidden" name="total_target" id="total_target" value="">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row clearfix">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="body">
+                                            <form class="form-horizontal" id="add_project_frequency" action="" method="POST">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 clearfix" style="margin-top:5px; margin-bottom:5px">
+                                                    <div class="table-responsive">
+                                                        <div id="tasks_wbs_table_body">
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                                                        <input type="hidden" name="user_name" id="user_name" value="<?= $user_name ?>">
+                                                        <input type="hidden" name="store_target" id="store_target" value="">
+                                                        <input type="hidden" name="projid" id="t_projid" value="<?= $projid ?>">
+                                                        <input type="hidden" name="output_id" id="t_output_id" value="">
+                                                        <input type="hidden" name="site_id" id="t_site_id" value="">
+                                                        <input type="hidden" name="task_id" id="t_task_id" value="">
+                                                        <input type="hidden" name="frequency" id="frequency" value="<?= $monitoring_frequency_id ?>">
+                                                        <input type="hidden" name="subtask_id" id="t_subtask_id" value="">
+                                                        <input type="hidden" name="today" id="today" value="<?= date('Y-m-d') ?>">
+                                                        <input name="submtt" type="submit" class="btn btn-primary waves-effect waves-light" id="tag-form-submit-frequency" value="Save" />
+                                                        <button type="button" class="btn btn-warning waves-effect waves-light" data-dismiss="modal"> Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- /modal-body -->
+                    </div>
+                    <!-- /modal-content -->
+                </div>
+                <!-- /modal-dailog -->
             </div>
 <?php
         } else {

@@ -140,7 +140,6 @@ function get_tasks(details) {
     $("#site_id").val(site_id);
     $("#task_id").val(task_id);
     var projid = $("#projid").val();
-
     (edit == "1") ? $("#store_tasks").val(1) : $("#store_tasks").val(0);
 
     $.ajax({
