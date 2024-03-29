@@ -22,19 +22,13 @@ class Auth
 
         $years = floor($diff / (365 * 60 * 60 * 24));
 
-        $months = floor(($diff - $years * 365 * 60 * 60 * 24)
-            / (30 * 60 * 60 * 24));
+        $months = floor(($diff - $years * 365 * 60 * 60 * 24) / (30 * 60 * 60 * 24));
 
-        $days = floor(($diff - $years * 365 * 60 * 60 * 24 -
-            $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
+        $days = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
 
-        $hours = floor(($diff - $years * 365 * 60 * 60 * 24
-            - $months * 30 * 60 * 60 * 24 - $days * 60 * 60 * 24)
-            / (60 * 60));
+        $hours = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24 - $days * 60 * 60 * 24) / (60 * 60));
 
-        $minutes = floor(($diff - $years * 365 * 60 * 60 * 24
-            - $months * 30 * 60 * 60 * 24 - $days * 60 * 60 * 24
-            - $hours * 60 * 60) / 60);
+        $minutes = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24 - $days * 60 * 60 * 24 - $hours * 60 * 60) / 60);
 
         return ((60 - $minutes) > 0) ? true : false;
     }
@@ -51,11 +45,11 @@ class Auth
         return implode($pass);
     }
 
-    private function send_mail($user_id, $fullname, $email, $notification_type_id, $page_url, $priority)
+    private function send_mail($user_id, $fullname, $email, $notification_type_id, $page_url, $priority, $otp)
     {
         $notification_group_id = 7;
         $mail = new Email();
-        $token = $mail->get_auth_token($fullname, $email, '');
+        $token = $mail->get_auth_token($fullname, $email, '', $otp);
         $notification = $mail->get_notifications($priority, $notification_group_id);
         $notification_id = $notification->id;
         return $mail->get_template($token, $user_id, $notification_type_id, $notification_group_id, $notification_id, $page_url, 0);
@@ -91,7 +85,7 @@ class Auth
             $sql = $this->db->prepare("UPDATE tbl_contractor SET  `disabled`=1 WHERE email=:email");
             $results = $sql->execute(array(":email" => $email));
             if ($results) {
-                $mail_response = $this->send_mail($user->contrid, $user->fullname, $email, 10, "index.php", 3);
+                $mail_response = $this->send_mail($user->contrid, $user->fullname, $email, 10, "index.php", 3, '');
             }
         }
         return $mail_response;
@@ -101,11 +95,10 @@ class Auth
     // send mail to contractor and block if attempts reached limit
     public function otp($email)
     {
-        $mail = new Email();
         $user = $this->get_contractor($email);
         $mail_response = false;
         if ($user) {
-            // generate otp 
+            // generate otp
             $otp = rand(100000, 999999);
             date_default_timezone_set('Africa/Nairobi');
             $expires_at = date('Y-m-d H:i:s', strtotime('+2 minute'));
@@ -113,8 +106,7 @@ class Auth
             $opt_stmt = $this->db->prepare('UPDATE tbl_contractor SET otp=:otp, expires_at=:expires_at WHERE email=:email');
             $otp_result = $opt_stmt->execute([":otp" => $otp, ":expires_at" => $expires_at, ":email" => $email]);
             if ($otp_result) {
-                // $mail_response = $this->send_mail($user->contrid, $user->fullname, $email, 10, "/otp.php", 3);
-                $mail_response = $mail->sendMailOtp("one time password", $otp, $email, $user->user_name, []);
+                $mail_response = $this->send_mail($user->contrid, $user->contractor_name, $email, 27, '', 3, $otp);
             }
         }
         return $mail_response;
@@ -151,7 +143,7 @@ class Auth
             } else {
                 $_SESSION["errorMessage"] = "Wrong otp code entered.";
                 return false;
-            } 
+            }
         }
     }
 
@@ -174,7 +166,7 @@ class Auth
             $results = $create_reset_token->execute(array(":email" => $email, ":token" => $token));
             if ($results) {
                 $page_url = "reset-password.php?token=$token";
-                $mail_response = $this->send_mail($contractor->contrid, $contractor->contractor_name, $email, 8, $page_url, 2);
+                $mail_response = $this->send_mail($contractor->contrid, $contractor->contractor_name, $email, 8, $page_url, 2, '');
                 $response = ($mail_response) ? true : false;
             }
         }
@@ -203,7 +195,7 @@ class Auth
                 $results = $sql->execute(array(":password" => password_hash($password, PASSWORD_DEFAULT), ":email" => $email));
 
                 if ($results) {
-                    $mail_response =  $this->send_mail($contractor->contrid, $contractor->contractor_name, $email, 22, "index.php", 2);
+                    $mail_response =  $this->send_mail($contractor->contrid, $contractor->contractor_name, $email, 22, "index.php", 2, '');
                 }
             }
         }
@@ -220,7 +212,7 @@ class Auth
             $sql = $this->db->prepare("UPDATE tbl_contractor SET password=:password, first_login=0 WHERE contrid=:contractor_id");
             $results = $sql->execute(array(":password" => $password_hashed, ":contractor_id" => $contractor_id));
             if ($results) {
-                $response = $this->send_mail($contractor->contrid, $contractor->fullname, $contractor->email, 22, "index.php", 2);
+                $response = $this->send_mail($contractor->contrid, $contractor->fullname, $contractor->email, 22, "index.php", 2, '');
                 $response = ($results) ? $contractor : false;
             }
         }

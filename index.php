@@ -20,49 +20,43 @@ if (isset($_POST['sign-in'])) {
     $password = $_POST['password'];
     $contractor = $contractor_auth->login($email, $password);
 
-
-    //check if there are 3 attempts already
-    // if ($_SESSION['attempt'] == $company_settings->login_attempts) {
-    //     $_SESSION['errorMessage'] = 'Attempt limit reached';
-    //     $contractor_auth->suspicious_activity($email);
-    //     header("location:index.php");
-    //     return;
-    // } else {
+    // check if there are 3 attempts already
+    if ($_SESSION['attempt'] == $company_settings->login_attempts) {
+        $_SESSION['errorMessage'] = 'Attempt limit reached';
+        $contractor_auth->suspicious_activity($email);
+        header("location:index.php");
+        return;
+    } else {
         if ($contractor) {
             //unset our attempt
             unset($_SESSION['attempt']);
-            $_SESSION['MM_Contractor'] = $contractor->contrid;
             if ($contractor->first_login) {
                 header("location: set-new-password.php");
             } else {
-
-                $_SESSION['avatar'] = $contractor->avatar;
-                $_SESSION['contractor_name'] = $contractor->fullname;
-
-            if (isset($_GET['action'])) {
-                $page_url = $_GET['action'];
-                header("location: $page_url");
-            } else {
-                // send mail then redirect
-                $mail_otp_code = $contractor_auth->otp($email);
-                if ($mail_otp_code) {
-                    header("location: otp.php?email=$email");
+                if (isset($_GET['action'])) {
+                    $page_url = $_GET['action'];
+                    header("location: $page_url");
+                } else {
+                    // send mail then redirect
+                    $mail_otp_code = $contractor_auth->otp($email);
+                    if ($mail_otp_code) {
+                        header("location: otp.php?email=$email");
+                    }
                 }
             }
+        } else {
+            $_SESSION["errorMessage"] =  "Your login attempt failed. You may have entered a wrong username or wrong password.";
+            //this is where we put our 3 attempt limit
+            $_SESSION['attempt'] += 1;
+            //set the time to allow login if third attempt is reach
+            if ($_SESSION['attempt'] == 3) {
+                $_SESSION['attempt_again'] = time() + (5 * 60);
+                //note 5*60 = 5mins, 60*60 = 1hr, to set to 2hrs change it to 2*60*60
+            }
+            header("location:index.php");
+            return;
         }
-    } else {
-        $_SESSION["errorMessage"] =  "Your login attempt failed. You may have entered a wrong username or wrong password.";
-        //this is where we put our 3 attempt limit
-        $_SESSION['attempt'] += 1;
-        //set the time to allow login if third attempt is reach
-        if ($_SESSION['attempt'] == 3) {
-            $_SESSION['attempt_again'] = time() + (5 * 60);
-            //note 5*60 = 5mins, 60*60 = 1hr, to set to 2hrs change it to 2*60*60
-        }
-        header("location:index.php");
-        return;
     }
-    // }
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -127,31 +121,27 @@ if (isset($_POST['sign-in'])) {
 </head>
 
 <body>
-
     <div class="container">
         <div class="row">
             <div class="col-md-4" style="padding-top: 10vh;">
                 <div style="margin-bottom: 8vh;">
                     <img src="./images/logo-proj.png" alt="" srcset="" width="500">
                 </div>
-
-
                 <form method="POST" id="loginusers">
                     <div style="margin-bottom: 4vh;">
                         <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
                         <p style="color: #dc2626;"></p>
                     </div>
-
                     <div style="margin-bottom: 4vh;">
                         <input name="password" type="password" id="password" placeholder="Password" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
                         <p style="color: #dc2626;"></p>
                     </div>
-
                     <input type="hidden" name="sign-in" value="sign-in">
-
                     <div style="display: flex; gap: 2vw;">
                         <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Sign In</button>
-                        <a href="forgot-password.php"><button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button></a>
+                        <a href="forgot-password.php">
+                            <button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button>
+                        </a>
                     </div>
                 </form>
             </div>
@@ -186,15 +176,15 @@ if (isset($_POST['sign-in'])) {
     <?php
     if (isset($_SESSION["successMessage"])) {
     ?>
-    <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
-        <div class="m-alert-danger">
-            <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
-            <div>
-                <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
-                <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+        <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
+            <div class="m-alert-danger">
+                <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
+                <div>
+                    <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
+                    <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+                </div>
             </div>
         </div>
-    </div>
     <?php
     }
     unset($_SESSION["successMessage"]);
@@ -202,8 +192,6 @@ if (isset($_POST['sign-in'])) {
 
     <script>
         $(function() {
-            console.log($('#email'));
-
             $('#submit-btn').on('click', (e) => {
                 e.preventDefault();
 
@@ -229,7 +217,7 @@ if (isset($_POST['sign-in'])) {
 
 </html>
 
- <!-- <p>&nbsp;</p>
+<!-- <p>&nbsp;</p>
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span12">
