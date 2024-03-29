@@ -19,7 +19,7 @@ if (isset($_POST['submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $contractor = $contractor_auth->login($email, $password);
-    
+
     //check if there are 3 attempts already
     // if ($_SESSION['attempt'] == $company_settings->login_attempts) {
     //     $_SESSION['errorMessage'] = 'Attempt limit reached';
@@ -34,7 +34,6 @@ if (isset($_POST['submit'])) {
             if ($contractor->first_login) {
                 header("location: set-new-password.php");
             } else {
-               
                 $_SESSION['avatar'] = $contractor->avatar;
                 $_SESSION['contractor_name'] = $contractor->fullname;
 
