@@ -28,10 +28,7 @@ if ($permission) {
             $start_date = $row_rsTender['startdate'];
             $end_date = $row_rsTender['enddate'];
         }
-    } catch (PDOException $ex) {
-        $result = flashMessage("An error occurred: " . $ex->getMessage());
-        echo $result;
-    }
+
 ?>
     <style>
         @import "https://code.highcharts.com/dashboards/css/dashboards.css";
@@ -395,6 +392,9 @@ if ($permission) {
     </div>
     <!-- end body  -->
 <?php
+    } catch (PDOException $ex) {
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
+    }
 } else {
     $results =  restriction();
     echo $results;

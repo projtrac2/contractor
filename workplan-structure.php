@@ -30,15 +30,6 @@ function get_target($site_id, $task_id, $subtask_id, $start_date, $end_date)
     return $target;
 }
 
-function check_target_breakdown($site_id, $task_id, $subtask_id)
-{
-    global $db;
-    $stmt = $db->prepare('SELECT * FROM tbl_project_target_breakdown WHERE site_id=:site_id AND task_id = :task_id AND subtask_id = :subtask_id ');
-    $stmt->execute(array(':site_id' => $site_id, ':task_id' => $task_id, ":subtask_id" => $subtask_id));
-    $stmt_result = $stmt->rowCount();
-    return $stmt_result > 0 ? true : false;
-}
-
 function getStartAndEndDate($week, $year)
 {
     $dto = new DateTime();
@@ -92,6 +83,7 @@ function get_table_body($site_id, $output_id, $task_id, $issue_id, $duration_det
 {
     global $db;
     $body = '';
+    $today =  date('Y-m-d');
     $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
     $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $task_id));
     $totalRows_rsTasks = $query_rsTasks->rowCount();
@@ -102,37 +94,31 @@ function get_table_body($site_id, $output_id, $task_id, $issue_id, $duration_det
             $task_name = $row_rsTasks['task'];
             $subtask_id = $row_rsTasks['tkid'];
             $unit =  $row_rsTasks['unit_of_measure'];
-            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id AND msid=:task_id");
-            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id, ":task_id" => $task_id));
+            $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id AND msid=:task_id AND sub_task_id=:sub_task_id");
+            $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id, ":task_id" => $task_id, ":sub_task_id" => $subtask_id));
             $totalRows_Issues = $query_Issues->rowCount();
-
+            $Rows_Issues = $query_Issues->fetch();
             if ($totalRows_Issues > 0) {
                 $unit_of_measure = get_unit_of_measure($unit);
                 $work_program = check_program_of_works($site_id, $task_id, $subtask_id);
-                $breakdown = check_target_breakdown($site_id, $task_id, $subtask_id);
                 $subtask_start_date = $work_program['start_date'];
                 $subtask_end_date = $work_program['end_date'];
-
-
+                $flag = $Rows_Issues['flag'];
                 $tbody = '';
                 $duration = count($duration_details);
                 for ($i = 0; $i < $duration; $i++) {
                     $start_date = $duration_details[$i][0];
                     $end_date = $duration_details[$i][1];
                     $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date);
-                    $tbody .= filter_body($start_date, $end_date, $target, $site_id, $task_id, $subtask_id, 1);
+                    if ($today <= $start_date || $today <= $end_date) {
+                        $tbody .= filter_body($start_date, $end_date, $target, $site_id, $task_id, $subtask_id, 1);
+                    }
                 }
-
-                $button = '';
-                if ($work_program) {
-                    $button .=
-                        '<button type="button" onclick="get_subtasks_wbs(' . $output_id . ', ' . $site_id . ', ' . $task_id . ', ' . $subtask_id . ')" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" >';
-                    $button .= $breakdown ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>';
-                    $button .= '
+                $button =
+                    '<button type="button" onclick="get_subtasks_wbs(' . $output_id . ', ' . $site_id . ', ' . $task_id . ', ' . $subtask_id . ', ' . $issue_id . ')" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" >';
+                $button .= $flag == 1 ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>';
+                $button .= '
                     </button>';
-                }
-
-
                 $body .=
                     "<tr>
                         <td style='width:5%'>$tcounter</td>
@@ -183,6 +169,7 @@ function get_frequency_header($frequency, $start_date)
 
 function get_header($annual_dates, $duration_details, $frequency, $thead)
 {
+    $today =  date('Y-m-d');
     $table_head = $tyears  = '';
     if ($frequency != 6) {
         for ($i = 0; $i < count($annual_dates); $i++) {
@@ -192,14 +179,16 @@ function get_header($annual_dates, $duration_details, $frequency, $thead)
             for ($t = 0; $t < count($duration_details); $t++) {
                 $start_date = $duration_details[$t][0];
                 $end_date = $duration_details[$t][1];
-                if (
-                    ($annual_start_date >= $start_date && $annual_start_date <= $end_date) ||
-                    ($annual_end_date >= $start_date && $annual_end_date <= $end_date) ||
-                    ($annual_start_date <= $start_date && $annual_end_date >= $start_date && $annual_end_date >= $end_date)
-                ) {
-                    $header = get_frequency_header($frequency, $start_date);
-                    $table_head .= "<th>$header</th>";
-                    $spans++;
+                if ($today <= $start_date || $today <= $end_date) {
+                    if (
+                        ($annual_start_date >= $start_date && $annual_start_date <= $end_date) ||
+                        ($annual_end_date >= $start_date && $annual_end_date <= $end_date) ||
+                        ($annual_start_date <= $start_date && $annual_end_date >= $start_date && $annual_end_date >= $end_date)
+                    ) {
+                        $header = get_frequency_header($frequency, $start_date);
+                        $table_head .= "<th>$header</th>";
+                        $spans++;
+                    }
                 }
             }
 

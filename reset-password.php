@@ -1,7 +1,4 @@
-<?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+<?php 
 $token = (isset($_GET['token']) && !empty($_GET['token'])) ? $_GET['token'] : header("location:index.php");
 require 'vendor/autoload.php';
 require 'models/Connection.php';
@@ -121,7 +118,7 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
         <div style="margin-bottom: 4vh;">
           <img src="./images/logo-proj.png" alt="" srcset="" width="400">
         </div>
-        <?php 
+        <?php
           if ($verified) {
         ?>
         <!-- inputs -->
@@ -156,7 +153,7 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
         <?php
         }
         ?>
-        
+
       </div>
       <div class="col-md-8">
 
@@ -253,7 +250,7 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
             ?>
               <form action="" method="POST" class="form-signin" style="margin-bottom:10px" id="loginusers">
                 <div style="width:100%; height:auto; background-color:#036">
-                  <p><img src="<?php // $company_settings->main_url . $company_settings->logo; 
+                  <p><img src="<?php // $company_settings->main_url . $company_settings->logo;
                                 ?>" style="height:100px; width:230px; margin-top:10px" class="imgdim" /></p>
                 </div>
                 <br />

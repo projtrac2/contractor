@@ -107,10 +107,7 @@ if ($permission) {
         $duration = $duration_details['duration'];
         $percentage_duration_consumed = $duration_details['percentage_duration_consumed'];
         $percentage_duration_remaining = $duration_details['percentage_duration_remaining'];
-    } catch (PDOException $ex) {
-        $result = flashMessage("An error occurred: " . $ex->getMessage());
-        echo $result;
-    }
+
 ?>
     <!-- start body  -->
     <div class="container-fluid">
@@ -239,6 +236,9 @@ if ($permission) {
     </div>
     <!-- end body  -->
 <?php
+    } catch (PDOException $ex) {
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
+    }
 } else {
     $results =  restriction();
     echo $results;

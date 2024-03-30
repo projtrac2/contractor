@@ -87,9 +87,7 @@ if ($permission) {
                 $results = alert_message("Error", "Error check your credentials 3", "error", "profile.php");
             }
         }
-    } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
-    }
+
 ?>
 
     <!-- start body  -->
@@ -329,6 +327,10 @@ if ($permission) {
 
         <!-- end body  -->
     <?php
+
+    } catch (PDOException $ex) {
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
+    }
 } else {
     $results =  restriction();
     echo $results;

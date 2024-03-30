@@ -1,9 +1,5 @@
 <?php
 require('includes/head.php');
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 if ($permission) {
     try {
         function get_unit_of_measure($unit)
@@ -523,7 +519,7 @@ if ($permission) {
             echo $results;
         }
     } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
 } else {
     $results =  restriction();

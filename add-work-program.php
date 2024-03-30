@@ -305,7 +305,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
             echo $results;
         }
     } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
 } else {
     $results =  restriction();

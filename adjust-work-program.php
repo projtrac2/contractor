@@ -92,6 +92,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             <li class="list-group-item"><strong>Monitoring Frequency: </strong> <?= $monitoring_frequency; ?> </li>
                                             <input type="hidden" name="project_start_date" id="project_start_date" value="<?= $start_date ?>">
                                             <input type="hidden" name="project_end_date" id="project_end_date" value="<?= $end_date ?>">
+                                            <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                                         </ul>
                                     </div>
                                 </div>
@@ -110,6 +111,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments WHERE issueid=:issue_id AND site_id=:site_id");
                                             $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id));
                                             $totalRows_Issues = $query_Issues->rowCount();
+                                            $Rows_Issues = $query_Issues->fetch();
                                             if ($totalRows_Issues > 0) {
                                                 $counter++;
                                     ?>
@@ -218,6 +220,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                 <fieldset class="scheduler-border">
                                                     <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
                                                         WAY POINT OUTPUT <?= $counter ?>: <?= $output ?>
+
                                                     </legend>
                                                     <?php
                                                     $query_rsMilestone = $db->prepare("SELECT * FROM tbl_milestone WHERE outputid=:output_id ");
@@ -234,14 +237,10 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                             $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments i INNER JOIN tbl_task t ON t.tkid=i.sub_task_id WHERE issueid=:issue_id AND site_id=:site_id and outputid=:output_id AND msid=:task_id");
                                                             $query_Issues->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":output_id" => $output_id, ":task_id" => $task_id));
                                                             $totalRows_Issues = $query_Issues->rowCount();
-
-                                                            if ($totalRows_Issues) {
+                                                            if ($totalRows_Issues > 0) {
                                                                 $table = get_structure($site_id, $output_id, $task_id, $issue_id, $frequency, $duration, $start_year, $task_start_date, $task_end_date);
                                                                 $task_counter++;
                                                     ?>
-                                                                <input type="hidden" name="task_id" value="<?php echo $msid ?>" class="tasks_id_header" />
-                                                                <input type="hidden" name="site_id" value="<?php echo $site_id ?>" class="sites_id_header" />
-                                                                <input type="hidden" name="outputs_id" value="<?php echo $output_id ?>" class="outputs_id_header" />
                                                                 <div class="row clearfix">
                                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                                         <div class="card-header">
@@ -285,7 +284,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" style="color:#fff" align="center" id="modal-title">Add Program of Works Structure</h4>
                         </div>
-                        <div class="modal-body" style="max-height:450px; overflow:auto;">
+                        <div class="modal-body">
                             <div class="card">
                                 <div class="card-header">
                                     <div class="row clearfix">
@@ -296,6 +295,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                 <li class="list-group-item"><strong>Duration: </strong> <span id="subtask_duration"></span> days</li>
                                                 <li class="list-group-item"><strong>End Date: </strong> <span id="subtask_end_date"></span> </li>
                                                 <li class="list-group-item"><strong>Target: </strong> <span id="subtask_target"></span> </li>
+                                                <li class="list-group-item"><strong>Requested Units: </strong> <span id="requested_units"></span> </li>
                                                 <input type="hidden" name="total_target" id="total_target" value="">
                                             </ul>
                                         </div>
@@ -317,6 +317,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                         <input type="hidden" name="user_name" id="user_name" value="<?= $user_name ?>">
                                                         <input type="hidden" name="store_target" id="store_target" value="">
                                                         <input type="hidden" name="projid" id="t_projid" value="<?= $projid ?>">
+                                                        <input type="hidden" name="issue_id" id="issue_id" value="<?= $issue_id ?>">
                                                         <input type="hidden" name="output_id" id="t_output_id" value="">
                                                         <input type="hidden" name="site_id" id="t_site_id" value="">
                                                         <input type="hidden" name="task_id" id="t_task_id" value="">
@@ -344,7 +345,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
             echo $results;
         }
     } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
 } else {
     $results =  restriction();
@@ -353,3 +354,5 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
 
 require('includes/footer.php');
 ?>
+
+<script src="assets/js/programofWorks/extend.js"></script>

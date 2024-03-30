@@ -83,9 +83,7 @@ if ($permission) {
             $count_row_rsPMbrs = $query_rsPMbrs->rowCount();
             return $count_row_rsPMbrs > 0 ?  $row_rsPMbrs['ttitle'] . ". " . $row_rsPMbrs['fullname'] : "";
         }
-    } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
-    }
+
 ?>
     <div class="container-fluid">
         <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
@@ -213,6 +211,9 @@ if ($permission) {
         </div>
     </div>
 <?php
+    } catch (PDOException $ex) {
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
+    }
 } else {
     $results =  restriction();
     echo $results;
