@@ -237,37 +237,3 @@ if (isset($_POST['resend']) && $_POST['resend'] == "resend otp") {
 </body>
 
 </html>
-
-
-<!-- <p>&nbsp;</p>
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span12">
-                <div align="center">
-                    <div class="container-fluid1" id="content_area_cell">
-                        <h3 align="center" class="contenttitles">ProjTrac Monitoring, Evaluation, And Reporting System</h3>
-                        <p>&nbsp;</p>
-                        <form action="" method="POST" class="form-signin" style="margin-bottom:10px" id="loginusers">
-                            <div style="width:100%; height:auto; background-color:#036">
-                                <p><img src="<?php //$company_settings->main_url . $company_settings->logo;
-                                                ?>" style="height:100px; width:230px; margin-top:10px" class="imgdim" /></p>
-                            </div>
-                            <br />
-                            <p>
-                                <label for="password">Opt</label>
-                                <input name="otp_code" type="text" class="input-block-level" id="password" placeholder="Enter otp code" required />
-                            </p>
-                            <p>
-                                <input name="submit" type="submit" class="loginbutton" id="submit" value="Sign In" />
-                            </p>
-                        </form>
-                        <p>&nbsp;</p>
-                    </div>
-                </div>
-                <p>&nbsp;</p>
-            </div>
-        </div>
-    </div>
-    <?php
-    // include_once "includes/login-footer.php";
-    ?> -->

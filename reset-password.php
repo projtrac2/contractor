@@ -19,6 +19,7 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
   $token = $_POST['token'];
   $user = $user_auth->get_contractor($email);
 
+
   if ($user && $confirm_password === $password) {
     $verify = $user_auth->verify_token($token);
     if ($verify) {
@@ -72,7 +73,6 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
     }
 
     @media only screen and (max-height: 600px) {
-
       /* CSS rules for extra small devices */
       .m-padding {
         padding-top: 4vh;
@@ -98,7 +98,6 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
 
     /* Large devices (laptops/desktops, 1200px and up) */
     @media only screen and (min-height: 1201px) {
-
       /* CSS rules for large devices */
       .m-padding {
         padding-top: 10vh;
@@ -120,33 +119,33 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
           <img src="./images/logo-proj.png" alt="" srcset="" width="400">
         </div>
         <?php
-        if ($verified) {
+          if ($verified) {
         ?>
-          <!-- inputs -->
-          <form method="POST" id="loginusers">
-            <div style="margin-bottom: 4vh;">
-              <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
-              <p style="color: #dc2626;"></p>
-            </div>
+        <!-- inputs -->
+        <form method="POST" id="loginusers">
+          <div style="margin-bottom: 4vh;">
+            <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
+            <p style="color: #dc2626;"></p>
+          </div>
 
-            <div style="margin-bottom: 4vh;">
-              <input name="password" type="password" id="password" placeholder="Enter new password" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
-              <p style="color: #dc2626;"></p>
-            </div>
+          <div style="margin-bottom: 4vh;">
+            <input name="password" type="password" id="password" placeholder="Enter new password" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
+            <p style="color: #dc2626;"></p>
+          </div>
 
-            <div style="margin-bottom: 4vh;">
-              <input name="confirm_password" type="password" id="confirm_password" placeholder="Confirm new password" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
-              <p style="color: #dc2626;"></p>
-            </div>
+          <div style="margin-bottom: 4vh;">
+            <input name="confirm_password" type="password" id="confirm_password" placeholder="Confirm new password" style="color:black; padding: 0.4vw; border-radius: 5px; border: none; width: 40%; font-size: 14px;" required>
+            <p style="color: #dc2626;"></p>
+          </div>
 
-            <input type="hidden" name="token" value="<?= $token ?>">
-            <input type="hidden" name="resetpassword" value="Reset Password">
+          <input type="hidden" name="token" value="<?= $token ?>">
+          <input type="hidden" name="resetpassword" value="Reset Password">
 
-            <div style="display: flex; gap: 2vw;">
-              <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Reset Password</button>
-              <a href="forgot-password.php"><button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button></a>
-            </div>
-          </form>
+          <div style="display: flex; gap: 2vw;">
+            <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Reset Password</button>
+            <a href="forgot-password.php"><button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button></a>
+          </div>
+        </form>
         <?php
         } else {
         ?>
@@ -167,79 +166,79 @@ if (isset($_POST['resetpassword']) && $_POST['resetpassword'] == "Reset Password
   </div>
 
   <?php
-  if (isset($_SESSION["errorMessage"])) {
-  ?>
-    <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
-      <div class="m-alert">
-        <i class="fa-solid fa-circle-exclamation" style="font-size: 26px; color: #dc2626; padding-left: 1vw"></i>
-        <div>
-          <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #7f1d1d;">Danger Alert</p>
-          <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["errorMessage"] ?></p>
+    if (isset($_SESSION["errorMessage"])) {
+    ?>
+        <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
+            <div class="m-alert">
+                <i class="fa-solid fa-circle-exclamation" style="font-size: 26px; color: #dc2626; padding-left: 1vw"></i>
+                <div>
+                    <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #7f1d1d;">Danger Alert</p>
+                    <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["errorMessage"] ?></p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  <?php
-  }
-  unset($_SESSION["errorMessage"]);
-  ?>
+    <?php
+    }
+    unset($_SESSION["errorMessage"]);
+    ?>
 
 
-  <?php
-  if (isset($_SESSION["successMessage"])) {
-  ?>
+    <?php
+    if (isset($_SESSION["successMessage"])) {
+    ?>
     <div style="position:absolute; bottom: 12vh; right: 2vw; width: 35%;">
-      <div class="m-alert-danger">
-        <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
-        <div>
-          <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
-          <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+        <div class="m-alert-danger">
+            <i class="fa-solid fa-circle-check" style="font-size: 26px; color: #16a34a; padding-left: 1vw"></i>
+            <div>
+                <p style="margin: 0px; font-size: 1rem; line-height: 1.5rem; font-weight: bold; letter-spacing: 1px; color: #052e16;">Success Alert</p>
+                <p style="margin: 0px; font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.6px;"><?= $_SESSION["successMessage"] ?></p>
+            </div>
         </div>
-      </div>
     </div>
-  <?php
-  }
-  unset($_SESSION["successMessage"]);
-  ?>
+    <?php
+    }
+    unset($_SESSION["successMessage"]);
+    ?>
 
-  <script>
-    $(function() {
-      console.log($('#email'));
+    <script>
+        $(function() {
+            console.log($('#email'));
 
-      $('#submit-btn').on('click', (e) => {
-        e.preventDefault();
+            $('#submit-btn').on('click', (e) => {
+                e.preventDefault();
 
-        if (!$('#email').val()) {
-          $('#email').next().text('field required');
-          return;
-        } else {
-          $('#email').next().text('');
-        }
+                if (!$('#email').val()) {
+                    $('#email').next().text('field required');
+                    return;
+                } else {
+                    $('#email').next().text('');
+                }
 
-        if (!$('#password').val()) {
-          $('#password').next().text('field required');
-          return;
-        } else {
-          $('#password').next().text('');
-        }
+                if (!$('#password').val()) {
+                    $('#password').next().text('field required');
+                    return;
+                } else {
+                    $('#password').next().text('');
+                }
 
-        if (!$('#confirm_password').val()) {
-          $('#confirm_password').next().text('field required');
-          return;
-        } else {
-          $('#confirm_password').next().text('');
-        }
+                if (!$('#confirm_password').val()) {
+                    $('#confirm_password').next().text('field required');
+                    return;
+                } else {
+                    $('#confirm_password').next().text('');
+                }
 
-        $('#loginusers').submit();
-      })
-    })
-  </script>
+                $('#loginusers').submit();
+            })
+        })
+    </script>
 </body>
 
 </html>
 
 
 <!-- <p>&nbsp;</p> -->
-<!-- <div class="container-fluid">
+  <!-- <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
         <div align="center">
