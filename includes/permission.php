@@ -1,7 +1,14 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+function customErrorHandler($errno, $errstr, $errfile, $errline)
+{
+	$message = "Error: [$errno] $errstr - $errfile:$errline";
+	error_log($message . PHP_EOL, 3, "error_log.log");
+}
+
+set_error_handler("customErrorHandler");
 
 include_once 'projtrac-dashboard/resource/Database.php';
 include_once 'projtrac-dashboard/resource/utilities.php';
@@ -21,29 +28,12 @@ function get_current_url_tests()
 	return $url_path[0];
 }
 
-session_start();
 // Set the inactivity time of 60 minutes (3600 seconds)
 $inactivity_time = 15 * 60;
+$current_page_url = get_current_url_tests();
 
-if (isset($_SESSION['last_timestamp']) && (time() - $_SESSION['last_timestamp']) > $inactivity_time) {
-	session_unset();
-	session_destroy();
-	$current_page_url = get_current_url_tests();
-	//Redirect user to login page
-	header("Location: index.php?action=$current_page_url");
-	exit();
-} else {
-	// Regenerate new session id and delete old one to prevent session fixation attack
-	session_regenerate_id(true);
-	// Update the last timestamp
-	$_SESSION['last_timestamp'] = time();
-}
-// var_dump($_SESSION['MM_Contractor']);
-(!isset($_SESSION['MM_Contractor'])) ? header("location: index.php") : "";
 
-$user_name = $_SESSION['MM_Contractor'];
-$contractor_name = $_SESSION['contractor_name'];
-$avatar = $_SESSION['avatar'];
+
 $today = date('Y-m-d');
 $results = "";
 

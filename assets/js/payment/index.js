@@ -206,3 +206,39 @@ function get_more_info(request_id) {
         console.log("Ensure that the request is correct");
     }
 }
+
+
+const request_payment = (projid, project_name, payment_plan) => {
+    swal({
+        title: "Are you sure?",
+        text: `You want to create a request for ${project_name}!`,
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+        .then((willDelete) => {
+            if (willDelete) {
+                $.ajax({
+                    type: "get",
+                    url: ajax_url,
+                    data: {
+                        create_request: "create_request",
+                        projid: projid,
+                        payment_plan: payment_plan
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.success) {
+                            setTimeout(() => {
+                                window.location.href = response.redirect_url;
+                            }, 3000);
+                        } else {
+                            error_alert("Error occured please try again later");
+                        }
+                    }
+                });
+            } else {
+                swal("You cancelled the action!");
+            }
+        });
+}
