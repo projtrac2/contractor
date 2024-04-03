@@ -6,7 +6,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
         $decode_projid = base64_decode($encoded_projid);
         $projid_array = explode("projid54321", $decode_projid);
         $projid = $projid_array[1];
-
         $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid = :projid");
         $query_rsProjects->execute(array(":projid" => $projid));
         $row_rsProjects = $query_rsProjects->fetch();
@@ -37,8 +36,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                 $start_date = $row_rsTender['startdate'];
                 $end_date = $row_rsTender['enddate'];
             }
-
-            $approval_stage = $project_sub_stage > 2 ? true : false;
 ?>
             <!-- start body  -->
             <div class="container-fluid">
@@ -158,7 +155,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             }
 
                                             $proceed = validate_tasks();
-                                            if ($proceed && !$approval_stage) {
+                                            if ($proceed) {
                                                 $approve_details = "{projid:$projid,project_name:'$projname',}";
                                             ?>
                                                 <input type="hidden" name="projid" value="<?= $projid ?>">
@@ -305,7 +302,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
             echo $results;
         }
     } catch (PDOException $ex) {
-        $results = flashMessage("An error occurred: " . $ex->getMessage());
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
 } else {
     $results =  restriction();

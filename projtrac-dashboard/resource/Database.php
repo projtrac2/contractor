@@ -9,19 +9,11 @@ $db_username = $config['database']['username'];
 $db_password = $config['database']['password'];
 
 $dsn = "{$driver}:host={$host}; dbname={$dbname};charset=utf8mb4";
-
-try{
-    //create an instance of the PDO class with the required parameters
+try {
     $db = new PDO($dsn, $db_username, $db_password);
-
-    //set pdo error mode to exception
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    //display success message
-    //echo "Connected to the register database";
-
-}catch (PDOException $ex){
-    //display error message
-    echo "Connection failed ".$ex->getMessage();
+} catch (PDOException $ex) {
+    $message = "Connection failed " . $ex->getMessage();
+    
+    error_log($message . PHP_EOL, 3, "error_log.txt");
 }
-

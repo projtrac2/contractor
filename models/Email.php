@@ -37,7 +37,7 @@ class Email
         $company_settings = $this->company_settings();
         if ($company_settings) {
             $this->url = $company_settings->main_url;
-            $this->contractor_url = '/contractor';
+            $this->contractor_url = $company_settings->contractor_url;
             $this->org = $company_settings->company_name;
             $this->org_email = $company_settings->email_address;
         }
@@ -270,13 +270,14 @@ class Email
         return  $varMap;
     }
 
-    function get_auth_token($recipient_name, $email, $password)
+    function get_auth_token($recipient_name, $email, $password, $otp)
     {
         $varMap = [];
         $token = array(
             'FIRST_NAME' => $recipient_name,
             'EMAIL' => $email,
             "PASSWORD" => $password,
+            "OTP" => $otp,
         );
 
         $pattern = '[%s]';
@@ -526,8 +527,11 @@ class Email
         if ($count > 0) {
             $content = strtr($row_email_templates->content, $token);
             $subject = strtr($row_email_templates->title, $token);
-            $main_url = $user_type == 1 ? $this->url . $page_url : $this->contractor_url . $page_url;
-            $details_link =  '<a href="' . $main_url . '" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Click Here</a>';
+            $details_link =  $main_url = '';
+            if ($page_url) {
+                $main_url = $user_type == 1 ? $this->url . $page_url : $this->contractor_url . $page_url;
+                $details_link =  '<a href="' . $main_url . '" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Click Here</a>';
+            }
             $body = $this->email_body_template($subject, $content, $details_link);
             if ($recipient_id != '') {
                 $user =  $user_type == 1 ?  $this->get_user_details($recipient_id) : $this->get_contractor_details($recipient_id);
