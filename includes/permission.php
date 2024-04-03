@@ -9,6 +9,7 @@ function customErrorHandler($errno, $errstr, $errfile, $errline)
 }
 
 set_error_handler("customErrorHandler");
+
 include_once 'projtrac-dashboard/resource/Database.php';
 include_once 'projtrac-dashboard/resource/utilities.php';
 include_once("includes/system-labels.php");
