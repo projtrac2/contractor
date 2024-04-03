@@ -8,7 +8,6 @@ require('includes/head.php');
 if ($permission) {
     try {
         $percent2 = number_format(calculate_project_progress($projid, $projcat), 2);
-
         $query_rsMyP =  $db->prepare("SELECT * FROM tbl_projects WHERE deleted='0' AND projid = '$projid'");
         $query_rsMyP->execute();
         $row_rsMyP = $query_rsMyP->fetch();
@@ -108,7 +107,6 @@ if ($permission) {
             $row_rstender = $query_rstender->fetch();
             $tendertype = $row_rstender["type"];
         }
-
 ?>
         <div class="container-fluid">
             <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:35px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">

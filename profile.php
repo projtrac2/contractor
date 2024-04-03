@@ -89,245 +89,243 @@ if ($permission) {
         }
 
 ?>
-
-    <!-- start body  -->
-    <div class="container-fluid">
-        <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:10px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
-            <h4 class="contentheader">
-                <i class="fa fa-puzzle-piece" style="color:white"></i> Contractor Info
-                <input type="button" VALUE="Go Back to Projects Dashboard" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
-                <?= $results ?>
-            </h4>
-        </div>
-        <div class="row clearfix">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="body">
-                        <!-- start body -->
-                        <div class="table-responsive">
-                            <ul class="nav nav-tabs" style="font-size:14px">
-                                <li class="active">
-                                    <a data-toggle="tab" href="#home"><span class="fa fa-address-card-o"></span> Contractor Info</a>
-                                </li>
-                                <li>
-                                    <a data-toggle="tab" href="#menu1"><span class="fa fa-users"></span> Contractor List of Directors &nbsp;<span class="badge bg-blue"><?php echo $totalRows_rsContrDir; ?></span></a>
-                                </li>
-                                <li>
-                                    <a data-toggle="tab" href="#menu2"><span class="fa fa-certificate"></span> Contractor Documents&nbsp;<span class="badge bg-light-green"><?php echo $totalRows_rsContrDocs; ?></span></a>
-                                </li>
-                                <li>
-                                    <a data-toggle="tab" href="#menu3"><span class="fa fa-certificate"></span> Change Password &nbsp;<span class="badge bg-light-green">|</span></a>
-                                </li>
-                            </ul>
-                            <div class="tab-content">
-                                <div id="home" class="tab-pane fade in active">
-                                    <div style="color:#333; background-color:#EEE; width:100%; height:30px">
-                                        <h4><i class="fa fa-list" style="font-size:25px;color:blue"></i> Project Contractor Information</h4>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered table-hover contractor_info" width="98%">
-                                            <thead>
-                                                <tr id="colrow">
-                                                    <th style="width:30%">Title</th>
-                                                    <th style="width:70%">Details</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>Contractor Name</td>
-                                                    <td><?php echo $row_rsContrInfo["contractor_name"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Pin Number</td>
-                                                    <td><?php echo $row_rsContrInfo["pinno"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Business Registration Number</td>
-                                                    <td><?php echo $row_rsContrInfo["busregno"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Business Type</td>
-                                                    <td><?php echo $row_rsBzType["type"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Date Registered</td>
-                                                    <td><?php echo $row_rsContrInfo["dtregistered"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Pin Status</td>
-                                                    <td><?php echo $row_rsContrPinStatus["pin_status"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Is VAT Registered</td>
-                                                    <td><?php echo $row_rsContrVat["vat"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Phone Number</td>
-                                                    <td><?php echo $row_rsContrInfo["phone"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Email Address</td>
-                                                    <td><?php echo $row_rsContrInfo["email"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Postal Address</td>
-                                                    <td><?php echo $row_rsContrInfo["contact"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Physical Address</td>
-                                                    <td><?php echo $row_rsContrInfo["address"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>City/Town</td>
-                                                    <td><?php echo $row_rsContrInfo["city"]; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>County</td>
-                                                    <td><?php echo $row_rsContrCounty["name"]; ?></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div id="menu1" class="tab-pane fade">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered table-hover contractor_info" width="98%">
-                                            <thead>
-                                                <tr id="colrow">
-                                                    <td width="5%">
-                                                        <div align="center">#</div>
-                                                    </td>
-                                                    <td width="50%">Director Full Name</td>
-                                                    <td width="20%">ID/Passport Number</td>
-                                                    <td width="20%">Nationality</td>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $sn = 0;
-                                                while ($row_rsContrDir = $query_rsContrDir->fetch()) {
-                                                    $sn = $sn + 1;
-                                                    $Dirfullname = $row_rsContrDir['fullname'];
-                                                    $DirID = $row_rsContrDir['pinpassport'];
-                                                    $DirNat = $row_rsContrDir['nationality'];
-
-                                                    $query_rsDirNat = $db->prepare("SELECT * FROM tbl_contractornationality WHERE id='$DirNat'");
-                                                    $query_rsDirNat->execute();
-                                                    $row_rsDirNat = $query_rsDirNat->fetch();
-                                                ?>
-                                                    <tr>
-                                                        <td align="center"><?php echo $sn; ?></td>
-                                                        <td style="padding-left:15px"><?php echo $Dirfullname; ?></td>
-                                                        <td style="padding-left:15px"><?php echo $DirID; ?></td>
-                                                        <td style="padding-left:15px"><?php echo $row_rsDirNat['nationality']; ?></td>
-
+        <!-- start body  -->
+        <div class="container-fluid">
+            <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:10px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+                <h4 class="contentheader">
+                    <i class="fa fa-puzzle-piece" style="color:white"></i> Contractor Info
+                    <input type="button" VALUE="Go Back to Projects Dashboard" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
+                    <?= $results ?>
+                </h4>
+            </div>
+            <div class="row clearfix">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                        <div class="body">
+                            <!-- start body -->
+                            <div class="table-responsive">
+                                <ul class="nav nav-tabs" style="font-size:14px">
+                                    <li class="active">
+                                        <a data-toggle="tab" href="#home"><span class="fa fa-address-card-o"></span> Contractor Info</a>
+                                    </li>
+                                    <li>
+                                        <a data-toggle="tab" href="#menu1"><span class="fa fa-users"></span> Contractor List of Directors &nbsp;<span class="badge bg-blue"><?php echo $totalRows_rsContrDir; ?></span></a>
+                                    </li>
+                                    <li>
+                                        <a data-toggle="tab" href="#menu2"><span class="fa fa-certificate"></span> Contractor Documents&nbsp;<span class="badge bg-light-green"><?php echo $totalRows_rsContrDocs; ?></span></a>
+                                    </li>
+                                    <li>
+                                        <a data-toggle="tab" href="#menu3"><span class="fa fa-certificate"></span> Change Password &nbsp;<span class="badge bg-light-green">|</span></a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div id="home" class="tab-pane fade in active">
+                                        <div style="color:#333; background-color:#EEE; width:100%; height:30px">
+                                            <h4><i class="fa fa-list" style="font-size:25px;color:blue"></i> Project Contractor Information</h4>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover contractor_info" width="98%">
+                                                <thead>
+                                                    <tr id="colrow">
+                                                        <th style="width:30%">Title</th>
+                                                        <th style="width:70%">Details</th>
                                                     </tr>
-                                                <?php
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Contractor Name</td>
+                                                        <td><?php echo $row_rsContrInfo["contractor_name"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Pin Number</td>
+                                                        <td><?php echo $row_rsContrInfo["pinno"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Business Registration Number</td>
+                                                        <td><?php echo $row_rsContrInfo["busregno"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Business Type</td>
+                                                        <td><?php echo $row_rsBzType["type"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Date Registered</td>
+                                                        <td><?php echo $row_rsContrInfo["dtregistered"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Pin Status</td>
+                                                        <td><?php echo $row_rsContrPinStatus["pin_status"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Is VAT Registered</td>
+                                                        <td><?php echo $row_rsContrVat["vat"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Phone Number</td>
+                                                        <td><?php echo $row_rsContrInfo["phone"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Email Address</td>
+                                                        <td><?php echo $row_rsContrInfo["email"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Postal Address</td>
+                                                        <td><?php echo $row_rsContrInfo["contact"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Physical Address</td>
+                                                        <td><?php echo $row_rsContrInfo["address"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>City/Town</td>
+                                                        <td><?php echo $row_rsContrInfo["city"]; ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>County</td>
+                                                        <td><?php echo $row_rsContrCounty["name"]; ?></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                                <div id="menu2" class="tab-pane fade">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered table-hover contractor_info" width="98%" border="1">
-                                            <thead>
-                                                <tr id="colrow">
-                                                    <td width="3%">
-                                                        <div align="center"><strong># </strong></div>
-                                                    </td>
-                                                    <td width="52%"> File Name</td>
-                                                    <td width="10%"> File Type</td>
-                                                    <td width="15%"> File Date</td>
-                                                    <td width="20%" data-orderable="false">
-                                                        <div align="center"><i class="fa fa-cloud-download" style="font-size:24px;color:red" alt="download"></i></div>
-                                                    </td>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                if ($totalRows_rsPFiles > 0) {
-                                                    if ($row_rsPFiles['file_format'] == "rtf" || $row_rsPFiles['file_format'] == "doc" || $row_rsPFiles['file_format'] == "docx") {
-                                                        $docformat = "Word";
-                                                    } elseif ($row_rsPFiles['file_format'] == "pdf" || $row_rsPFiles['file_format'] == "PDF") {
-                                                        $docformat = "PDF";
-                                                    } else {
-                                                        $docformat = $row_rsPFiles['file_format'];
-                                                    }
+                                    <div id="menu1" class="tab-pane fade">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover contractor_info" width="98%">
+                                                <thead>
+                                                    <tr id="colrow">
+                                                        <td width="5%">
+                                                            <div align="center">#</div>
+                                                        </td>
+                                                        <td width="50%">Director Full Name</td>
+                                                        <td width="20%">ID/Passport Number</td>
+                                                        <td width="20%">Nationality</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
                                                     $sn = 0;
-                                                    do {
+                                                    while ($row_rsContrDir = $query_rsContrDir->fetch()) {
                                                         $sn = $sn + 1;
-                                                ?>
+                                                        $Dirfullname = $row_rsContrDir['fullname'];
+                                                        $DirID = $row_rsContrDir['pinpassport'];
+                                                        $DirNat = $row_rsContrDir['nationality'];
+
+                                                        $query_rsDirNat = $db->prepare("SELECT * FROM tbl_contractornationality WHERE id='$DirNat'");
+                                                        $query_rsDirNat->execute();
+                                                        $row_rsDirNat = $query_rsDirNat->fetch();
+                                                    ?>
                                                         <tr>
-                                                            <td width="3%" height="35">
-                                                                <div align="center"><?php echo $sn; ?></div>
-                                                            </td>
-                                                            <td width="52%" height="35">
-                                                                <div><?php echo $row_rsPFiles['attachment_purpose']; ?></div>
-                                                            </td>
-                                                            <td width="10%" height="35">
-                                                                <div align="center"><?php echo $docformat; ?></div>
-                                                            </td>
-                                                            <td width="15%">
-                                                                <div align="center"><?php echo date("d M Y", strtotime($row_rsPFiles['ufdate'])); ?></div>
-                                                            </td>
-                                                            <td width="20%">
-                                                                <div align="center"><a href="<?php echo $row_rsPFiles['floc']; ?>" type="button" class="btn bg-light-green waves-effect" title="Download File" target="new">Download</a></div>
-                                                            </td>
+                                                            <td align="center"><?php echo $sn; ?></td>
+                                                            <td style="padding-left:15px"><?php echo $Dirfullname; ?></td>
+                                                            <td style="padding-left:15px"><?php echo $DirID; ?></td>
+                                                            <td style="padding-left:15px"><?php echo $row_rsDirNat['nationality']; ?></td>
+
                                                         </tr>
-                                                <?php } while ($row_rsPFiles = $query_rsPFiles->fetch());
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
+                                                    <?php
+                                                    }
+                                                    ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                                <div id="menu3" class="tab-pane fade">
-                                    <form class="form-horizontal" action="" method="post">
-                                        <div class="form-group">
-                                            <label for="OldPassword" class="col-sm-3 control-label">Old Password</label>
-                                            <div class="col-sm-9">
-                                                <div class="form-line">
-                                                    <input type="password" class="form-control" id="old_password" name="old_password" placeholder="Old Password" required>
+                                    <div id="menu2" class="tab-pane fade">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover contractor_info" width="98%" border="1">
+                                                <thead>
+                                                    <tr id="colrow">
+                                                        <td width="3%">
+                                                            <div align="center"><strong># </strong></div>
+                                                        </td>
+                                                        <td width="52%"> File Name</td>
+                                                        <td width="10%"> File Type</td>
+                                                        <td width="15%"> File Date</td>
+                                                        <td width="20%" data-orderable="false">
+                                                            <div align="center"><i class="fa fa-cloud-download" style="font-size:24px;color:red" alt="download"></i></div>
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
+                                                    if ($totalRows_rsPFiles > 0) {
+                                                        if ($row_rsPFiles['file_format'] == "rtf" || $row_rsPFiles['file_format'] == "doc" || $row_rsPFiles['file_format'] == "docx") {
+                                                            $docformat = "Word";
+                                                        } elseif ($row_rsPFiles['file_format'] == "pdf" || $row_rsPFiles['file_format'] == "PDF") {
+                                                            $docformat = "PDF";
+                                                        } else {
+                                                            $docformat = $row_rsPFiles['file_format'];
+                                                        }
+                                                        $sn = 0;
+                                                        do {
+                                                            $sn = $sn + 1;
+                                                    ?>
+                                                            <tr>
+                                                                <td width="3%" height="35">
+                                                                    <div align="center"><?php echo $sn; ?></div>
+                                                                </td>
+                                                                <td width="52%" height="35">
+                                                                    <div><?php echo $row_rsPFiles['attachment_purpose']; ?></div>
+                                                                </td>
+                                                                <td width="10%" height="35">
+                                                                    <div align="center"><?php echo $docformat; ?></div>
+                                                                </td>
+                                                                <td width="15%">
+                                                                    <div align="center"><?php echo date("d M Y", strtotime($row_rsPFiles['ufdate'])); ?></div>
+                                                                </td>
+                                                                <td width="20%">
+                                                                    <div align="center"><a href="<?php echo $row_rsPFiles['floc']; ?>" type="button" class="btn bg-light-green waves-effect" title="Download File" target="new">Download</a></div>
+                                                                </td>
+                                                            </tr>
+                                                    <?php } while ($row_rsPFiles = $query_rsPFiles->fetch());
+                                                    }
+                                                    ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div id="menu3" class="tab-pane fade">
+                                        <form class="form-horizontal" action="" method="post">
+                                            <div class="form-group">
+                                                <label for="OldPassword" class="col-sm-3 control-label">Old Password</label>
+                                                <div class="col-sm-9">
+                                                    <div class="form-line">
+                                                        <input type="password" class="form-control" id="old_password" name="old_password" placeholder="Old Password" required>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="NewPassword" class="col-sm-3 control-label">New Password</label>
-                                            <div class="col-sm-9">
-                                                <div class="form-line">
-                                                    <input type="password" class="form-control" id="new_password" name="new_password" placeholder="New Password" required>
+                                            <div class="form-group">
+                                                <label for="NewPassword" class="col-sm-3 control-label">New Password</label>
+                                                <div class="col-sm-9">
+                                                    <div class="form-line">
+                                                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="New Password" required>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="NewPasswordConfirm" class="col-sm-3 control-label">New Password (Confirm)</label>
-                                            <div class="col-sm-9">
-                                                <div class="form-line">
-                                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="New Password (Confirm)" required>
+                                            <div class="form-group">
+                                                <label for="NewPasswordConfirm" class="col-sm-3 control-label">New Password (Confirm)</label>
+                                                <div class="col-sm-9">
+                                                    <div class="form-line">
+                                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="New Password (Confirm)" required>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="col-sm-offset-3 col-sm-9">
-                                                <input type="hidden" name="change_password" value="change_password">
-                                                <button type="submit" class="btn btn-danger">SUBMIT</button>
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-3 col-sm-9">
+                                                    <input type="hidden" name="change_password" value="change_password">
+                                                    <button type="submit" class="btn btn-danger">SUBMIT</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </form>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
+                            <!-- end body -->
                         </div>
-                        <!-- end body -->
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- end body  -->
-    <?php
-
+<?php
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
@@ -337,9 +335,9 @@ if ($permission) {
 }
 
 require('includes/footer.php');
-    ?>
-    <script>
-        $(document).ready(function() {
-            $('.contractor_info').DataTable();
-        });
-    </script>
+?>
+<script>
+    $(document).ready(function() {
+        $('.contractor_info').DataTable();
+    });
+</script>

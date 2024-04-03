@@ -517,7 +517,7 @@ if ($permission) {
         } else {
             $results =  restriction();
             echo $results;
-        }
+        } 
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }

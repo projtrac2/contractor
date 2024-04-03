@@ -51,300 +51,300 @@ if ($permission) {
         }
 
 ?>
-    <div class="container-fluid">
-        <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
-            <h4 class="contentheader">
-                <i class="fa fa-users" style="color:white"></i> Progress
-                <div class="btn-group" style="float:right; margin-right:10px">
-                    <input type="button" VALUE="Go Back" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
-                </div>
-            </h4>
-        </div>
-        <div class="row clearfix">
-            <div class="block-header">
-                <?= $results; ?>
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="header" style="padding-bottom:0px">
-                        <div class="button-demo" style="margin-top:-15px">
-                            <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
-                            <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
-                            <a href="project-timeline.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
-                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
-                            <a href="project-team.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
-                            <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
-                        </div>
+        <div class="container-fluid">
+            <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+                <h4 class="contentheader">
+                    <i class="fa fa-users" style="color:white"></i> Progress
+                    <div class="btn-group" style="float:right; margin-right:10px">
+                        <input type="button" VALUE="Go Back" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
                     </div>
-                </div>
+                </h4>
             </div>
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row clearfix">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
-                                <ul class="list-group">
-                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
-                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
-                                    <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
-                                    <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
-                                    <li class="list-group-item"><strong>Project Progress: </strong>
-                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                                <?= $percent2 ?>%
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
+            <div class="row clearfix">
+                <div class="block-header">
+                    <?= $results; ?>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="header" style="padding-bottom:0px">
+                            <div class="button-demo" style="margin-top:-15px">
+                                <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
+                                <a href="project-dashboard.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
+                                <a href="project-timeline.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
+                                <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
+                                <a href="project-team.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
+                                <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
                             </div>
                         </div>
                     </div>
-
-                    <div class="header">
-                        <h2>
-                            USE BELOW SELECTION TO FILTER THE RECORDS BY DATE RANGE
-                        </h2>
-                        <div class="row clearfix">
-                            <form id="searchform" name="searchform" method="get" style="margin-top:10px" action="">
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <label class="control-label">From *:</label>
-                                    <input type="date" name="start_date" id="start_date" class="form-control" onchange="get_records(<?= $projid ?>)">
-                                </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <label class="control-label">To *:</label>
-                                    <input type="date" name="end_date" id="end_date" class="form-control" onchange="get_records(<?= $projid ?>)">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="body">
-                        <div class="row clearfix" id="filter_data">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                <?php
-                                $query_Sites = $db->prepare("SELECT * FROM tbl_project_sites WHERE projid=:projid");
-                                $query_Sites->execute(array(":projid" => $projid));
-                                $rows_sites = $query_Sites->rowCount();
-                                if ($rows_sites > 0) {
-                                    $counter = 0;
-                                    while ($row_Sites = $query_Sites->fetch()) {
-                                        $site_id = $row_Sites['site_id'];
-                                        $site = $row_Sites['site'];
-                                        $query_Site_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id");
-                                        $query_Site_score->execute(array(":site_id" => $site_id));
-                                        $rows_site_score = $query_Site_score->rowCount();
-                                        if ($rows_site_score > 0) {
-                                            $counter++;
-                                ?>
-                                            <fieldset class="scheduler-border">
-                                                <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                    <i class="fa fa-list-ol" aria-hidden="true"></i> Site <?= $counter ?> :
-                                                </legend>
-                                                <div class="card-header">
-                                                    <div class="row clearfix">
-                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                            <ul class="list-group">
-                                                                <li class="list-group-item list-group-item list-group-item-action active">Site : <?= $site ?></li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row clearfix">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                                    <ul class="list-group">
+                                        <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
+                                        <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
+                                        <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
+                                        <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
+                                        <li class="list-group-item"><strong>Project Progress: </strong>
+                                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
+                                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
+                                                    <?= $percent2 ?>%
                                                 </div>
-                                                <?php
-                                                $query_Site_Output = $db->prepare("SELECT * FROM tbl_output_disaggregation  WHERE output_site=:site_id");
-                                                $query_Site_Output->execute(array(":site_id" => $site_id));
-                                                $rows_Site_Output = $query_Site_Output->rowCount();
-                                                if ($rows_Site_Output > 0) {
-                                                    $output_counter = 0;
-                                                    while ($row_Site_Output = $query_Site_Output->fetch()) {
-                                                        $output_counter++;
-                                                        $output_id = $row_Site_Output['outputid'];
-                                                        $query_output_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id AND output_id=:output_id");
-                                                        $query_output_score->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
-                                                        $rows_output_score = $query_output_score->rowCount();
-                                                        if ($rows_output_score > 0) {
-                                                            $query_Output = $db->prepare("SELECT * FROM tbl_project_details d INNER JOIN tbl_indicator i ON i.indid = d.indicator WHERE id = :outputid");
-                                                            $query_Output->execute(array(":outputid" => $output_id));
-                                                            $row_Output = $query_Output->fetch();
-                                                            $total_Output = $query_Output->rowCount();
-                                                            if ($total_Output) {
-                                                                $output_id = $row_Output['id'];
-                                                                $output = $row_Output['indicator_name'];
-                                                                $query_rsTargetUsed = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_monitoringoutput WHERE output_id=:output_id");
-                                                                $query_rsTargetUsed->execute(array(":output_id" => $output_id));
-                                                                $Rows_rsTargetUsed = $query_rsTargetUsed->fetch();
-                                                                $output_achieved = $Rows_rsTargetUsed['achieved'] != null ? $Rows_rsTargetUsed['achieved'] : 0;
-                                                ?>
-                                                                <fieldset class="scheduler-border">
-                                                                    <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                                        <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> :
-                                                                    </legend>
-                                                                    <div class="row clearfix">
-                                                                        <div class="card-header">
-                                                                            <div class="row clearfix">
-                                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                                    <ul class="list-group">
-                                                                                        <li class="list-group-item list-group-item list-group-item-action active">Output : <?= $output ?></li>
-                                                                                        <li class="list-group-item">Achieved : <?= number_format($output_achieved, 2) ?></li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                            <div class="table-responsive">
-                                                                                <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
-                                                                                    <thead>
-                                                                                        <tr>
-                                                                                            <th style="width:5%">#</th>
-                                                                                            <th style="width:30%">Item</th>
-                                                                                            <th style="width:15%">Target</th>
-                                                                                            <th style="width:20%">Achieved</th>
-                                                                                            <th style="width:10%">Ksh.&nbsp;&nbsp;Unit Price</th>
-                                                                                            <th style="width:15%">Ksh.&nbsp;&nbsp;Cost</th>
-                                                                                        </tr>
-                                                                                    </thead>
-                                                                                    <tbody>
-                                                                                        <?php
-                                                                                        $query_rsOther_cost_plan_budget =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE site_id=:site_id AND outputid=:output_id AND cost_type=1");
-                                                                                        $query_rsOther_cost_plan_budget->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
-                                                                                        $rows_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->rowCount();
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
 
-                                                                                        if ($rows_rsOther_cost_plan_budget > 0) {
-                                                                                            $tcounter = 0;
-                                                                                            while ($row_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->fetch()) {
-                                                                                                $subtask_id = $row_rsOther_cost_plan_budget['subtask_id'];
-                                                                                                $units_no = $row_rsOther_cost_plan_budget['units_no'];
-                                                                                                $unit_cost = $row_rsOther_cost_plan_budget['unit_cost'];
-                                                                                                $unit_id = $row_rsOther_cost_plan_budget['unit'];
-                                                                                                $description = $row_rsOther_cost_plan_budget['description'];
-                                                                                                $achieved = get_achieved($site_id, $output_id, $subtask_id);
-                                                                                                $measurement_unit =  get_measurement_unit($unit_id);
-                                                                                                $cost = $achieved * $unit_cost;
-                                                                                                $tcounter++;
-                                                                                        ?>
-                                                                                                <tr id="row<?= $tcounter ?>">
-                                                                                                    <td style="width:5%"><?= $tcounter ?></td>
-                                                                                                    <td style="width:35%"><?= $description ?></td>
-                                                                                                    <td style="width:35%"><?= $measurement_unit ?></td>
-                                                                                                    <td style="width:20%"><?= number_format($units_no, 2)  ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($achieved, 2) ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
-                                                                                                    <td style="width:10%"><?= number_format($cost, 2) ?></td>
-                                                                                                </tr>
-                                                                                        <?php
-                                                                                            }
-                                                                                        }
-                                                                                        ?>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </fieldset>
-                                                <?php
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                ?>
-                                            </fieldset>
-                                            <?php
-                                        }
-                                    }
-                                }
-
-                                $query_Output = $db->prepare("SELECT * FROM tbl_project_details d INNER JOIN tbl_indicator i ON i.indid = d.indicator WHERE indicator_mapping_type<>1 AND projid = :projid");
-                                $query_Output->execute(array(":projid" => $projid));
-                                $total_Output = $query_Output->rowCount();
-                                $outputs = '';
-                                if ($total_Output > 0) {
-                                    $outputs = '';
-                                    if ($total_Output > 0) {
+                        <div class="header">
+                            <h2>
+                                USE BELOW SELECTION TO FILTER THE RECORDS BY DATE RANGE
+                            </h2>
+                            <div class="row clearfix">
+                                <form id="searchform" name="searchform" method="get" style="margin-top:10px" action="">
+                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                        <label class="control-label">From *:</label>
+                                        <input type="date" name="start_date" id="start_date" class="form-control" onchange="get_records(<?= $projid ?>)">
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                        <label class="control-label">To *:</label>
+                                        <input type="date" name="end_date" id="end_date" class="form-control" onchange="get_records(<?= $projid ?>)">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="body">
+                            <div class="row clearfix" id="filter_data">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <?php
+                                    $query_Sites = $db->prepare("SELECT * FROM tbl_project_sites WHERE projid=:projid");
+                                    $query_Sites->execute(array(":projid" => $projid));
+                                    $rows_sites = $query_Sites->rowCount();
+                                    if ($rows_sites > 0) {
                                         $counter = 0;
-                                        $site_id = 0;
-                                        while ($row_rsOutput = $query_Output->fetch()) {
-                                            $output_id = $row_rsOutput['id'];
-                                            $output = $row_rsOutput['indicator_name'];
-                                            $query_output_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id AND output_id=:output_id");
-                                            $query_output_score->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
-                                            $rows_output_score = $query_output_score->rowCount();
-                                            if ($rows_output_score > 0) {
+                                        while ($row_Sites = $query_Sites->fetch()) {
+                                            $site_id = $row_Sites['site_id'];
+                                            $site = $row_Sites['site'];
+                                            $query_Site_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id");
+                                            $query_Site_score->execute(array(":site_id" => $site_id));
+                                            $rows_site_score = $query_Site_score->rowCount();
+                                            if ($rows_site_score > 0) {
                                                 $counter++;
-                                                $query_rsTargetUsed = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_monitoringoutput WHERE output_id=:output_id");
-                                                $query_rsTargetUsed->execute(array(":output_id" => $output_id));
-                                                $Rows_rsTargetUsed = $query_rsTargetUsed->fetch();
-                                                $output_achieved = $Rows_rsTargetUsed['achieved'] != null ? $Rows_rsTargetUsed['achieved'] : 0;
-                                            ?>
+                                    ?>
                                                 <fieldset class="scheduler-border">
                                                     <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                        <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> : <?= $output ?>
+                                                        <i class="fa fa-list-ol" aria-hidden="true"></i> Site <?= $counter ?> :
                                                     </legend>
                                                     <div class="card-header">
                                                         <div class="row clearfix">
                                                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                                 <ul class="list-group">
-                                                                    <li class="list-group-item list-group-item list-group-item-action active">Output : <?= $output ?></li>
+                                                                    <li class="list-group-item list-group-item list-group-item-action active">Site : <?= $site ?></li>
                                                                 </ul>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th style="width:5%">#</th>
-                                                                    <th style="width:30%">Item</th>
-                                                                    <th style="width:30%">Unit of Measure </th>
-                                                                    <th style="width:15%">Target</th>
-                                                                    <th style="width:20%">Achieved</th>
-                                                                    <th style="width:10%">Ksh.&nbsp;&nbsp;Unit Price</th>
-                                                                    <th style="width:15%">Ksh.&nbsp;&nbsp;Cost</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <?php
-                                                                $query_rsOther_cost_plan_budget =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE site_id=:site_id AND outputid=:output_id AND cost_type=1");
-                                                                $query_rsOther_cost_plan_budget->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
-                                                                $rows_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->rowCount();
-                                                                if ($rows_rsOther_cost_plan_budget > 0) {
-                                                                    $tcounter = 0;
-                                                                    while ($row_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->fetch()) {
-                                                                        $subtask_id = $row_rsOther_cost_plan_budget['subtask_id'];
-                                                                        $units_no = $row_rsOther_cost_plan_budget['units_no'];
-                                                                        $unit_cost = $row_rsOther_cost_plan_budget['unit_cost'];
-                                                                        $unit_id = $row_rsOther_cost_plan_budget['unit'];
-                                                                        $description = $row_rsOther_cost_plan_budget['description'];
-                                                                        $achieved = get_achieved($site_id, $output_id, $subtask_id);
-                                                                        $measurement_unit =  get_measurement_unit($unit_id);
-                                                                        $cost = $achieved * $unit_cost;
-                                                                        $tcounter++;
-                                                                ?>
-                                                                        <tr id="row<?= $tcounter ?>">
-                                                                            <td style="width:5%"><?= $tcounter ?></td>
-                                                                            <td style="width:35%"><?= $description ?></td>
-                                                                            <td style="width:35%"><?= $measurement_unit ?></td>
-                                                                            <td style="width:20%"><?= number_format($units_no, 2)  ?></td>
-                                                                            <td style="width:10%"><?= number_format($achieved, 2) ?></td>
-                                                                            <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
-                                                                            <td style="width:10%"><?= number_format($cost, 2) ?></td>
-                                                                        </tr>
-                                                                <?php
-                                                                    }
+                                                    <?php
+                                                    $query_Site_Output = $db->prepare("SELECT * FROM tbl_output_disaggregation  WHERE output_site=:site_id");
+                                                    $query_Site_Output->execute(array(":site_id" => $site_id));
+                                                    $rows_Site_Output = $query_Site_Output->rowCount();
+                                                    if ($rows_Site_Output > 0) {
+                                                        $output_counter = 0;
+                                                        while ($row_Site_Output = $query_Site_Output->fetch()) {
+                                                            $output_counter++;
+                                                            $output_id = $row_Site_Output['outputid'];
+                                                            $query_output_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id AND output_id=:output_id");
+                                                            $query_output_score->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
+                                                            $rows_output_score = $query_output_score->rowCount();
+                                                            if ($rows_output_score > 0) {
+                                                                $query_Output = $db->prepare("SELECT * FROM tbl_project_details d INNER JOIN tbl_indicator i ON i.indid = d.indicator WHERE id = :outputid");
+                                                                $query_Output->execute(array(":outputid" => $output_id));
+                                                                $row_Output = $query_Output->fetch();
+                                                                $total_Output = $query_Output->rowCount();
+                                                                if ($total_Output) {
+                                                                    $output_id = $row_Output['id'];
+                                                                    $output = $row_Output['indicator_name'];
+                                                                    $query_rsTargetUsed = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_monitoringoutput WHERE output_id=:output_id");
+                                                                    $query_rsTargetUsed->execute(array(":output_id" => $output_id));
+                                                                    $Rows_rsTargetUsed = $query_rsTargetUsed->fetch();
+                                                                    $output_achieved = $Rows_rsTargetUsed['achieved'] != null ? $Rows_rsTargetUsed['achieved'] : 0;
+                                                    ?>
+                                                                    <fieldset class="scheduler-border">
+                                                                        <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
+                                                                            <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> :
+                                                                        </legend>
+                                                                        <div class="row clearfix">
+                                                                            <div class="card-header">
+                                                                                <div class="row clearfix">
+                                                                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                                        <ul class="list-group">
+                                                                                            <li class="list-group-item list-group-item list-group-item-action active">Output : <?= $output ?></li>
+                                                                                            <li class="list-group-item">Achieved : <?= number_format($output_achieved, 2) ?></li>
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                                <div class="table-responsive">
+                                                                                    <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
+                                                                                        <thead>
+                                                                                            <tr>
+                                                                                                <th style="width:5%">#</th>
+                                                                                                <th style="width:30%">Item</th>
+                                                                                                <th style="width:15%">Target</th>
+                                                                                                <th style="width:20%">Achieved</th>
+                                                                                                <th style="width:10%">Ksh.&nbsp;&nbsp;Unit Price</th>
+                                                                                                <th style="width:15%">Ksh.&nbsp;&nbsp;Cost</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            <?php
+                                                                                            $query_rsOther_cost_plan_budget =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE site_id=:site_id AND outputid=:output_id AND cost_type=1");
+                                                                                            $query_rsOther_cost_plan_budget->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
+                                                                                            $rows_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->rowCount();
+
+                                                                                            if ($rows_rsOther_cost_plan_budget > 0) {
+                                                                                                $tcounter = 0;
+                                                                                                while ($row_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->fetch()) {
+                                                                                                    $subtask_id = $row_rsOther_cost_plan_budget['subtask_id'];
+                                                                                                    $units_no = $row_rsOther_cost_plan_budget['units_no'];
+                                                                                                    $unit_cost = $row_rsOther_cost_plan_budget['unit_cost'];
+                                                                                                    $unit_id = $row_rsOther_cost_plan_budget['unit'];
+                                                                                                    $description = $row_rsOther_cost_plan_budget['description'];
+                                                                                                    $achieved = get_achieved($site_id, $output_id, $subtask_id);
+                                                                                                    $measurement_unit =  get_measurement_unit($unit_id);
+                                                                                                    $cost = $achieved * $unit_cost;
+                                                                                                    $tcounter++;
+                                                                                            ?>
+                                                                                                    <tr id="row<?= $tcounter ?>">
+                                                                                                        <td style="width:5%"><?= $tcounter ?></td>
+                                                                                                        <td style="width:35%"><?= $description ?></td>
+                                                                                                        <td style="width:35%"><?= $measurement_unit ?></td>
+                                                                                                        <td style="width:20%"><?= number_format($units_no, 2)  ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($achieved, 2) ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
+                                                                                                        <td style="width:10%"><?= number_format($cost, 2) ?></td>
+                                                                                                    </tr>
+                                                                                            <?php
+                                                                                                }
+                                                                                            }
+                                                                                            ?>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </fieldset>
+                                                    <?php
                                                                 }
-                                                                ?>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                            }
+                                                        }
+                                                    }
+                                                    ?>
                                                 </fieldset>
-                                <?php
+                                                <?php
                                             }
                                         }
                                     }
-                                }
-                                ?>
+
+                                    $query_Output = $db->prepare("SELECT * FROM tbl_project_details d INNER JOIN tbl_indicator i ON i.indid = d.indicator WHERE indicator_mapping_type<>1 AND projid = :projid");
+                                    $query_Output->execute(array(":projid" => $projid));
+                                    $total_Output = $query_Output->rowCount();
+                                    $outputs = '';
+                                    if ($total_Output > 0) {
+                                        $outputs = '';
+                                        if ($total_Output > 0) {
+                                            $counter = 0;
+                                            $site_id = 0;
+                                            while ($row_rsOutput = $query_Output->fetch()) {
+                                                $output_id = $row_rsOutput['id'];
+                                                $output = $row_rsOutput['indicator_name'];
+                                                $query_output_score = $db->prepare("SELECT * FROM tbl_project_monitoring_checklist_score WHERE site_id=:site_id AND output_id=:output_id");
+                                                $query_output_score->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
+                                                $rows_output_score = $query_output_score->rowCount();
+                                                if ($rows_output_score > 0) {
+                                                    $counter++;
+                                                    $query_rsTargetUsed = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_monitoringoutput WHERE output_id=:output_id");
+                                                    $query_rsTargetUsed->execute(array(":output_id" => $output_id));
+                                                    $Rows_rsTargetUsed = $query_rsTargetUsed->fetch();
+                                                    $output_achieved = $Rows_rsTargetUsed['achieved'] != null ? $Rows_rsTargetUsed['achieved'] : 0;
+                                                ?>
+                                                    <fieldset class="scheduler-border">
+                                                        <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
+                                                            <i class="fa fa-list-ol" aria-hidden="true"></i> Output <?= $counter ?> : <?= $output ?>
+                                                        </legend>
+                                                        <div class="card-header">
+                                                            <div class="row clearfix">
+                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                                    <ul class="list-group">
+                                                                        <li class="list-group-item list-group-item list-group-item-action active">Output : <?= $output ?></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:5%">#</th>
+                                                                        <th style="width:30%">Item</th>
+                                                                        <th style="width:30%">Unit of Measure </th>
+                                                                        <th style="width:15%">Target</th>
+                                                                        <th style="width:20%">Achieved</th>
+                                                                        <th style="width:10%">Ksh.&nbsp;&nbsp;Unit Price</th>
+                                                                        <th style="width:15%">Ksh.&nbsp;&nbsp;Cost</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <?php
+                                                                    $query_rsOther_cost_plan_budget =  $db->prepare("SELECT * FROM tbl_project_direct_cost_plan WHERE site_id=:site_id AND outputid=:output_id AND cost_type=1");
+                                                                    $query_rsOther_cost_plan_budget->execute(array(":site_id" => $site_id, ":output_id" => $output_id));
+                                                                    $rows_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->rowCount();
+                                                                    if ($rows_rsOther_cost_plan_budget > 0) {
+                                                                        $tcounter = 0;
+                                                                        while ($row_rsOther_cost_plan_budget = $query_rsOther_cost_plan_budget->fetch()) {
+                                                                            $subtask_id = $row_rsOther_cost_plan_budget['subtask_id'];
+                                                                            $units_no = $row_rsOther_cost_plan_budget['units_no'];
+                                                                            $unit_cost = $row_rsOther_cost_plan_budget['unit_cost'];
+                                                                            $unit_id = $row_rsOther_cost_plan_budget['unit'];
+                                                                            $description = $row_rsOther_cost_plan_budget['description'];
+                                                                            $achieved = get_achieved($site_id, $output_id, $subtask_id);
+                                                                            $measurement_unit =  get_measurement_unit($unit_id);
+                                                                            $cost = $achieved * $unit_cost;
+                                                                            $tcounter++;
+                                                                    ?>
+                                                                            <tr id="row<?= $tcounter ?>">
+                                                                                <td style="width:5%"><?= $tcounter ?></td>
+                                                                                <td style="width:35%"><?= $description ?></td>
+                                                                                <td style="width:35%"><?= $measurement_unit ?></td>
+                                                                                <td style="width:20%"><?= number_format($units_no, 2)  ?></td>
+                                                                                <td style="width:10%"><?= number_format($achieved, 2) ?></td>
+                                                                                <td style="width:10%"><?= number_format($unit_cost, 2) ?></td>
+                                                                                <td style="width:10%"><?= number_format($cost, 2) ?></td>
+                                                                            </tr>
+                                                                    <?php
+                                                                        }
+                                                                    }
+                                                                    ?>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </fieldset>
+                                    <?php
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 <?php
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());

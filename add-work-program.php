@@ -37,8 +37,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                 $start_date = $row_rsTender['startdate'];
                 $end_date = $row_rsTender['enddate'];
             }
-
-
 ?>
             <!-- start body  -->
             <div class="container-fluid">
