@@ -423,40 +423,44 @@ try {
     }
 
     if (isset($_POST['store_target'])) {
-        $projid = $_POST['projid'];
-        $output_id = $_POST['output_id'];
-        $site_id = $_POST['site_id'];
-        $task_id = $_POST['task_id'];
-        $subtask_id = $_POST['subtask_id'];
-        $frequency = $_POST['frequency'];
-        $targets = $_POST['target'];
-        $start_dates = $_POST['start_date'];
-        $end_dates = $_POST['end_date'];
-        $issue_id = $_POST['issue_id'];
-        $counter = count($targets);
-        $date = date('Y-m-d');
-        for ($i = 0; $i < $counter; $i++) {
-            $target = $targets[$i];
-            $start_date = $start_dates[$i];
-            $end_date = $end_dates[$i];
-            $stmt = $db->prepare('SELECT * FROM tbl_project_target_breakdown WHERE site_id=:site_id AND task_id = :task_id AND subtask_id = :subtask_id AND start_date=:start_date AND end_date=:end_date ');
-            $stmt->execute(array(':site_id' => $site_id, ':task_id' => $task_id, ":subtask_id" => $subtask_id, ":start_date" => $start_date, ":end_date" => $end_date));
-            $stmt_result = $stmt->rowCount();
-            $stmts_result = $stmt->fetch();
+        if (validate_csrf_token($_POST['csrf_token'])) {
+            $projid = $_POST['projid'];
+            $output_id = $_POST['output_id'];
+            $site_id = $_POST['site_id'];
+            $task_id = $_POST['task_id'];
+            $subtask_id = $_POST['subtask_id'];
+            $frequency = $_POST['frequency'];
+            $targets = $_POST['target'];
+            $start_dates = $_POST['start_date'];
+            $end_dates = $_POST['end_date'];
+            $issue_id = $_POST['issue_id'];
+            $counter = count($targets);
+            $date = date('Y-m-d');
+            for ($i = 0; $i < $counter; $i++) {
+                $target = $targets[$i];
+                $start_date = $start_dates[$i];
+                $end_date = $end_dates[$i];
+                $stmt = $db->prepare('SELECT * FROM tbl_project_target_breakdown WHERE site_id=:site_id AND task_id = :task_id AND subtask_id = :subtask_id AND start_date=:start_date AND end_date=:end_date ');
+                $stmt->execute(array(':site_id' => $site_id, ':task_id' => $task_id, ":subtask_id" => $subtask_id, ":start_date" => $start_date, ":end_date" => $end_date));
+                $stmt_result = $stmt->rowCount();
+                $stmts_result = $stmt->fetch();
 
-            if ($stmt_result == 0) {
-                $sql = $db->prepare("INSERT INTO tbl_project_target_breakdown (projid, output_id, site_id, task_id, subtask_id,start_date,end_date, frequency, target, created_by, created_at) VALUES (:projid, :output_id, :site_id, :task_id, :subtask_id,:start_date,:end_date, :frequency, :target, :created_by, :created_at)");
-                $results = $sql->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ':start_date' => $start_date, ':end_date' => $end_date, ":frequency" => $frequency, ":target" => $target, ":created_by" => $user_name, ':created_at' => $date));
-            } else {
-                $id = $stmts_result['id'];
-                $sql = $db->prepare("UPDATE tbl_project_target_breakdown SET start_date=:start_date,end_date=:end_date, target=:target WHERE id=:id");
-                $results = $sql->execute(array(':start_date' => $start_date, ':end_date' => $end_date, ":target" => $target, ":id" => $id));
+                if ($stmt_result == 0) {
+                    $sql = $db->prepare("INSERT INTO tbl_project_target_breakdown (projid, output_id, site_id, task_id, subtask_id,start_date,end_date, frequency, target, created_by, created_at) VALUES (:projid, :output_id, :site_id, :task_id, :subtask_id,:start_date,:end_date, :frequency, :target, :created_by, :created_at)");
+                    $results = $sql->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ':start_date' => $start_date, ':end_date' => $end_date, ":frequency" => $frequency, ":target" => $target, ":created_by" => $user_name, ':created_at' => $date));
+                } else {
+                    $id = $stmts_result['id'];
+                    $sql = $db->prepare("UPDATE tbl_project_target_breakdown SET start_date=:start_date,end_date=:end_date, target=:target WHERE id=:id");
+                    $results = $sql->execute(array(':start_date' => $start_date, ':end_date' => $end_date, ":target" => $target, ":id" => $id));
+                }
+
+                $sql = $db->prepare("UPDATE tbl_project_adjustments SET flag=1 WHERE issueid=:issue_id AND site_id=:site_id AND sub_task_id=:sub_task_id");
+                $results = $sql->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":sub_task_id" => $subtask_id));
             }
-
-            $sql = $db->prepare("UPDATE tbl_project_adjustments SET flag=1 WHERE issueid=:issue_id AND site_id=:site_id AND sub_task_id=:sub_task_id");
-            $results = $sql->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":sub_task_id" => $subtask_id));
+            echo json_encode(array('success' => true));
+        } else {
+            echo json_encode(array('success' => false));
         }
-        echo json_encode(array('success' => true));
     }
 } catch (PDOException $ex) {
     $result = flashMessage("An error occurred: " . $ex->getMessage());

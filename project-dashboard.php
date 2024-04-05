@@ -1,12 +1,10 @@
 <?php
-$decode_projid = (isset($_GET['proj']) && !empty($_GET["proj"])) ? base64_decode($_GET['proj']) : header("Location: projects");
-$projid_array = explode("projid54321", $decode_projid);
-$projid = $projid_array[1];
-
-$original_projid = $_GET['proj'];
 require('includes/head.php');
-
-if ($permission) {
+$original_projid = $_GET['proj'];
+if ($permission && (isset($_GET['proj']) && !empty($_GET["proj"]))) {
+    $decode_projid =  base64_decode($_GET['proj']);
+    $projid_array = explode("projid54321", $decode_projid);
+    $projid = $projid_array[1];
     try {
         $query_rsMyP = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid='$projid'");
         $query_rsMyP->execute();
@@ -39,7 +37,6 @@ if ($permission) {
             $rows_rsPayement_reuests = $query_rsPayement_reuests->fetch();
             $expense = !is_null($rows_rsPayement_reuests['expense']) ? $rows_rsPayement_reuests['expense'] : 0;
             $balance = $budget - $expense;
-
             return array("budget" => $budget, "expense" => $expense, "balance" => $balance);
         }
 
@@ -109,123 +106,123 @@ if ($permission) {
         $percentage_duration_remaining = $duration_details['percentage_duration_remaining'];
 
 ?>
-    <!-- start body  -->
-    <div class="container-fluid">
-        <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
-            <h4 class="contentheader">
-                <i class="fa fa-dashboard" style="color:white"></i> Dashboard
-                <div class="btn-group" style="float:right; margin-right:10px">
-                    <input type="button" VALUE="Go Back to Projects Dashboard" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
+        <!-- start body  -->
+        <div class="container-fluid">
+            <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+                <h4 class="contentheader">
+                    <i class="fa fa-dashboard" style="color:white"></i> Dashboard
+                    <div class="btn-group" style="float:right; margin-right:10px">
+                        <input type="button" VALUE="Go Back to Projects Dashboard" class="btn btn-warning pull-right" onclick="location.href='projects.php'" id="btnback">
+                    </div>
+                </h4>
+            </div>
+            <div class="row clearfix">
+                <div class="block-header">
+                    <?= $results; ?>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="header" style="padding-bottom:0px">
+                            <div class="button-demo" style="margin-top:-15px">
+                                <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
+
+                                <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
+                                <a href="project-timeline.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
+                                <a href="project-progress.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
+                                <a href="project-team.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
+                                <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </h4>
-        </div>
-        <div class="row clearfix">
-            <div class="block-header">
-                <?= $results; ?>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="header" style="padding-bottom:0px">
-                        <div class="button-demo" style="margin-top:-15px">
-                            <span class="label bg-black" style="font-size:17px"><img src="images/proj-icon.png" alt="Project Menu" title="Project Menu" style="vertical-align:middle; height:25px" />Menu</span>
-
-                            <a href="#" class="btn bg-grey waves-effect" style="margin-top:10px; padding-left:-5px">Dashboard</a>
-                            <a href="project-timeline.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Timelines</a>
-                            <a href="project-progress.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Progress</a>
-                            <a href="project-team.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Team</a>
-                            <a href="project-contract.php?proj=<?= $original_projid; ?>" class="btn bg-light-blue waves-effect" style="margin-top:10px; margin-left:-9px">Contract</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row clearfix">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
-                                <ul class="list-group">
-                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
-                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
-                                    <li class="list-group-item"><strong>Project Description: </strong> <?= $projdesc ?> </li>
-                                    <li class="list-group-item"><strong>Program Name: </strong> <?= $progname ?> </li>
-                                    <li class="list-group-item"><strong>Project Progress: </strong>
-                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                                <?= $percent2 ?>%
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row clearfix">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                                    <ul class="list-group">
+                                        <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
+                                        <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
+                                        <li class="list-group-item"><strong>Project Description: </strong> <?= $projdesc ?> </li>
+                                        <li class="list-group-item"><strong>Program Name: </strong> <?= $progname ?> </li>
+                                        <li class="list-group-item"><strong>Project Progress: </strong>
+                                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
+                                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
+                                                    <?= $percent2 ?>%
+                                                </div>
                                             </div>
-                                        </div>
-                                    </li>
-                                </ul>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="body">
-                        <div class="row clearfix">
-                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <figure class="highcharts-figure">
-                                    <div id="highcharts-progress"></div>
-                                </figure>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <figure class="highcharts-figure">
-                                    <div id="highcharts-time"></div>
-                                </figure>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                <figure class="highcharts-figure">
-                                    <div id="highcharts-funds"></div>
-                                </figure>
-                            </div>
-
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="body">
+                            <div class="row clearfix">
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <li class="list-group-item">
-                                        <label>
-                                            <strong>PROJECT LOCATION</strong>
-                                        </label>
-                                        <div>
-                                            <strong><?= $level1label ?>:</strong> <?php echo implode(",", $level1); ?>
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                        <div>
-                                            <strong><?= $level2label ?>:</strong> <?php echo implode(",", $level2); ?>
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                    </li>
+                                    <figure class="highcharts-figure">
+                                        <div id="highcharts-progress"></div>
+                                    </figure>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <li class="list-group-item">
-                                        <label>
-                                            <strong>PROJECT TIMELINES</strong>
-                                        </label>
-                                        <div>
-                                            <strong>Duration Assigned: </strong><?= $duration ?> Days
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                        <div>
-                                            <strong>Duration Consumed: </strong><?= $durationtodate ?> Days
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                        <div>
-                                            <strong>Remaining Duration: </strong><?= $durationtoenddate ?> Days
-                                        </div>
-                                    </li>
+                                    <figure class="highcharts-figure">
+                                        <div id="highcharts-time"></div>
+                                    </figure>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <li class="list-group-item">
-                                        <label>
-                                            <strong>PROJECT FUNDS</strong>
-                                        </label>
-                                        <div>
-                                            <strong>Budget Allocated: </strong>Ksh.<?php echo $projcost; ?>
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                        <div>
-                                            <strong>Budget Consumed: </strong>Ksh.<?php echo $consumed; ?>
-                                        </div>
-                                        <hr style="border-top: 1px dashed red;">
-                                        <div>
-                                            <strong>Budget Balance: </strong>Ksh.<?php echo $balance; ?>
-                                        </div>
-                                    </li>
+                                    <figure class="highcharts-figure">
+                                        <div id="highcharts-funds"></div>
+                                    </figure>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                        <li class="list-group-item">
+                                            <label>
+                                                <strong>PROJECT LOCATION</strong>
+                                            </label>
+                                            <div>
+                                                <strong><?= $level1label ?>:</strong> <?php echo implode(",", $level1); ?>
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                            <div>
+                                                <strong><?= $level2label ?>:</strong> <?php echo implode(",", $level2); ?>
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                        <li class="list-group-item">
+                                            <label>
+                                                <strong>PROJECT TIMELINES</strong>
+                                            </label>
+                                            <div>
+                                                <strong>Duration Assigned: </strong><?= $duration ?> Days
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                            <div>
+                                                <strong>Duration Consumed: </strong><?= $durationtodate ?> Days
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                            <div>
+                                                <strong>Remaining Duration: </strong><?= $durationtoenddate ?> Days
+                                            </div>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                                        <li class="list-group-item">
+                                            <label>
+                                                <strong>PROJECT FUNDS</strong>
+                                            </label>
+                                            <div>
+                                                <strong>Budget Allocated: </strong>Ksh.<?php echo $projcost; ?>
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                            <div>
+                                                <strong>Budget Consumed: </strong>Ksh.<?php echo $consumed; ?>
+                                            </div>
+                                            <hr style="border-top: 1px dashed red;">
+                                            <div>
+                                                <strong>Budget Balance: </strong>Ksh.<?php echo $balance; ?>
+                                            </div>
+                                        </li>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -233,8 +230,7 @@ if ($permission) {
                 </div>
             </div>
         </div>
-    </div>
-    <!-- end body  -->
+        <!-- end body  -->
 <?php
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());

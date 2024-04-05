@@ -1,21 +1,20 @@
 <?php
-$decode_projid = (isset($_GET['proj']) && !empty($_GET["proj"])) ? base64_decode($_GET['proj']) : "";
-$projid_array = explode("projid54321", $decode_projid);
-$projid = $projid_array[1];
-$original_projid = $_GET['proj'];
 
 require('includes/head.php');
-if ($permission) {
+if ($permission && (isset($_GET['proj']) && !empty($_GET["proj"]))) {
+    $decode_projid =  base64_decode($_GET['proj']);
+    $projid_array = explode("projid54321", $decode_projid);
+    $projid = $projid_array[1];
+    $original_projid = $_GET['proj'];
     try {
         $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects WHERE deleted='0' and projid=:projid");
         $query_rsProjects->execute(array(":projid" => $projid));
         $row_rsProjects = $query_rsProjects->fetch();
         $totalRows_rsProjects = $query_rsProjects->rowCount();
+        if($totalRows_rsProjects > 0){
         $projname = $totalRows_rsProjects > 0 ? $row_rsProjects['projname'] : "";
         $percent2 = $totalRows_rsProjects > 0 ? number_format($row_rsProjects['progress'], 2) : "";
 ?>
-        <link href="projtrac-dashboard/plugins/nestable/jquery-nestable.css" rel="stylesheet" />
-        <link rel="stylesheet" href="assets/css/strategicplan/view-strategic-plan-framework.css">
         <div class="container-fluid">
             <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
                 <h4 class="contentheader">
@@ -236,6 +235,10 @@ if ($permission) {
             </div>
         </div>
 <?php
+        } else {
+            $results =  restriction();
+            echo $results;
+        }
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }

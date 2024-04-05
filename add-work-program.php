@@ -158,6 +158,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                             if ($proceed) {
                                                 $approve_details = "{projid:$projid,project_name:'$projname',}";
                                             ?>
+                                                <?= csrf_token_html(); ?>
                                                 <input type="hidden" name="projid" value="<?= $projid ?>">
                                                 <input type="hidden" name="update_project_substage" id="update_project_substage">
                                                 <button type="button" class="btn btn-success" onclick="approve_project(<?= $approve_details ?>)">Submit</button>
@@ -212,6 +213,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                 </div>
                                                 <div class="modal-footer">
                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                                                        <?= csrf_token_html(); ?>
                                                         <input type="hidden" name="user_name" id="user_name" value="<?= $user_name ?>">
                                                         <input type="hidden" name="projid" id="projid" value="<?= $projid ?>">
                                                         <input type="hidden" name="store_tasks" id="store_tasks" value="">
@@ -272,6 +274,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                 </div>
                                                 <div class="modal-footer">
                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                                                        <?= csrf_token_html(); ?>
                                                         <input type="hidden" name="user_name" id="user_name" value="<?= $user_name ?>">
                                                         <input type="hidden" name="store_target" id="store_target" value="">
                                                         <input type="hidden" name="projid" id="t_projid" value="<?= $projid ?>">

@@ -1,262 +1,77 @@
 <?php
-session_start();
-(!isset($_SESSION['MM_Contractor'])) ? $_SESSION['MM_Contractor'] : "index.php";
-
-require 'vendor/autoload.php';
-require 'models/Connection.php';
-include "models/Auth.php";
-include "models/Company.php";
-require 'models/Email.php';
-
-$contractor_auth = new Auth();
-$company_details = new Company();
-$company_settings = $company_details->get_company_details();
-if (isset($_POST['setpass']) && $_POST['setpass'] == "setpassword") {
-    $confirm_password = $_POST['confirm_password'];
-    $password = $_POST['password'];
-    if ($confirm_password === $password) {
-        $contractor_id = $_SESSION['MM_Contractor'];
-        $contractor = $contractor_auth->change_password($contractor_id, $password);
-        if ($contractor) {
-            $_SESSION['avatar'] = $contractor->avatar;
-            $_SESSION['contractor_name'] = $contractor->fullname;
-            $_SESSION["success"] =  "Successfully changed  password";
-            header("location: projects.php");
-        } else {
-            $_SESSION["errorMessage"] =  "Error changing your password";
-            header("location:set-new-password.php");
-            return;
+include_once('./includes/contractor-sessions.php');
+if ((isset($_SESSION['MM_Contractor_First_Login']) && !empty($_SESSION['MM_Contractor_First_Login']))) {
+    try {
+        if (isset($_POST['setpass']) && $_POST['setpass'] == "setpassword") {
+            if (validate_csrf_token($_POST['csrf_token'])) {
+                $confirm_password = $_POST['confirm_password'];
+                $password = $_POST['password'];
+                if ($confirm_password === $password) {
+                    $contractor_id = $_SESSION['MM_Contractor_First_Login'];
+                    $contractor = $contractor_auth->change_password($contractor_id, $password);
+                    if ($contractor) {
+                        $_SESSION['avatar'] = $contractor->avatar;
+                        $_SESSION['contractor_name'] = $contractor->contractor_name;
+                        $_SESSION["success"] =  "Successfully changed  password";
+                        header("location: projects.php");
+                    } else {
+                        $_SESSION["errorMessage"] =  "Error changing your password";
+                        header("location:set-new-password.php");
+                        return;
+                    }
+                } else {
+                    $_SESSION["errorMessage"] =  "Check the passwords they do not match";
+                    header("location:set-new-password.php");
+                    return;
+                }
+            } else {
+                $_SESSION["successMessage"] = "Sorry try again later!";
+                header("location: index.php");
+                return;
+            }
         }
-    } else {
-        $_SESSION["errorMessage"] =  "Check the passwords they do not match";
-        header("location:set-new-password.php");
-        return;
-    }
-}
+        include_once('includes/auth-head.php');
 ?>
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="no-cache">
-    <meta http-equiv="Expires" content="-1">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <title>Result-Based Monitoring &amp; Evaluation System</title>
-    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
-    <style media="screen">
-        body {
-            background-color: #036;
-        }
-
-        #loginuser {
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 1px solid #999;
-            border-radius: 5px;
-            box-shadow: 5px 5px 5px #888888;
-            max-width: 100%;
-            min-width: 50%;
-        }
-
-        .form-signin {
-            max-width: 350px;
-            padding: 19px 29px 29px;
-            margin: 0 auto 20px;
-            background-color: #E8E8E8;
-            border: 1px solid #e5e5e5;
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-            -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-            -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-            box-shadow: 5px 5px 5px #CCCCCC;
-            margin-top: 20px;
-        }
-
-        .form-signin .form-signin-heading,
-        .form-signin .checkbox {
-            margin-bottom: 10px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
-
-        .form-signin input[type="text"] {
-            font-size: 14px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-            background-image: url(images/user.png);
-            background-repeat: no-repeat;
-            background-position: 98%;
-            font-family: Verdana, Geneva, sans-serif;
-            color: #000;
-        }
-
-        .form-signin input[type="password"] {
-            font-size: 14px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-            background-image: url(images/pwd.png);
-            background-repeat: no-repeat;
-            background-position: 98%;
-            font-family: Verdana, Geneva, sans-serif;
-            color: #000;
-        }
-
-        .loginbutton {
-            width: 130px;
-            height: 40px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 14px;
-            color: #FFF;
-            background-color: #06C;
-            border: 5px solid #06C;
-            border-radius: 3px;
-            cursor: pointer;
-            -webkit-appearance: button;
-            font-weight: bold;
-        }
-
-        .errormsg {
-            width: 80%;
-            height: 30%;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            border: #930 1px solid;
-            padding-left: 10px;
-            padding-right: 10px;
-            color: #000;
-            padding-top: 10px;
-            background-color: #F9B6AC;
-            text-align: center;
-            margin-left: 10px;
-            padding-bottom: 10px;
-        }
-
-
-        .loginbutton {
-            width: 200px;
-            height: 40px;
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 14px;
-            color: #FFF;
-            background-color: #06C;
-            border: 5px solid #06C;
-            border-radius: 3px;
-            cursor: pointer;
-            -webkit-appearance: button;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: 10px;
-        }
-
-        #contentleft {
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            float: left;
-            width: 800px;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-
-        #footer {
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 12px;
-            color: #999;
-            height: 20px;
-        }
-
-        .row {
-            margin-left: 0px;
-            margin-top: 10px;
-        }
-
-        #content_area_cell {
-            max-width: 100%;
-            min-width: 70%;
-            margin-left: 0px;
-            background-color: #fff;
-            padding-left: 5px;
-        }
-
-        .container-fluid1 {
-            outline: 1px dashed #999;
-        }
-
-        .contenttitles {
-            font-family: Candara;
-            font-size: 28px;
-            font-weight: bold;
-            color: #036;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-            border-bottom-width: thin;
-            border-bottom-style: dashed;
-            border-bottom-color: #999;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-    </style>
-    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-responsive.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
-</head>
-
-<body>
-    <p>&nbsp;</p>
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span12">
-                <div align="center">
-                    <div class="container-fluid1" id="content_area_cell">
-                        <h3 align="center" class="contenttitles">ProjTrac Monitoring, Evaluation, And Reporting System</h3>
-                        <p>&nbsp;</p>
-                        <form action="" method="POST" class="form-signin" style="margin-bottom:10px" id="loginusers">
-                            <div style="width:100%; height:auto; background-color:#036">
-                                <p><img src="<?= $company_settings->main_url . $company_settings->logo; ?>" style="height:100px; width:230px; margin-top:10px" class="imgdim" /></p>
-                            </div>
-                            <br />
-                            <?php
-                            if (isset($_SESSION["errorMessage"])) {
-                            ?>
-                                <div class='alert alert-danger'>
-                                    <p class="errormsg">
-                                        <img src="images/error.png" alt="errormsg" />
-                                        Your login attempt failed. You may have entered a wrong username or wrong password.
-                                    </p>
-                                </div>
-                            <?php
-                            }
-                            unset($_SESSION["errorMessage"]);
-                            ?>
-                            <h4 class="card-text">Welcome this is your first time to login, change password</h4>
-                            <p>
-                                <label for="password"></label>
-                                <input name="password" type="password" class="input-block-level" id="password" placeholder="New Password" required />
-                                <label for="password"></label>
-                                <input name="confirm_password" type="password" class="input-block-level" id="password" placeholder="Confirm password" required />
-                            </p>
-                            <p>
-                                <input type="hidden" name="setpass" value="setpassword">
-                                <input type="hidden" name="token" value="<?= $token ?>">
-                                <input name="resetpassword" type="submit" class="loginbutton" id="submit" value="Reset Password" />
-                            </p>
-                            <a href="forgot-password.php">Forgot your password?</a>
-                        </form>
-                        <p>&nbsp;</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 m-padding">
+                    <div style="margin-bottom: 8vh;">
+                        <img src="./images/logo-proj.png" alt="" srcset="" width="500">
                     </div>
+                    <div style="margin-bottom: 4vh;">
+                        <h4 style="color: #003366;"> Login</h4>
+                        <p style="color: black;"> Welcome this is your first time to login, change password.</p>
+                    </div>
+                    <form method="POST" id="loginusers">
+                        <div style="margin-bottom: 4vh;">
+                            <input name="password" type="password" id="password" placeholder="New Password" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
+                            <p style="color: #dc2626;"></p>
+                        </div>
+                        <div style="margin-bottom: 4vh;">
+                            <input name="confirm_password" type="password" id="confirm_password" placeholder="Confirm Password" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
+                            <p style="color: #dc2626;"></p>
+                        </div>
+                        <input type="hidden" name="sign-in" value="sign-in">
+                        <input type="hidden" name="setpass" value="setpassword">
+                        <?= csrf_token_html(); ?>
+                        <input type="hidden" name="token" value="<?= $token ?>">
+                        <div style="display: flex; gap: 2vw;">
+                            <button type="submit" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Reset Password</button>
+                            <a href="index.php">
+                                <button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Sign In</button>
+                            </a>
+                        </div>
+                    </form>
                 </div>
-                <p>&nbsp;</p>
+                <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                </div>
             </div>
         </div>
-    </div>
-    <?php
-    include_once "includes/login-footer.php";
-    ?>
-</body>
-
-</html>
+<?php
+        include_once('includes/auth-footer.php');
+    } catch (PDOException $ex) {
+        customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
+    }
+} else {
+}
+?>

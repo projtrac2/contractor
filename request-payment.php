@@ -409,6 +409,7 @@ if ($permission) {
                                         </div>
                                         <div class="row clearfix" style="margin-top:5px; margin-bottom:5px">
                                             <div class="col-md-12 text-center">
+                                                <?= csrf_token_html(); ?>
                                                 <input type="hidden" name="projid" value="<?= $projid ?>">
                                                 <input type="hidden" name="request_id" value="<?= $request_id ?>">
                                                 <input type="hidden" name="store_remarks" value="store_remarks">
@@ -486,6 +487,7 @@ if ($permission) {
                                         </div> <!-- /modal-body -->
                                         <div class="modal-footer">
                                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                                                <?= csrf_token_html(); ?>
                                                 <input type="hidden" name="projid" id="project_id" value="<?= $projid ?>">
                                                 <input type="hidden" name="site_id" id="site_id" value="">
                                                 <input type="hidden" name="output_id" id="output_id" value="">
@@ -517,7 +519,7 @@ if ($permission) {
         } else {
             $results =  restriction();
             echo $results;
-        } 
+        }
     } catch (PDOException $ex) {
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }

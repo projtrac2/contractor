@@ -69,22 +69,26 @@ if ($permission) {
             $old_password = $_POST['old_password'];
             $new_password = $_POST['new_password'];
             $confirm_password = $_POST['confirm_password'];
-            if ($confirm_password == $new_password) {
-                $auth = new Auth();
-                $contractor_details = $auth->get_contractor_by_id($user_name);
-                if (password_verify($old_password, $contractor_details->password)) {
-                    $change_pass = $auth->change_password($user_name, $new_password);
-                    var_dump(password_verify($old_password, $contractor_details->password));
-                    if ($change_pass) {
-                        $results = alert_message("Success", "Successfully changed password", "success", "logout.php");
+            if (validate_csrf_token($_POST['csrf_token'])) {
+                if ($confirm_password == $new_password) {
+                    $auth = new Auth();
+                    $contractor_details = $auth->get_contractor_by_id($user_name);
+                    if (password_verify($old_password, $contractor_details->password)) {
+                        $change_pass = $auth->change_password($user_name, $new_password);
+                        var_dump(password_verify($old_password, $contractor_details->password));
+                        if ($change_pass) {
+                            $results = alert_message("Success", "Successfully changed password", "success", "logout.php");
+                        } else {
+                            $results = alert_message("Error", "Password could not be verified", "error", "profile.php");
+                        }
                     } else {
-                        $results = alert_message("Error", "Password could not be verified", "error", "profile.php");
+                        $results = alert_message("Error", "Error check your credentials passwords do not match", "error", "profile.php");
                     }
                 } else {
-                    $results = alert_message("Error", "Error check your credentials passwords do not match", "error", "profile.php");
+                    $results = alert_message("Error", "Error check your credentials 3", "error", "profile.php");
                 }
             } else {
-                $results = alert_message("Error", "Error check your credentials 3", "error", "profile.php");
+                $results = alert_message("Error", "An Error occured please try again later", "error", "profile.php");
             }
         }
 
@@ -310,6 +314,7 @@ if ($permission) {
                                             </div>
                                             <div class="form-group">
                                                 <div class="col-sm-offset-3 col-sm-9">
+                                                    <?= csrf_token_html(); ?>
                                                     <input type="hidden" name="change_password" value="change_password">
                                                     <button type="submit" class="btn btn-danger">SUBMIT</button>
                                                 </div>

@@ -1,4 +1,4 @@
-const ajax_url = "ajax/programsOfWorks/index.php";
+const ajax_url = "includes/ajax/programsOfWorks/index.php";
 
 $(document).ready(function () {
     $("#add_output").submit(function (e) {

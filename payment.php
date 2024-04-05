@@ -790,6 +790,7 @@ if ($permission) {
                         </div> <!-- /modal-body -->
                         <div class="modal-footer">
                             <div class="col-md-12 text-center">
+                                <?= csrf_token_html(); ?>
                                 <input type="hidden" name="projid" id="projid" value="">
                                 <input type="hidden" name="payment_plan" id="payment_plan" value="<?= $payment_plan ?>">
                                 <input type="hidden" name="requested_amount" id="requested_amount" value="">

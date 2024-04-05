@@ -1,14 +1,8 @@
 <?php
-require 'vendor/autoload.php';
-require 'models/Connection.php';
-include "models/Auth.php";
-include "models/Company.php";
-require 'models/Email.php';
-session_start();
+include_once('./includes/contractor-sessions.php');
 try {
     $company_details = new Company();
     $company_settings = $company_details->get_company_details();
-
     if (isset($_POST['forgotpassword']) && $_POST['forgotpassword'] == "Forgot Password") {
         $email = $_POST['email'];
         $contractor_auth = new Auth();
@@ -24,8 +18,7 @@ try {
             return;
         }
     }
-
-    include_once('includes/login-head.php');
+    include_once('includes/auth-head.php');
 ?>
 
     <div class="container">
@@ -34,9 +27,6 @@ try {
                 <div style="margin-bottom: 6vh;">
                     <img src="./images/logo-proj.png" alt="" srcset="" width="400">
                 </div>
-
-
-
                 <div style="margin-bottom: 4vh;">
                     <h4 style="color: #003366;">Forgot your password ?</h4>
                     <p style="color: #808080;">Enter your email to reset it!</p>
@@ -58,12 +48,8 @@ try {
             </div>
         </div>
     </div>
-    <div class="m-footer">
-        <p>ProjTrac M&E - Your Best Result-Based Monitoring & Evaluation System .</p>
-        <p>Copyright @ 2017 - 2024. ProjTrac Systems Ltd .</p>
-    </div>
 <?php
-    include_once('includes/login-footer.php');
+    include_once('includes/auth-footer.php');
 } catch (PDOException $ex) {
     customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

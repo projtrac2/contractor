@@ -314,6 +314,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                 </div>
                                                 <div class="modal-footer">
                                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                                                        <?= csrf_token_html(); ?>
                                                         <input type="hidden" name="user_name" id="user_name" value="<?= $user_name ?>">
                                                         <input type="hidden" name="store_target" id="store_target" value="">
                                                         <input type="hidden" name="projid" id="t_projid" value="<?= $projid ?>">

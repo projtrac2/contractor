@@ -1,4 +1,4 @@
-const ajax_url = "ajax/programsOfWorks/extend";
+const ajax_url = "includes/ajax/programsOfWorks/extend";
 
 $(document).ready(function () {
     $("#add_project_frequency").submit(function (e) {

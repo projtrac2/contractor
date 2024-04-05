@@ -83,48 +83,57 @@ try {
     }
 
     if (isset($_POST['store_tasks'])) {
-        $projid = $_POST['projid'];
-        $output_id = $_POST['output_id'];
-        $site_id = $_POST['site_id'];
-        $task_id = $_POST['task_id'];
-        $tasks = $_POST['tasks'];
-        $edit = $_POST['store_tasks'];
-        $user_name = $_POST['user_name'];
-        $start_dates = $_POST['start_date'];
-        $durations = $_POST['duration'];
-        $end_dates = $_POST['end_date'];
-        $current_date = date('Y-m-d');
+        if (validate_csrf_token($_POST['csrf_token'])) {
 
-        for ($i = 0; $i < count($tasks); $i++) {
-            $tkid = $tasks[$i];
-            $start_date = $start_dates[$i];
-            $end_date = $end_dates[$i];
-            $duration = $durations[$i];
+            $projid = $_POST['projid'];
+            $output_id = $_POST['output_id'];
+            $site_id = $_POST['site_id'];
+            $task_id = $_POST['task_id'];
+            $tasks = $_POST['tasks'];
+            $edit = $_POST['store_tasks'];
+            $user_name = $_POST['user_name'];
+            $start_dates = $_POST['start_date'];
+            $durations = $_POST['duration'];
+            $end_dates = $_POST['end_date'];
+            $current_date = date('Y-m-d');
 
-            $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
-            $query_rsTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id, ":subtask_id" => $tkid));
-            $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
+            for ($i = 0; $i < count($tasks); $i++) {
+                $tkid = $tasks[$i];
+                $start_date = $start_dates[$i];
+                $end_date = $end_dates[$i];
+                $duration = $durations[$i];
 
-            if ($totalRows_rsTask_Start_Dates > 0) {
-                $sql = $db->prepare("UPDATE `tbl_program_of_works` SET start_date=:start_date,duration=:duration, end_date=:end_date,updated_by=:updated_by,updated_at=:updated_at WHERE subtask_id=:subtask_id AND site_id=:site_id AND task_id=:task_id");
-                $sql->execute(array(':start_date' => $start_date, ':duration' => $duration, ':end_date' => $end_date, ':updated_by' => $user_name, ":updated_at" => $current_date, ":task_id" => $task_id, ':site_id' => $site_id, ":subtask_id" => $tkid));
-            } else {
-                $sql = $db->prepare("INSERT INTO tbl_program_of_works (projid,output_id,task_id,site_id,subtask_id,start_date,duration,end_date,created_by,created_at) VALUES (:projid,:output_id,:task_id,:site_id,:subtask_id,:start_date,:duration,:end_date,:created_by,:created_at)");
-                $results = $sql->execute(array(':projid' => $projid, ":output_id" => $output_id, ":task_id" => $task_id, ":site_id" => $site_id, ":subtask_id" => $tkid, ':start_date' => $start_date, ':duration' => $duration, ':end_date' => $end_date, ":created_by" => $user_name, ':created_at' => $current_date));
+                $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
+                $query_rsTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id, ":subtask_id" => $tkid));
+                $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
+
+                if ($totalRows_rsTask_Start_Dates > 0) {
+                    $sql = $db->prepare("UPDATE `tbl_program_of_works` SET start_date=:start_date,duration=:duration, end_date=:end_date,updated_by=:updated_by,updated_at=:updated_at WHERE subtask_id=:subtask_id AND site_id=:site_id AND task_id=:task_id");
+                    $sql->execute(array(':start_date' => $start_date, ':duration' => $duration, ':end_date' => $end_date, ':updated_by' => $user_name, ":updated_at" => $current_date, ":task_id" => $task_id, ':site_id' => $site_id, ":subtask_id" => $tkid));
+                } else {
+                    $sql = $db->prepare("INSERT INTO tbl_program_of_works (projid,output_id,task_id,site_id,subtask_id,start_date,duration,end_date,created_by,created_at) VALUES (:projid,:output_id,:task_id,:site_id,:subtask_id,:start_date,:duration,:end_date,:created_by,:created_at)");
+                    $results = $sql->execute(array(':projid' => $projid, ":output_id" => $output_id, ":task_id" => $task_id, ":site_id" => $site_id, ":subtask_id" => $tkid, ':start_date' => $start_date, ':duration' => $duration, ':end_date' => $end_date, ":created_by" => $user_name, ':created_at' => $current_date));
+                }
+
+                $stmt = $db->prepare("DELETE FROM `tbl_project_target_breakdown` WHERE projid=:projid AND output_id=:output_id AND site_id=:site_id AND task_id=:task_id AND subtask_id=:subtask_id ");
+                $results = $stmt->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $tkid));
             }
-
-            $stmt = $db->prepare("DELETE FROM `tbl_project_target_breakdown` WHERE projid=:projid AND output_id=:output_id AND site_id=:site_id AND task_id=:task_id AND subtask_id=:subtask_id ");
-            $results = $stmt->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $tkid));
+            echo json_encode(array("success" => true));
+        } else {
+            echo json_encode(array("success" => true));
         }
-        echo json_encode(array("success" => true));
     }
 
     if (isset($_POST['approve_stage'])) {
-        $projid = $_POST['projid'];
-        $sql = $db->prepare("UPDATE tbl_projects SET proj_substage=:proj_substage WHERE  projid=:projid");
-        $result  = $sql->execute(array(":proj_substage" => 3, ":projid" => $projid));
-        $results =  $mail->send_master_data_email($projid, 6, '');
-        echo json_encode(array('success' => $result));
+        if (validate_csrf_token($_POST['csrf_token'])) {
+            $projid = $_POST['projid'];
+            $sql = $db->prepare("UPDATE tbl_projects SET proj_substage=:proj_substage WHERE  projid=:projid");
+            $result  = $sql->execute(array(":proj_substage" => 3, ":projid" => $projid));
+            $results =  $mail->send_master_data_email($projid, 6, '');
+            echo json_encode(array('success' => $result));
+        } else {
+            echo json_encode(array('success' => false));
+        }
     }
 } catch (PDOException $ex) {
     $result = flashMessage("An error occurred: " . $ex->getMessage());

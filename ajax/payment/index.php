@@ -282,111 +282,6 @@ try {
         return $result;
     }
 
-    if (isset($_POST['contractor_payment'])) {
-        $projid = $_POST['projid'];
-        $requested_amount = $_POST['requested_amount'];
-        $comments = $_POST['comments'];
-        $created_by = $_POST['user_name'];
-        $created_at = date('Y-m-d');
-        $payment_plan = $_POST['payment_plan'];
-        $complete = $_POST['complete'];
-        $status = 1;
-        $stage = 1;
-        $request_id = isset($_POST['request_id']) ? $_POST['request_id'] : incrementalHash() . $projid;
-        $deleteQueryI = $db->prepare("DELETE FROM `tbl_contractor_payment_requests` WHERE request_id=:request_id");
-        $resultsI = $deleteQueryI->execute(array(':request_id' => $request_id));
-
-        $deleteQueryI = $db->prepare("DELETE FROM `tbl_contractor_payment_request_details` WHERE request_id=:request_id");
-        $resultsI = $deleteQueryI->execute(array(':request_id' => $request_id));
-
-        $filepath = '';
-        if (!empty($_FILES['invoice']['name'])) {
-            $filename = basename($_FILES['invoice']['name']);
-            $ext = substr($filename, strrpos($filename, '.') + 1);
-            if (($ext != "exe") && ($_FILES["invoice"]["type"] != "application/x-msdownload")) {
-                $newname = time() . '_' . $projid . "_" . $stage . "_" . $filename;
-                $filepath = "../../uploads/payments/" . $newname;
-                if (!file_exists($filepath)) {
-                    if (move_uploaded_file($_FILES['invoice']['tmp_name'], $filepath)) {
-                        $fname = $newname;
-                    } else {
-                        $msg =  "file culd not be  allowed";
-                    }
-                } else {
-                    $msg = 'File you are uploading already exists, try another file!!';
-                }
-            } else {
-                $msg = 'This file type is not allowed, try another file!!';
-            }
-        }
-
-
-        if ($payment_plan == 1) {
-            $complete = 0;
-            $item_id = $_POST['payment_phase'];
-            $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-            $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => $item_id, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
-            $payment_request_id = $db->lastInsertId();
-            store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
-        } else if ($payment_plan == 2) {
-            if (isset($_POST['tender_id'])) {
-                $item_id = 0;
-                $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
-
-                if ($result) {
-                    $payment_request_id = $db->lastInsertId();
-                    store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
-                    $total_tasks = count($_POST['tender_id']);
-                    for ($i = 0; $i < $total_tasks; $i++) {
-                        $plan_counter = 0;
-                        $tender_id = $_POST['tender_id'][$i];
-                        $query_rsProcurement =  $db->prepare("SELECT * FROM tbl_project_tender_details WHERE id=:tender_id ");
-                        $query_rsProcurement->execute(array(":tender_id" => $tender_id));
-                        $row_rsProcurement = $query_rsProcurement->fetch();
-                        $totalRows_rsProcurement = $query_rsProcurement->rowCount();
-                        if ($totalRows_rsProcurement > 0) {
-                            $unit_cost = $row_rsProcurement['unit_cost'];
-                            $units_no = $row_rsProcurement['units_no'];
-                            $unit = $row_rsProcurement['unit'];
-                            $site_id = $row_rsProcurement['site_id'];
-                            $output_id = $row_rsProcurement['outputid'];
-                            $subtask_id = $row_rsProcurement['subtask_id'];
-                            $task_id = $row_rsProcurement['tasks'];
-                            $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_details (projid,output_id,site_id,task_id,subtask_id,tender_item_id,payment_request_id,request_id,unit_cost,units_no) VALUES(:projid,:output_id,:site_id,:task_id,:subtask_id,:tender_item_id,:payment_request_id,:request_id,:unit_cost,:units_no)");
-                            $result = $sql->execute(array(":projid" => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":tender_item_id" => $tender_id, ":payment_request_id" => $payment_request_id, ":request_id" => $request_id, ":unit_cost" => $unit_cost, ":units_no" => $units_no));
-                        }
-                    }
-                }
-            }
-        } else if ($payment_plan == 3) {
-            if (isset($_POST['subtask_id'])) {
-                $item_id = 0;
-                $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
-                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
-
-                if ($result) {
-                    $payment_request_id = $db->lastInsertId();
-                    store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
-                    $total_tasks = count($_POST['subtask_id']);
-                    for ($i = 0; $i < $total_tasks; $i++) {
-                        $plan_counter = 0;
-                        $output_id = $_POST['output_id'][$i];
-                        $site_id = $_POST['site_id'][$i];
-                        $task_id = $_POST['task_id'][$i];
-                        $subtask_id = $_POST['subtask_id'][$i];
-                        $units_no = $_POST['request_units'][$i];
-                        $unit_cost = $_POST['unit_cost'][$i];
-                        $tender_id = 0;
-                        $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_details (projid,output_id,site_id,task_id,subtask_id,tender_item_id,payment_request_id,request_id,unit_cost,units_no) VALUES(:projid,:output_id,:site_id,:task_id,:subtask_id,:tender_item_id,:payment_request_id,:request_id,:unit_cost,:units_no)");
-                        $result = $sql->execute(array(":projid" => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":tender_item_id" => $tender_id, ":payment_request_id" => $payment_request_id, ":request_id" => $request_id, ":unit_cost" => $unit_cost, ":units_no" => $units_no));
-                    }
-                }
-            }
-        }
-        echo json_encode(array("success" => true));
-    }
-
     function get_milestone_based_details($projid, $payment_plan_id)
     {
         global $db;
@@ -685,6 +580,116 @@ try {
         }
 
         echo json_encode(array("details" => $data, "comments" => $comments, "attachment" => $attachment));
+    }
+
+
+    if (isset($_POST['contractor_payment'])) {
+        if (validate_csrf_token($_POST['csrf_token'])) {
+            $projid = $_POST['projid'];
+            $requested_amount = $_POST['requested_amount'];
+            $comments = $_POST['comments'];
+            $created_by = $_POST['user_name'];
+            $created_at = date('Y-m-d');
+            $payment_plan = $_POST['payment_plan'];
+            $complete = $_POST['complete'];
+            $status = 1;
+            $stage = 1;
+            $request_id = isset($_POST['request_id']) ? $_POST['request_id'] : incrementalHash() . $projid;
+            $deleteQueryI = $db->prepare("DELETE FROM `tbl_contractor_payment_requests` WHERE request_id=:request_id");
+            $resultsI = $deleteQueryI->execute(array(':request_id' => $request_id));
+
+            $deleteQueryI = $db->prepare("DELETE FROM `tbl_contractor_payment_request_details` WHERE request_id=:request_id");
+            $resultsI = $deleteQueryI->execute(array(':request_id' => $request_id));
+
+            $filepath = '';
+            if (!empty($_FILES['invoice']['name'])) {
+                $filename = basename($_FILES['invoice']['name']);
+                $ext = substr($filename, strrpos($filename, '.') + 1);
+                if (($ext != "exe") && ($_FILES["invoice"]["type"] != "application/x-msdownload")) {
+                    $newname = time() . '_' . $projid . "_" . $stage . "_" . $filename;
+                    $filepath = "../../uploads/payments/" . $newname;
+                    if (!file_exists($filepath)) {
+                        if (move_uploaded_file($_FILES['invoice']['tmp_name'], $filepath)) {
+                            $fname = $newname;
+                        } else {
+                            $msg =  "file culd not be  allowed";
+                        }
+                    } else {
+                        $msg = 'File you are uploading already exists, try another file!!';
+                    }
+                } else {
+                    $msg = 'This file type is not allowed, try another file!!';
+                }
+            }
+
+
+            if ($payment_plan == 1) {
+                $complete = 0;
+                $item_id = $_POST['payment_phase'];
+                $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
+                $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => $item_id, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
+                $payment_request_id = $db->lastInsertId();
+                store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
+            } else if ($payment_plan == 2) {
+                if (isset($_POST['tender_id'])) {
+                    $item_id = 0;
+                    $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
+                    $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
+
+                    if ($result) {
+                        $payment_request_id = $db->lastInsertId();
+                        store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
+                        $total_tasks = count($_POST['tender_id']);
+                        for ($i = 0; $i < $total_tasks; $i++) {
+                            $plan_counter = 0;
+                            $tender_id = $_POST['tender_id'][$i];
+                            $query_rsProcurement =  $db->prepare("SELECT * FROM tbl_project_tender_details WHERE id=:tender_id ");
+                            $query_rsProcurement->execute(array(":tender_id" => $tender_id));
+                            $row_rsProcurement = $query_rsProcurement->fetch();
+                            $totalRows_rsProcurement = $query_rsProcurement->rowCount();
+                            if ($totalRows_rsProcurement > 0) {
+                                $unit_cost = $row_rsProcurement['unit_cost'];
+                                $units_no = $row_rsProcurement['units_no'];
+                                $unit = $row_rsProcurement['unit'];
+                                $site_id = $row_rsProcurement['site_id'];
+                                $output_id = $row_rsProcurement['outputid'];
+                                $subtask_id = $row_rsProcurement['subtask_id'];
+                                $task_id = $row_rsProcurement['tasks'];
+                                $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_details (projid,output_id,site_id,task_id,subtask_id,tender_item_id,payment_request_id,request_id,unit_cost,units_no) VALUES(:projid,:output_id,:site_id,:task_id,:subtask_id,:tender_item_id,:payment_request_id,:request_id,:unit_cost,:units_no)");
+                                $result = $sql->execute(array(":projid" => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":tender_item_id" => $tender_id, ":payment_request_id" => $payment_request_id, ":request_id" => $request_id, ":unit_cost" => $unit_cost, ":units_no" => $units_no));
+                            }
+                        }
+                    }
+                }
+            } else if ($payment_plan == 3) {
+                if (isset($_POST['subtask_id'])) {
+                    $item_id = 0;
+                    $sql = $db->prepare("INSERT INTO tbl_contractor_payment_requests (projid,contractor_id,request_id,item_id,project_plan,requested_amount,status,stage,acceptance,invoice,created_at) VALUES(:projid,:contractor_id, :request_id,:item_id,:project_plan,:requested_amount,:status,:stage,:acceptance,:invoice,:created_at) ");
+                    $result = $sql->execute(array(":projid" => $projid, ":contractor_id" => $user_name, ":request_id" => $request_id, ":item_id" => 0, ":project_plan" => $payment_plan, ":requested_amount" => $requested_amount, ":status" => $status, ":stage" => $stage, ":acceptance" => $complete, ":invoice" => $filepath, ":created_at" => $created_at));
+
+                    if ($result) {
+                        $payment_request_id = $db->lastInsertId();
+                        store_comments($payment_request_id, $stage, $status, $comments, $user_name, $created_at);
+                        $total_tasks = count($_POST['subtask_id']);
+                        for ($i = 0; $i < $total_tasks; $i++) {
+                            $plan_counter = 0;
+                            $output_id = $_POST['output_id'][$i];
+                            $site_id = $_POST['site_id'][$i];
+                            $task_id = $_POST['task_id'][$i];
+                            $subtask_id = $_POST['subtask_id'][$i];
+                            $units_no = $_POST['request_units'][$i];
+                            $unit_cost = $_POST['unit_cost'][$i];
+                            $tender_id = 0;
+                            $sql = $db->prepare("INSERT INTO tbl_contractor_payment_request_details (projid,output_id,site_id,task_id,subtask_id,tender_item_id,payment_request_id,request_id,unit_cost,units_no) VALUES(:projid,:output_id,:site_id,:task_id,:subtask_id,:tender_item_id,:payment_request_id,:request_id,:unit_cost,:units_no)");
+                            $result = $sql->execute(array(":projid" => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ":tender_item_id" => $tender_id, ":payment_request_id" => $payment_request_id, ":request_id" => $request_id, ":unit_cost" => $unit_cost, ":units_no" => $units_no));
+                        }
+                    }
+                }
+            }
+            echo json_encode(array("success" => true));
+        }
+    } else {
+        echo json_encode(array("success" => false));
     }
 } catch (PDOException $ex) {
     $result = flashMessage("An error occurred: " . $ex->getMessage());

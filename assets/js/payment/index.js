@@ -1,4 +1,4 @@
-const ajax_url = 'ajax/payment/index';
+const ajax_url = 'includes/ajax/payment/index';
 $(document).ready(function () {
     $("#invoice_div").hide();
     $("#modal_form_submit").submit(function (e) {

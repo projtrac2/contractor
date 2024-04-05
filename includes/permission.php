@@ -1,24 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-function customErrorHandler($errno, $errstr, $errfile, $errline)
-{
-	$message = "Error: [$errno] $errstr - $errfile:$errline";
-	error_log($message . PHP_EOL, 3, "error_log.log");
-}
-
-set_error_handler("customErrorHandler");
-
 include_once 'projtrac-dashboard/resource/Database.php';
 include_once 'projtrac-dashboard/resource/utilities.php';
 include_once("includes/system-labels.php");
-
-require 'vendor/autoload.php';
-include "models/Auth.php";
-include "models/Company.php";
-require 'models/Connection.php';
-require 'models/Email.php';
 
 function get_current_url_tests()
 {
@@ -27,11 +10,6 @@ function get_current_url_tests()
 	$url_path = isset($paths[2]) ? explode(".", $paths[2]) : explode(".", $paths[1]);
 	return $url_path[0];
 }
-
-// Set the inactivity time of 60 minutes (3600 seconds)
-$inactivity_time = 15 * 60;
-$current_page_url = get_current_url_tests();
-
 
 
 $today = date('Y-m-d');

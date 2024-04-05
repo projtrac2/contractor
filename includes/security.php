@@ -1,4 +1,14 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+function customErrorHandler($errno, $errstr, $errfile, $errline)
+{
+    $message = "Error: [$errno] $errstr - $errfile:$errline";
+    error_log($message . PHP_EOL, 3, "error_log.log");
+}
+
+set_error_handler("customErrorHandler");
 
 // Audit Trail
 function logActivity($action, $outcome)
@@ -10,18 +20,5 @@ function logActivity($action, $outcome)
     return $results;
 }
 
-// Function to generate HTML with CSRF token input
-function csrf_token_html()
-{
-    return '<input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">';
-}
 
-// Validate CSRF token
-function validate_csrf_token($token)
-{
-    return isset($_SESSION['csrf_token']) && $token === $_SESSION['csrf_token'];
-}
-
-
-csrf_token_html();
-logActivity("view", "true");
+// logActivity("view", "true");

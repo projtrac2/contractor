@@ -8,45 +8,30 @@ if ($permission) {
 
         function get_progress($progress, $projstatus)
         {
+            $css_class = "progress-bar progress-bar-info progress-bar-striped active";
+            $progress_bar = $progress;
+            if ($progress == 100 && $projstatus == 5) {
+                $css_class = "progress-bar progress-bar-success progress-bar-striped active";
+                $progress_bar = 100;
+            } else if ($progress > 100) {
+                if ($projstatus == 5) {
+                    $css_class = "progress-bar progress-bar-success progress-bar-striped active";
+                    $progress_bar = 100;
+                } else {
+                    $css_class = "progress-bar progress-bar-info progress-bar-striped active";
+                    $progress_bar = 100;
+                }
+            } else if ($progress <  100 && $projstatus == 5) {
+                $css_class = "progress-bar progress-bar-success progress-bar-striped active";
+                $progress_bar = 100;
+            }
 
-            $project_progress = '
+            return  '
             <div class="progress" style="height:20px; font-size:10px; color:black">
-                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="' . $progress . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress . '%; height:20px; font-size:10px; color:black">
+                <div class="' . $css_class . '" role="progressbar" aria-valuenow="' . $progress_bar . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress_bar . '%; height:20px; font-size:10px; color:black">
                     ' . $progress . '%
                 </div>
             </div>';
-            if ($progress == 100) {
-                $project_progress = '
-                <div class="progress" style="height:20px; font-size:10px; color:black">
-                    <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="' . $progress . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress . '%; height:20px; font-size:10px; color:black">
-                    ' . $progress . '%
-                    </div>
-                </div>';
-            } else if ($progress > 100) {
-                if ($projstatus == 5) {
-                    $project_progress = '
-                    <div class="progress" style="height:20px; font-size:10px; color:black">
-                        <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; height:20px; font-size:10px; color:black">
-                        ' . $progress . '%
-                        </div>
-                    </div>';
-                } else {
-                    $project_progress = '
-                    <div class="progress" style="height:20px; font-size:10px; color:black">
-                        <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%; height:20px; font-size:10px; color:black">
-                            ' . $progress . '%
-                        </div>
-                    </div>';
-                }
-            } else if ($progress <  100 && $projstatus == 5) {
-                $project_progress = '
-                <div class="progress" style="height:20px; font-size:10px; color:black">
-                    <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="' . $progress . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress . '%; height:20px; font-size:10px; color:black">
-                    ' . $progress . '%
-                    </div>
-                </div>';
-            }
-            return $project_progress;
         }
 
         function get_status($projstatus)
@@ -66,7 +51,7 @@ if ($permission) {
         }
 ?>
         <div class="container-fluid">
-            <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:10px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
+            <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
                 <h4 class="contentheader">
                     <i class="fa fa-dashboard" style="color:white"></i> Projects
                     <div class="btn-group" style="float:right">
