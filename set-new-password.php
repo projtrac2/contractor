@@ -1,5 +1,6 @@
 <?php
-include_once('./includes/contractor-sessions.php');
+include_once('includes/auth-head.php');
+
 if ((isset($_SESSION['MM_Contractor_First_Login']) && !empty($_SESSION['MM_Contractor_First_Login']))) {
     try {
         if (isset($_POST['setpass']) && $_POST['setpass'] == "setpassword") {
@@ -29,8 +30,7 @@ if ((isset($_SESSION['MM_Contractor_First_Login']) && !empty($_SESSION['MM_Contr
                 header("location: index.php");
                 return;
             }
-        }
-        include_once('includes/auth-head.php');
+        } 
 ?>
         <div class="container">
             <div class="row">

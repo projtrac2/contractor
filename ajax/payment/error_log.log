@@ -1,0 +1,145 @@
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:30
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:39
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:58
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:58
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'd.direct_cost_id' in 'where clause' - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:58
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:58
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'd.direct_cost_id' in 'where clause' - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'direct_cost_id' in 'where clause' - /var/www/html/contractor/ajax/payment/amend.php:38
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: site_id - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:63
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:63
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:63
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:63
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:59
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:64
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:60
+Error: [8] Undefined variable: projid - /var/www/html/contractor/ajax/payment/amend.php:65
+Error: [8] Undefined index: direct_cost_id - /var/www/html/contractor/ajax/payment/amend.php:87
+Error: [8] Undefined index: direct_cost_id - /var/www/html/contractor/ajax/payment/amend.php:87
+Error: [8] Undefined index: direct_cost_id - /var/www/html/contractor/ajax/payment/amend.php:87
+Error: [8] Undefined index: direct_cost_id - /var/www/html/contractor/ajax/payment/amend.php:87
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:103
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:118
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_request_id' in 'where clause' - /var/www/html/contractor/ajax/payment/amend.php:38
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'request_id' in where clause is ambiguous - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/amend.php:29
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:100
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:115
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:98
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:112
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:98
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:112
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:97
+Error: [HY093] SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens - /var/www/html/contractor/ajax/payment/amend.php:111
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:97
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'output_id' cannot be null - /var/www/html/contractor/ajax/payment/amend.php:112
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:97
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'output_id' cannot be null - /var/www/html/contractor/ajax/payment/amend.php:111
+Error: [8] Undefined index: output_id - /var/www/html/contractor/ajax/payment/amend.php:97
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'output_id' cannot be null - /var/www/html/contractor/ajax/payment/amend.php:113
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:106
+Error: [8] Undefined variable: stmts_result - /var/www/html/contractor/ajax/payment/amend.php:107
+Error: [8] Trying to access array offset on value of type null - /var/www/html/contractor/ajax/payment/amend.php:107
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:459
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:459
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:626
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:629
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'request_id' in 'field list' - /var/www/html/contractor/ajax/payment/index.php:628
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'r.request_id' in 'on clause' - /var/www/html/contractor/ajax/payment/index.php:464
+Error: [HY000] SQLSTATE[HY000]: General error: 1364 Field 'direct_cost_id' doesn't have a default value - /var/www/html/contractor/ajax/payment/index.php:637
+Error: [HY000] SQLSTATE[HY000]: General error: 1364 Field 'direct_cost_id' doesn't have a default value - /var/www/html/contractor/ajax/payment/index.php:634
+Error: [8] Undefined variable: direct_cost_id - /var/www/html/contractor/ajax/payment/index.php:683
+Error: [23000] SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'direct_cost_id' cannot be null - /var/www/html/contractor/ajax/payment/index.php:634
+Error: [8] Undefined variable: subtasks_id - /var/www/html/contractor/ajax/payment/index.php:686
+Error: [42S22] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subtasks_id' in 'where clause' - /var/www/html/contractor/ajax/payment/index.php:644
+Error: [8] Undefined variable: subtasks_id - /var/www/html/contractor/ajax/payment/index.php:686
+Error: [HY000] SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'direct_cost_id' at row 1 - /var/www/html/contractor/ajax/payment/index.php:634
+Error: [8] Undefined variable: subtasks_id - /var/www/html/contractor/ajax/payment/index.php:687
+Error: [HY000] SQLSTATE[HY000]: General error: 1366 Incorrect integer value: '' for column 'direct_cost_id' at row 1 - /var/www/html/contractor/ajax/payment/index.php:634
+Error: [8] Undefined variable: payment_request_id - /var/www/html/contractor/ajax/payment/index.php:701
+Error: [8] Undefined variable: payment_request_id - /var/www/html/contractor/ajax/payment/index.php:697

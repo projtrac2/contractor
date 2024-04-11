@@ -1,5 +1,5 @@
 <?php
-include_once('./includes/contractor-sessions.php');
+include_once('includes/auth-head.php');
 try {
     if (isset($_SESSION['attempt_again'])) {
         $now = time();
@@ -62,7 +62,6 @@ try {
             return;
         }
     }
-    include_once('includes/auth-head.php');
 ?>
     <div class="container">
         <div class="row">

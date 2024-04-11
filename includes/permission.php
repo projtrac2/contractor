@@ -1,8 +1,4 @@
 <?php
-include_once 'projtrac-dashboard/resource/Database.php';
-include_once 'projtrac-dashboard/resource/utilities.php';
-include_once("includes/system-labels.php");
-
 function get_current_url_tests()
 {
 	$path = $_SERVER['REQUEST_URI'];

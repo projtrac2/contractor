@@ -1,7 +1,8 @@
 <?php
+include_once "includes/contractor-security.php";
 include_once "includes/permission.php";
-include_once "includes/security.php";
 include_once "includes/contractor-sessions.php";
+
 ?>
 <!DOCTYPE html>
 <html>

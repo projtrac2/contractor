@@ -1,11 +1,10 @@
-const ajax_url = "includes/ajax/programsOfWorks/extend";
-
+const ajax_url = "ajax/programsOfWorks/extend";
 $(document).ready(function () {
     $("#add_project_frequency").submit(function (e) {
         e.preventDefault();
         if (calculate_total1()) {
             var form_data = $(this).serialize();
-            // $("#tag-form-submit-frequency").prop("disabled", true);
+            $("#tag-form-submit-frequency").prop("disabled", true);
             $.ajax({
                 type: "post",
                 url: ajax_url,
@@ -125,4 +124,53 @@ const calculate_total1 = () => {
         }
     }
     return response;
+}
+
+function close_issue(details) {
+    swal({
+        title: "Are you sure?",
+        text: `You want to close issue for  ${details.project_name} !`,
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+        .then((willDelete) => {
+            if (willDelete) {
+                $.ajax({
+                    type: "post",
+                    url: ajax_url,
+                    data: {
+                        close_issue: "close_issue",
+                        projid: details.projid,
+                        csrf_token: details.csrf_token,
+                        issue_id: details.issue_id,
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.success == true) {
+                            swal({
+                                title: "Project !",
+                                text: "Successfully closed issue",
+                                icon: "success",
+                            });
+                            setTimeout(function () {
+                                window.location.href = "projects.php";
+                            }, 3000);
+                        } else {
+                            swal({
+                                title: "Project !",
+                                text: "Error closing project issue",
+                                icon: "error",
+                            });
+
+                            setTimeout(function () {
+                                window.location.reload(true);
+                            }, 3000);
+                        }
+                    },
+                });
+            } else {
+                swal("You cancelled the action!");
+            }
+        });
 }

@@ -83,8 +83,8 @@ try {
     }
 
     if (isset($_POST['store_tasks'])) {
+        $msg = false;
         if (validate_csrf_token($_POST['csrf_token'])) {
-
             $projid = $_POST['projid'];
             $output_id = $_POST['output_id'];
             $site_id = $_POST['site_id'];
@@ -118,24 +118,23 @@ try {
                 $stmt = $db->prepare("DELETE FROM `tbl_project_target_breakdown` WHERE projid=:projid AND output_id=:output_id AND site_id=:site_id AND task_id=:task_id AND subtask_id=:subtask_id ");
                 $results = $stmt->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $tkid));
             }
-            echo json_encode(array("success" => true));
-        } else {
-            echo json_encode(array("success" => true));
+            $msg = true;
         }
+        logActivity("add duration", "$msg");
+        echo json_encode(array("success" => $msg));
     }
 
     if (isset($_POST['approve_stage'])) {
+        $results = false;
         if (validate_csrf_token($_POST['csrf_token'])) {
             $projid = $_POST['projid'];
             $sql = $db->prepare("UPDATE tbl_projects SET proj_substage=:proj_substage WHERE  projid=:projid");
             $result  = $sql->execute(array(":proj_substage" => 3, ":projid" => $projid));
             $results =  $mail->send_master_data_email($projid, 6, '');
-            echo json_encode(array('success' => $result));
-        } else {
-            echo json_encode(array('success' => false));
         }
+        logActivity("submit", "$results");
+        echo json_encode(array('success' => $result));
     }
 } catch (PDOException $ex) {
-    $result = flashMessage("An error occurred: " . $ex->getMessage());
-    echo $ex->getMessage();
+    customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

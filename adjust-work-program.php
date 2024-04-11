@@ -13,7 +13,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
         $query_rsProjects->execute(array(":projid" => $projid));
         $row_rsProjects = $query_rsProjects->fetch();
         $totalRows_rsProjects = $query_rsProjects->rowCount();
-        $approve_details = "";
 
         if ($totalRows_rsProjects > 0) {
             $projname = $row_rsProjects['projname'];
@@ -270,6 +269,25 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                         }
                                     }
                                     ?>
+                                    <form role="form" id="form_data" action="" method="post" autocomplete="off" enctype="multipart/form-data">
+                                        <div class="row clearfix" style="margin-top:5px; margin-bottom:5px">
+                                            <div class="col-md-12 text-center">
+                                                <?php
+                                                $query_Issues = $db->prepare("SELECT * FROM tbl_project_adjustments WHERE issueid=:issue_id AND projid=:projid and flag=0");
+                                                $query_Issues->execute(array(":issue_id" => $issue_id, ":projid" => $projid));
+                                                $totalRows_Issues = $query_Issues->rowCount();
+                                                if ($totalRows_Issues == 0) {
+                                                    $token = $_SESSION['csrf_token'];
+                                                    $issue_details = "{projid:$projid,project_name:'$projname',csrf_token:'$token', issue_id:$issue_id}";
+                                                ?>
+                                                    <button type="button" class="btn btn-success" onclick="close_issue(<?= $issue_details ?>)">Submit</button>
+                                                <?php
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </form>
+
                                 </div>
                             </div>
                         </div>

@@ -49,6 +49,24 @@ if ($permission) {
             }
             return $status;
         }
+
+        function get_issues($projid)
+        {
+            global $db;
+            $query_issues = $db->prepare("SELECT * FROM  tbl_projissues WHERE projid = :projid");
+            $query_issues->execute(array(":projid" => $projid));
+            $count_issues = $query_issues->rowCount();
+            return $count_issues > 0 ? true : false;
+        }
+
+        function get_scope_and_time_issues($projid)
+        {
+            global $db;
+            $query_issues = $db->prepare("SELECT * FROM  tbl_projissues WHERE status=1 AND (issue_area=2 OR issue_area=3) AND projid = :projid");
+            $query_issues->execute(array(":projid" => $projid));
+            $count_issues = $query_issues->rowCount();
+            return $count_issues > 0 ? true : false;
+        }
 ?>
         <div class="container-fluid">
             <div class="block-header bg-blue-grey" width="100%" height="55" style="margin-top:70px; padding-top:5px; padding-bottom:5px; padding-left:15px; color:#FFF">
@@ -113,29 +131,10 @@ if ($permission) {
                                                 }
 
                                                 $filter = false;
-
-
                                                 $today = date("Y-m-d");
-
-                                                if ($projstage == 8) {
-                                                    if ($sub_stage == 1 || $project_start_date <= $today) {
-                                                        $filter = true;
-                                                    } else if ($sub_stage == 2) {
-                                                        $filter = true;
-                                                    }
-                                                } else {
-                                                    $filter = true;
-                                                    if ($sub_stage == 0) {
-                                                    } else if ($sub_stage == 1) {
-                                                    } else if ($sub_stage == 2) {
-                                                    }
-                                                }
+                                                $filter = (($projstage == 8 && (($sub_stage == 1 || $project_start_date <= $today) || ($sub_stage == 2))) || ($projstage == 9)) ? true : false;
 
 
-                                                $query_rsPayement_reuests =  $db->prepare("SELECT * FROM  tbl_contractor_payment_requests WHERE status <> 3 AND contractor_id=:contractor_id AND projid=:projid");
-                                                $query_rsPayement_reuests->execute(array(":contractor_id" => $user_name, ":projid" => $projid));
-                                                $total_rsPayement_reuests = $query_rsPayement_reuests->rowCount();
-                                                $issue = true;
                                                 if ($filter) {
                                         ?>
                                                     <tr>
@@ -174,23 +173,25 @@ if ($permission) {
                                                                                 <i class="fa fa-money text-warning"></i> Payment Requests
                                                                             </a>
                                                                         </li>
+                                                                        <?php
+                                                                        if (get_issues($projid)) {
+                                                                        ?>
+                                                                            <li>
+                                                                                <a type="button" href="project-issues.php?proj=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                                    <i class="fa fa-exclamation-triangle text-danger"></i> Project Issues
+                                                                                </a>
+                                                                            </li>
+                                                                        <?php
+                                                                        }
+                                                                        if (get_scope_and_time_issues($projid)) {
+                                                                        ?>
+                                                                            <li>
+                                                                                <a type="button" href="adjust-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                                    <i class="fa fa-exclamation-triangle text-danger"></i> Adjust Work Program
+                                                                                </a>
+                                                                            </li>
                                                                     <?php
-                                                                    }
-                                                                    ?>
-                                                                    <li>
-                                                                        <a type="button" href="project-issues.php?proj=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                            <i class="fa fa-exclamation-triangle text-danger"></i> Project Issues
-                                                                        </a>
-                                                                    </li>
-                                                                    <?php
-                                                                    if ($issue) {
-                                                                    ?>
-                                                                        <li>
-                                                                            <a type="button" href="adjust-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                <i class="fa fa-exclamation-triangle text-danger"></i> Adjust Work Program
-                                                                            </a>
-                                                                        </li>
-                                                                    <?php
+                                                                        }
                                                                     }
                                                                     ?>
                                                                 </ul>

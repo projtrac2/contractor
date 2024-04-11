@@ -156,9 +156,9 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
 
                                             $proceed = validate_tasks();
                                             if ($proceed) {
-                                                $approve_details = "{projid:$projid,project_name:'$projname',}";
+                                                $token = $_SESSION['csrf_token'];
+                                                $approve_details = "{projid:$projid,project_name:'$projname',csrf_token:'$token'}";
                                             ?>
-                                                <?= csrf_token_html(); ?>
                                                 <input type="hidden" name="projid" value="<?= $projid ?>">
                                                 <input type="hidden" name="update_project_substage" id="update_project_substage">
                                                 <button type="button" class="btn btn-success" onclick="approve_project(<?= $approve_details ?>)">Submit</button>
@@ -168,8 +168,6 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                         </div>
                                     </div>
                                 </form>
-                                <?php
-                                ?>
                             </div>
                         </div>
                     </div>
@@ -184,7 +182,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" style="color:#fff" align="center" id="modal-title">Add Program of Works</h4>
                         </div>
-                        <div class="modal-body" style="max-height:450px; overflow:auto;">
+                        <div class="modal-body">
                             <div class="card">
                                 <div class="row clearfix">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -245,7 +243,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" style="color:#fff" align="center" id="modal-title">Add Program of Works Structure</h4>
                         </div>
-                        <div class="modal-body" style="max-height:450px; overflow:auto;">
+                        <div class="modal-body">
                             <div class="card">
                                 <div class="card-header">
                                     <div class="row clearfix">

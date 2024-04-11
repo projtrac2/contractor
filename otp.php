@@ -1,5 +1,5 @@
 <?php
-include_once('./includes/contractor-sessions.php');
+include_once('includes/auth-head.php');
 if (isset($_SESSION['MM_Contractor_Email'])) {
     try {
         if (isset($_POST['sign-in'])) {
@@ -13,20 +13,24 @@ if (isset($_SESSION['MM_Contractor_Email'])) {
                         $_SESSION['MM_Contractor'] = $contractor->contrid;
                         $_SESSION['avatar'] = $contractor->avatar;
                         $_SESSION['contractor_name'] = $contractor->contractor_name;
+                        logActivity("otp code", "true");
                         header("location: projects.php");
                         return;
                     } else {
+                        logActivity("otp code", "false");
                         $_SESSION["successMessage"] = "Sorry your details are incorrect!";
                         header("location: otp.php");
                         return;
                     }
                 } else {
+                    logActivity("otp code", "false");
                     $mail_otp_code = $contractor_auth->otp($contractor_email);
                     $_SESSION["successMessage"] = "Sorry Otp code has been expired a new code has been sent to your email!";
                     header("location: otp.php");
                     return;
                 }
             } else {
+                logActivity("otp code", "false");
                 $_SESSION["successMessage"] = "Sorry try again later!";
                 header("location: index.php");
                 return;
@@ -37,6 +41,7 @@ if (isset($_SESSION['MM_Contractor_Email'])) {
             if (validate_csrf_token($_POST['csrf_token'])) {
                 $mail_otp_code = $contractor_auth->otp($contractor_email);
                 $_SESSION['MM_Contractor_Email'] = $contractor_email;
+                logActivity("resend otp code", "false");
                 if ($mail_otp_code) {
                     $_SESSION["successMessage"] = "Otp code has been resent to your email!";
                     header("location: otp.php");
@@ -52,7 +57,6 @@ if (isset($_SESSION['MM_Contractor_Email'])) {
                 return;
             }
         }
-        include_once('includes/auth-head.php');
 ?>
         <div class="container">
             <div class="row">

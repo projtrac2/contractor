@@ -1,6 +1,32 @@
 <?php
+include_once 'projtrac-dashboard/resource/Database.php';
+include_once 'projtrac-dashboard/resource/utilities.php';
+include_once("includes/system-labels.php");
+
+require 'vendor/autoload.php';
+require 'models/Connection.php';
+include "models/Auth.php";
+include "models/Company.php";
+require 'models/Email.php';
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
+function get_current_url()
+{
+    $path = $_SERVER['REQUEST_URI'];
+    $paths = explode("/", $path);
+    $url_path = isset($paths[2]) ? explode(".", $paths[2]) : explode(".", $paths[1]);
+    return $url_path[0];
+}
+$current_page_url = get_current_url();
+$contractor_auth = new Auth();
+$company_details = new Company();
+$company_settings = $company_details->get_company_details();
 
 function customErrorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -21,4 +47,4 @@ function logActivity($action, $outcome)
 }
 
 
-// logActivity("view", "true");
+logActivity("view", "true");

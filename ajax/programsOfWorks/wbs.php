@@ -403,8 +403,8 @@ try {
     }
 
     if (isset($_POST['store_target'])) {
+        $msg = false;
         if (validate_csrf_token($_POST['csrf_token'])) {
-
             $projid = $_POST['projid'];
             $output_id = $_POST['output_id'];
             $site_id = $_POST['site_id'];
@@ -427,12 +427,12 @@ try {
                 $sql = $db->prepare("INSERT INTO tbl_project_target_breakdown (projid, output_id, site_id, task_id, subtask_id,start_date,end_date, frequency, target, created_by, created_at) VALUES (:projid, :output_id, :site_id, :task_id, :subtask_id,:start_date,:end_date, :frequency, :target, :created_by, :created_at)");
                 $results = $sql->execute(array(':projid' => $projid, ":output_id" => $output_id, ":site_id" => $site_id, ":task_id" => $task_id, ":subtask_id" => $subtask_id, ':start_date' => $start_date, ':end_date' => $end_date, ":frequency" => $frequency, ":target" => $target, ":created_by" => $user_name, ':created_at' => $date));
             }
-            echo json_encode(array('success' => true));
-        } else {
-            echo json_encode(array('success' => false));
+            $msg = true;
         }
+
+        logActivity("Add Target Breakdown", "$msg");
+        echo json_encode(array('success' => $msg));
     }
 } catch (PDOException $ex) {
-    $result = flashMessage("An error occurred: " . $ex->getMessage());
-    echo $ex->getMessage();
+    customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

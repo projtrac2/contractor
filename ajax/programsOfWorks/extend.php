@@ -1,5 +1,9 @@
 <?php
 include '../controller.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 try {
     function get_unit_of_measure($unit)
     {
@@ -423,6 +427,7 @@ try {
     }
 
     if (isset($_POST['store_target'])) {
+        $msg = false;
         if (validate_csrf_token($_POST['csrf_token'])) {
             $projid = $_POST['projid'];
             $output_id = $_POST['output_id'];
@@ -457,12 +462,25 @@ try {
                 $sql = $db->prepare("UPDATE tbl_project_adjustments SET flag=1 WHERE issueid=:issue_id AND site_id=:site_id AND sub_task_id=:sub_task_id");
                 $results = $sql->execute(array(":issue_id" => $issue_id, ":site_id" => $site_id, ":sub_task_id" => $subtask_id));
             }
-            echo json_encode(array('success' => true));
-        } else {
-            echo json_encode(array('success' => false));
+            $msg = true;
         }
+        // logActivity("adjust Target Breakdown", "$msg");
+        echo json_encode(array('success' => $msg));
+    }
+
+    if (isset($_POST['close_issue'])) {
+        $results = false;
+        if (validate_csrf_token($_POST['csrf_token'])) {
+            $projid = $_POST['projid'];
+            $issue_id = $_POST['issue_id'];
+            $sql = $db->prepare("UPDATE tbl_projissues SET status=2 WHERE  projid=:projid AND id=:issue_id");
+            $result  = $sql->execute(array(":projid" => $projid, ":issue_id" => $issue_id));
+            $results =  $mail->send_master_data_email($projid, 6, '');
+        }
+
+        logActivity("submit", "$results");
+        echo json_encode(array('success' => $result));
     }
 } catch (PDOException $ex) {
-    $result = flashMessage("An error occurred: " . $ex->getMessage());
-    echo $ex->getMessage();
+    customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

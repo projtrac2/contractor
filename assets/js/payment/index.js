@@ -1,4 +1,5 @@
-const ajax_url = 'includes/ajax/payment/index';
+const ajax_url = 'ajax/payment/index';
+const ajax_url1 = 'ajax/payment/info';
 $(document).ready(function () {
     $("#invoice_div").hide();
     $("#modal_form_submit").submit(function (e) {
@@ -164,25 +165,23 @@ function set_details(details) {
     } else if (payment_plan == "2") {
         $("#tasks").show();
     } else {
-        console.log("payment plan for work measured");
+        error_alert("payment plan for work measured");
     }
 }
 
-function get_more_info(request_id) {
-    $("#project_approve_div").hide();
-    $("#modal-form-submit").hide();
+function get_more_info(projid, request_id) {
     var payment_plan = $("#payment_plan1").val();
     if (request_id != "") {
         $.ajax({
             type: "get",
-            url: ajax_url,
+            url: ajax_url1,
             data: {
                 get_more_info: "get_more_info",
+                projid: projid,
                 request_id: request_id,
             },
             dataType: "json",
             success: function (response) {
-                console.log(response)
                 if (response.details.success) {
                     $("#comments_div").html(response.comments);
                     $("#attachment_div").html(response.attachment);
@@ -193,17 +192,15 @@ function get_more_info(request_id) {
                         $("#requested_amount_more").val(response.details.request_amount);
                         $("#payment_phase_more").val(response.details.payment_plan);
                     } else {
-                        $("#tasks_table").html(response.details.tasks);
-                        $("#subtotal").html(response.details.task_amount);
-                        $("#requested_amount").val(response.details.task_amount);
+                        $("#tasks_table").html(response.tasks);
                     }
                 } else {
-                    // sweet_alert("No data found !!!")
+                    error_alert("No data found !!!")
                 }
             }
         });
     } else {
-        console.log("Ensure that the request is correct");
+        error_alert("Ensure that the request is correct");
     }
 }
 

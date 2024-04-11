@@ -1,5 +1,5 @@
 <?php
-include_once('./includes/contractor-sessions.php');
+include_once('includes/auth-head.php');
 if ((isset($_GET['token']) && !empty($_GET['token']))) {
   try {
     $token =  $_GET['token'];

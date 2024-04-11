@@ -1,4 +1,4 @@
-const ajax_url = "includes/ajax/monitoring/index";
+const ajax_url = "ajax/monitoring/index";
 
 function get_records(projid) {
     if (projid) {

@@ -1,7 +1,6 @@
 <?php
 include '../controller.php';
 try {
-
     function get_unit_of_measure($unit)
     {
         global $db;
@@ -233,6 +232,7 @@ try {
             $end_year = $start_year + 1;
             $start_date = $start_year .  '-07-01';
             $end_date = $end_year  . '-06-30';
+
             $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date);
             if ($response) {
                 $annual_dates[] =  [$start_date, $end_date];
@@ -425,6 +425,7 @@ try {
             $project_end_date = $row_rsProjects['projenddate'];
             $contractor_start = $project_start_date;
             $contractor_end = $project_end_date;
+
             $contractor_details = get_contract_dates($projid);
             $task_details = get_task_dates($task_id, $site_id);
             $task_start_date = $task_details['task_start_date'];
@@ -434,6 +435,8 @@ try {
                 if ($contractor_details) {
                     $contractor_start = $contractor_details['contractor_start'];
                     $contractor_end = $contractor_details['contractor_end'];
+                    $project_start_date = $contractor_start;
+                    $project_end_date = $contractor_end;
                 }
             }
         }
@@ -445,6 +448,5 @@ try {
         echo json_encode(array("success" => true, 'table' => $table));
     }
 } catch (PDOException $ex) {
-    $result = flashMessage("An error occurred: " . $ex->getMessage());
-    echo $ex->getMessage();
+    customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

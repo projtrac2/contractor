@@ -61,7 +61,7 @@ try {
         return $ret;
     }
 
-    function filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date)
+    function filter_head($contractor_start, $contractor_end, $start_date, $end_date)
     {
         $response = false;
         if (
@@ -69,17 +69,7 @@ try {
             ($contractor_end >= $start_date && $contractor_end <= $end_date) ||
             ($contractor_start <= $start_date && $contractor_end >= $start_date && $contractor_end >= $end_date)
         ) {
-            if ($task_start_date != '' && $task_end_date != '') {
-                if (
-                    ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
-                    ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
-                    ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
-                ) {
-                    $response = true;
-                }
-            } else {
-                $response = true;
-            }
+            $response = true;
         }
         return $response;
     }
@@ -87,24 +77,12 @@ try {
     function filter_body($start_date, $end_date, $target, $site_id, $task_id, $subtask_id)
     {
         $work_program = check_program_of_works($site_id, $task_id, $subtask_id);
-        $task_start_date = $work_program ? $work_program['start_date'] : '';
-        $task_end_date = $work_program ?  $work_program['end_date'] : '';
         $achieved = get_achieved($site_id, $task_id, $subtask_id, $start_date, $end_date);
         $table = '';
         if ($work_program) {
-            if (
-                ($task_start_date >= $start_date && $task_start_date <= $end_date) ||
-                ($task_end_date >= $start_date && $task_end_date <= $end_date) ||
-                ($task_start_date <= $start_date && $task_end_date >= $start_date && $task_end_date >= $end_date)
-            ) {
-                $table .=
-                    '<td style="width:15%">' . $target . '</td>
+            $table .=
+                '<td style="width:15%">' . $target . '</td>
                     <td style="width:15%">' . $achieved . '</td>';
-            } else {
-                $table .=
-                    '<td style="width:15%">n/a</td>
-                    <td style="width:15%">n/a</td>';
-            }
         } else {
             $table .=
                 '<td style="width:15%">n/a</td>
@@ -206,7 +184,8 @@ try {
                 if ($spans != 0) {
                     $formated_head_start = date('Y', strtotime($annual_start_date));
                     $formated_head_end = date('Y', strtotime($annual_end_date));
-                    $tyears .= '<th colspan=' . $spans . '>' . $formated_head_start . ' / ' . $formated_head_end . '</th>';
+                    $span = $spans * 2;
+                    $tyears .= '<th colspan=' . $span . '>' . $formated_head_start . ' / ' . $formated_head_end . '</th>';
                 }
             }
 
@@ -234,7 +213,7 @@ try {
         return $head;
     }
 
-    function get_structure($site_id, $output_id, $task_id, $frequency, $duration, $start_year, $project_start_date, $project_end_date, $contractor_start, $contractor_end, $task_start_date, $task_end_date)
+    function get_structure($site_id, $output_id, $task_id, $frequency, $duration, $start_year, $project_start_date, $project_end_date, $contractor_start, $contractor_end)
     {
         $annual_dates =  [];
         $thead = '';
@@ -242,7 +221,7 @@ try {
             $end_year = $start_year + 1;
             $start_date = $start_year .  '-07-01';
             $end_date = $end_year  . '-06-30';
-            $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date);
+            $response = filter_head($contractor_start, $contractor_end, $start_date, $end_date);
             if ($response) {
                 $annual_dates[] =  [$start_date, $end_date];
                 $thead .= "<th>$start_year/$end_year</th>";
@@ -268,7 +247,7 @@ try {
                         $semi_details = $semi_annual_array[$t];
                         $start_date = $semi_details[0];
                         $end_date = $semi_details[1];
-                        $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date);
+                        $response = filter_head($contractor_start, $contractor_end, $start_date, $end_date);
                         if ($response) {
                             $semi_annual_dates[] = [$start_date, $end_date];
                         }
@@ -285,7 +264,7 @@ try {
                 $start_date = $sInc;
                 $startFinancialMidPoint = strtotime('+3 months -1 day', strtotime($sInc));
                 $end_date = date('Y-m-d', $startFinancialMidPoint);
-                $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date);
+                $response = filter_head($contractor_start, $contractor_end, $start_date, $end_date);
                 if ($response) {
                     $quarter_dates[] = [$start_date, $end_date];
                 }
@@ -299,7 +278,7 @@ try {
         while ($startFinancial <= $endFinancial) {
             $startFinancialMidPoint = strtotime('+1 month -1 day', strtotime($startFinancial));
             $date = date('Y-m-d', $startFinancialMidPoint);
-            $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startFinancial, $date);
+            $response = filter_head($contractor_start, $contractor_end, $startFinancial, $date);
             if ($response) {
                 $month_dates[] = [$startFinancial, $date];
             }
@@ -313,7 +292,7 @@ try {
                 $start_date =  date('Y-m-d', strtotime($week_array['week_start']));
                 $end_date =  date('Y-m-d', strtotime($week_array['week_end']));
                 if ($project_start_date < $end_date && $project_end_date >= $start_date) {
-                    $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $start_date, $end_date);
+                    $response = filter_head($contractor_start, $contractor_end, $start_date, $end_date);
                     if ($response) {
                         $week_dates[] = [$start_date, $end_date];
                     }
@@ -329,14 +308,9 @@ try {
             $day_end_date = $contractor_end;
         }
 
-        if ($task_start_date != '' && $task_end_date != '') {
-            $day_start_date = $task_start_date;
-            $day_end_date = $task_end_date;
-        }
-
         while ($day_start_date <= $day_end_date) {
             $date = date('Y-m-d', strtotime($day_start_date));
-            $response = filter_head($contractor_start, $contractor_end, $task_start_date, $task_end_date, $day_start_date, $day_start_date);
+            $response = filter_head($contractor_start, $contractor_end, $day_start_date, $day_start_date);
             if ($response) {
                 $day_dates[] = [$day_start_date, $day_start_date];
             }
@@ -375,20 +349,6 @@ try {
                     </tbody>
                 </table>
             </div>';
-    }
-
-    function get_task_dates($task_id, $site_id)
-    {
-        global $db;
-        $query_rsTask_Start_Dates = $db->prepare("SELECT MIN(start_date) AS start_date, MAX(end_date) AS end_date FROM `tbl_program_of_works` WHERE task_id=:task_id AND site_id=:site_id");
-        $query_rsTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id));
-        $Rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
-        $task_start_date = $task_end_date = '';
-        if ($Rows_rsTask_Start_Dates) {
-            $task_start_date = $Rows_rsTask_Start_Dates['start_date'];
-            $task_end_date =  $Rows_rsTask_Start_Dates['end_date'];
-        }
-        return array("task_start_date" => $task_start_date, "task_end_date" => $task_end_date);
     }
 
     function get_contract_dates($projid)
@@ -435,25 +395,36 @@ try {
             $contractor_start = $project_start_date;
             $contractor_end = $project_end_date;
             $contractor_details = get_contract_dates($projid);
-            $task_details = get_task_dates($task_id, $site_id);
-            $task_start_date = $task_details['task_start_date'];
-            $task_end_date = $task_details['task_end_date'];
             if ($implementation_type == 2) {
                 $contractor_details =  get_contract_dates($projid);
                 if ($contractor_details) {
                     $contractor_start = $contractor_details['contractor_start'];
                     $contractor_end = $contractor_details['contractor_end'];
+
+                    $project_start_date = $contractor_details['contractor_start'];
+                    $project_end_date = $contractor_details['contractor_end'];
                 }
             }
+        }
+
+
+        $query_rsWorkBreakdown = $db->prepare("SELECT MIN(start_date) as start_date, MAX(end_date) as end_date FROM tbl_program_of_works WHERE projid=:projid");
+        $query_rsWorkBreakdown->execute(array(':projid' => $projid));
+        $row_rsWorkBreakdown = $query_rsWorkBreakdown->fetch();
+        if (!is_null($row_rsWorkBreakdown['start_date']) && !is_null($row_rsWorkBreakdown['end_date'])) {
+            $project_start_date = $row_rsWorkBreakdown['start_date'];
+            $project_end_date = $row_rsWorkBreakdown['end_date'];
+
+            $contractor_start = $row_rsWorkBreakdown['start_date'];
+            $contractor_end = $row_rsWorkBreakdown['end_date'];
         }
 
         $duration_details = get_duration($project_start_date, $project_end_date);
         $duration = $duration_details['duration'];
         $start_year = $duration_details['start_year'];
-        $table =  get_structure($site_id, $output_id, $task_id, $frequency, $duration, $start_year, $project_start_date, $project_end_date, $contractor_start, $contractor_end, $task_start_date, $task_end_date);
+        $table =  get_structure($site_id, $output_id, $task_id, $frequency, $duration, $start_year, $project_start_date, $project_end_date, $contractor_start, $contractor_end);
         echo json_encode(array("success" => true, 'table' => $table));
     }
 } catch (PDOException $ex) {
-    $result = flashMessage("An error occurred: " . $ex->getMessage());
-    echo $ex->getMessage();
+    customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

@@ -1,4 +1,4 @@
-const ajax_url = "includes/ajax/programsOfWorks/index.php";
+const ajax_url = "ajax/programsOfWorks/index";
 
 $(document).ready(function () {
     $("#add_output").submit(function (e) {
@@ -38,7 +38,7 @@ $(document).ready(function () {
             $("#tag-form-submit-frequency").prop("disabled", true);
             $.ajax({
                 type: "post",
-                url: "ajax/programsOfWorks/wbs.php",
+                url: "ajax/programsOfWorks/wbs",
                 data: form_data,
                 dataType: "json",
                 success: function (response) {
@@ -69,7 +69,7 @@ $(document).ready(function () {
         if (projid != '') {
             $.ajax({
                 type: "get",
-                url: "ajax/programsOfWorks/get-wbs.php",
+                url: "ajax/programsOfWorks/get-wbs",
                 data: {
                     projid: projid,
                     site_id: site_id,
@@ -108,7 +108,7 @@ function get_subtasks_wbs(output_id, site_id, task_id, subtask_id) {
     // if (subtask_id != '' && site_id != '') {
     $.ajax({
         type: "get",
-        url: "ajax/programsOfWorks/wbs.php",
+        url: "ajax/programsOfWorks/wbs",
         data: {
             get_wbs: "get_wbs",
             projid: $("#projid").val(),
@@ -231,7 +231,6 @@ function calculate_end_date(task_id) {
         $(`#end_date${task_id}`).val("");
         error_alert('Project start date please check');
     }
-
 }
 
 function approve_project(details) {
@@ -250,6 +249,7 @@ function approve_project(details) {
                     data: {
                         approve_stage: "approve_stage",
                         projid: details.projid,
+                        csrf_token: details.csrf_token,
                     },
                     dataType: "json",
                     success: function (response) {
@@ -259,16 +259,20 @@ function approve_project(details) {
                                 text: "Successfully submitted project",
                                 icon: "success",
                             });
+                            setTimeout(function () {
+                                window.location.href = redirect_url;
+                            }, 3000);
                         } else {
                             swal({
                                 title: "Project !",
                                 text: "Error submitting project",
                                 icon: "error",
                             });
+
+                            setTimeout(function () {
+                                window.location.reload(true);
+                            }, 3000);
                         }
-                        setTimeout(function () {
-                            window.location.href = redirect_url;
-                        }, 3000);
                     },
                 });
             } else {
@@ -276,7 +280,6 @@ function approve_project(details) {
             }
         });
 }
-
 
 const calculate_total = (direct_cost_id) => {
     var target = 0;
