@@ -100,7 +100,7 @@ function add_project_frequency(details) {
     $("#m_subtask_id").val(details.subtask_id);
 }
 
-function get_subtasks_wbs(output_id, site_id, task_id, subtask_id) {
+function get_subtasks_wbs(output_id, site_id, task_id, subtask_id, frequency) {
     $("#t_output_id").val(output_id);
     $("#t_site_id").val(site_id);
     $("#t_task_id").val(task_id);
@@ -115,9 +115,11 @@ function get_subtasks_wbs(output_id, site_id, task_id, subtask_id) {
             output_id: output_id,
             site_id: site_id,
             task_id: task_id,
-            subtask_id: subtask_id
+            subtask_id: subtask_id,
+            frequency: frequency
         },
         dataType: "json",
+        cache: false,
         success: function (response) {
             if (response.success) {
                 $("#tasks_wbs_table_body").html(response.structure);

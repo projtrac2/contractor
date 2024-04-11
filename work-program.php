@@ -79,6 +79,7 @@ if ($rows_sites > 0) {
                                                             <th style="width:10%">Duration</th>
                                                             <th style="width:15%">Start Date</th>
                                                             <th style="width:15%">End Date</th>
+                                                            <th>Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -92,6 +93,7 @@ if ($rows_sites > 0) {
                                                                 $tcounter++;
                                                                 $task_name = $row_rsTasks['task'];
                                                                 $task_id = $row_rsTasks['tkid'];
+                                                                $subtask_frequency = $row_rsTasks['frequency'];
                                                                 $unit =  $row_rsTasks['unit_of_measure'];
                                                                 $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
                                                                 $query_rsIndUnit->execute(array(":unit_id" => $unit));
@@ -117,6 +119,7 @@ if ($rows_sites > 0) {
                                                                     <td style="width:10%"><?= $duration ?> Days</td>
                                                                     <td style="width:15%"><?= $start_date ?></td>
                                                                     <td style="width:15%"><?= $end_date ?></td>
+                                                                    <td><button type="button" onclick="get_subtasks_wbs(<?=$output_id ?>, <?=$site_id ?>, <?=$msid?> , <?=$task_id?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" ><span class="glyphicon glyphicon-pencil"></span></button></td>
                                                                 </tr>
                                                         <?php
                                                             }
@@ -214,6 +217,7 @@ if ($total_Output > 0) {
                                                 <th style="width:10%">Duration</th>
                                                 <th style="width:15%">Start Date</th>
                                                 <th style="width:15%">End Date</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -227,6 +231,7 @@ if ($total_Output > 0) {
                                                     $tcounter++;
                                                     $task_name = $row_rsTasks['task'];
                                                     $task_id = $row_rsTasks['tkid'];
+                                                    $subtask_frequency = $row_rsTasks['frequency'];
                                                     $unit =  $row_rsTasks['unit_of_measure'];
                                                     $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
                                                     $query_rsIndUnit->execute(array(":unit_id" => $unit));
@@ -252,6 +257,7 @@ if ($total_Output > 0) {
                                                         <td style="width:10%"><?= $duration ?> Days</td>
                                                         <td style="width:15%"><?= $start_date ?> </td>
                                                         <td style="width:15%"><?= $end_date ?></td>
+                                                        <td><button type="button" onclick="get_subtasks_wbs(<?=$output_id ?>, <?=$site_id ?>, <?=$msid?> , <?=$task_id?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" ><span class="glyphicon glyphicon-pencil"></span></button></td>
                                                     </tr>
                                             <?php
                                                 }

@@ -920,6 +920,7 @@ try {
         $task_id = $_GET['task_id'];
         $subtask_id = $_GET['subtask_id'];
         $output_id = $_GET['output_id'];
+        $frequency = $_GET['frequency'];
         $structure = $task_start_date = $task_end_date = $duration = $title = '';
         $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid = :projid");
         $query_rsProjects->execute(array(":projid" => $projid));
@@ -932,7 +933,6 @@ try {
 
             $min_date = $row_rsWorkBreakdown['startdate'];
             $max_date = $row_rsWorkBreakdown['enddate'];
-            $frequency =  $row_rsProjects['activity_monitoring_frequency'];
 
             $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
             $query_rsTender->execute(array(":projid" => $projid));
@@ -958,7 +958,6 @@ try {
                     $task_end_date = $row_rsTask_Start_Dates['end_date'];
                     $duration = $row_rsTask_Start_Dates['duration'];
                     $extension_bool = false;
-                    $frequency = 2;
                     if ($frequency == 6) { // yearly
                         $extension_start = date('Y');
                         $structure = get_annual_table($contractor_start, $contractor_end, $task_start_date, $task_end_date, $startYears, $subtask_id, $site_id, $task_id, $frequency, $extension_bool, $extension_start);

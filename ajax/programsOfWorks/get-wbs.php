@@ -802,11 +802,15 @@ if (isset($_GET['get_wbs'])) {
     $task_id = $_GET['task_id'];
     $output_id = $_GET['output_id'];
     $projid = $_GET['projid'];
+    $frequency = $_GET['subtask_frequency'];
     $query_rsProjects = $db->prepare("SELECT * FROM tbl_projects p inner join tbl_programs g on g.progid=p.progid WHERE p.deleted='0' AND projid = :projid");
     $query_rsProjects->execute(array(":projid" => $projid));
     $row_rsProjects = $query_rsProjects->fetch();
     $totalRows_rsProjects = $query_rsProjects->rowCount();
-    $frequency = '';
+
+    $get_subtask_frequency = $db->prepare('SELECT * FROM tbl_task WHERE tkid=:tkid');
+    $get_subtask_frequency->execute([':tkid' => $task_id]);
+    
 
     $table_details = array('head' => '', 'colspan' => '', 'body' => '');
     if ($totalRows_rsProjects > 0) {
@@ -816,7 +820,6 @@ if (isset($_GET['get_wbs'])) {
 
         $min_date = $row_rsWorkBreakdown['startdate'];
         $max_date = $row_rsWorkBreakdown['enddate'];
-        $frequency = $row_rsProjects['activity_monitoring_frequency'];
         $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
         $query_rsTender->execute(array(":projid" => $projid));
         $row_rsTender = $query_rsTender->fetch();
@@ -832,7 +835,7 @@ if (isset($_GET['get_wbs'])) {
             $annually = $details['annually'];
             $quarterly = $details['quarterly'];
             $monthly = $details['monthly'];
-            $frequency = 3;
+            $frequency = 6;
             if ($frequency == 6) {
                 $table_details = get_annual_table($startYears, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end);
             } elseif ($frequency == 5) {

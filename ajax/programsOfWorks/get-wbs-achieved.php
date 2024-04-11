@@ -219,7 +219,7 @@ function filter_body($contractor_start, $contractor_end, $start_date, $end_date,
 function get_annual_table($startYears, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end)
 {
     global $db;
-    $colspan = $body =  $head = '';
+    $tables = [];
     $input_array = [];
     for ($i = 0; $i < count($startYears); $i++) {
         $start_date = $startYears[$i][0];
@@ -229,8 +229,6 @@ function get_annual_table($startYears, $site_id, $task_id, $frequency, $output_i
         $response = filter_head($contractor_start, $contractor_end, $start_date, $end_date, $task_id, $site_id);
         if ($response) {
             $input_array[] = [$start_date, $end_date];
-            $head .= "<th colspan='2'>$formated_date_start / $formated_date_end</th>";
-            $colspan .= "<th>Target</th><th>Achieved</th>";
         }
     }
 
@@ -245,7 +243,27 @@ function get_annual_table($startYears, $site_id, $task_id, $frequency, $output_i
             $subtask_id = $row_rsTasks['tkid'];
             $unit =  $row_rsTasks['unit_of_measure'];
             $unit_of_measure = get_unit_of_measure($unit);
-            $body .=
+            $table ='<div class="table-responsive">
+                    <table style="width:100%" class="tables-'. $site_id . $task_id .' table-bordered js-basic-example dataTable" id="direct_table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">#</th>
+                            <th rowspan="2">Subtask</th>
+                            <th rowspan="2">Unit of Measure</th>
+            ';
+            for ($i = 0; $i < count($input_array); $i++) {
+                $start_date = $input_array[$i][0];
+                $end_date = $input_array[$i][1];
+                $formated_date_start = date('Y', strtotime($start_date));
+                $formated_date_end = date('Y', strtotime($end_date));
+                $table .= "<th colspan='2'>$formated_date_start / $formated_date_end</th>";
+            }
+            $table .= '</tr><tr>';
+            for ($i = 0; $i < count($input_array); $i++) {
+                $table .= "<th>Target</th><th>Achieved</th>";
+            }
+            $table .= '</tr></thead><tbody>';
+            $table .=
                 "<tr>
                 <td style='width:5%'>$tcounter</td>
                 <td style='width:40%'>$task_name</td>
@@ -255,12 +273,14 @@ function get_annual_table($startYears, $site_id, $task_id, $frequency, $output_i
                 $end_date = $input_array[$i][1];
                 $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
                 $achieved = get_achieved($site_id, $task_id, $subtask_id, $start_date, $end_date);
-                $body .=  filter_body($contractor_start, $contractor_end, $start_date, $end_date, $target, $achieved, $site_id, $task_id, $subtask_id, 1);
+                $table .=  filter_body($contractor_start, $contractor_end, $start_date, $end_date, $target, $achieved, $site_id, $task_id, $subtask_id, 1);
             }
-            $body .= '</tr>';
+            $table .= '</tr></tbody>';
+
+            array_push($tables, $table);
         }
     }
-    return array('head' => $head, 'colspan' => $colspan, 'body' => $body);
+    return $tables;
 }
 
 function get_semiannual_table($annually, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end)
@@ -622,7 +642,7 @@ if (isset($_GET['get_wbs'])) {
             $annually = $details['annually'];
             $quarterly = $details['quarterly'];
             $monthly = $details['monthly'];
-            $frequency = 3;
+            $frequency = 6;
             if ($frequency == 6) {
                 $table_details = get_annual_table($startYears, $site_id, $task_id, $frequency, $output_id, $contractor_start, $contractor_end);
             } elseif ($frequency == 5) {
@@ -639,23 +659,7 @@ if (isset($_GET['get_wbs'])) {
         }
     }
 
-    $table =
-        '<div class="table-responsive">
-        <table style="width:100%" class="tables-'. $site_id . $task_id .' table-bordered js-basic-example dataTable" id="direct_table">
-            <thead>
-                <tr>
-                    <th rowspan="2">#</th>
-                    <th rowspan="2">Subtask</th>
-                    <th rowspan="2">Unit of Measure</th>
-                    ' . $table_details['head'] . '
-                </tr>
-                <tr>' . $table_details['colspan'] . '</tr>
-            </thead>
-            <tbody>
-                ' . $table_details['body'] . '
-            </tbody>
-        </table>
-    </div>';
+    
 
-    echo json_encode(array("success" => true, 'frequency' => $frequency, 'table' => $table, 'task_id' => $task_id, 'site_id' => $site_id));
+    echo json_encode(array("success" => true, 'frequency' => $frequency, 'table' => $table_details, 'task_id' => $task_id, 'site_id' => $site_id));
 }
