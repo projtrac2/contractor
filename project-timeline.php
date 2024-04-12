@@ -621,29 +621,29 @@ $data =  get_output_chart($projid);
 
 
     $(function() {
-        $('.tasks_id_header').each((index, element) => {
+        $('.achieved-btn').each((index, element) => {
             var projid = $("#projid").val();
-            var site_id = $(element).next().val();
-            $.ajax({
-                type: "get",
-                url: "ajax/programsOfWorks/get-wbs-achieved.php",
-                data: {
-                    projid: projid,
-                    site_id: site_id,
-                    output_id: $(element).next().next().val(),
-                    task_id: $(element).val(),
-                    get_wbs: 'get_wbs'
-                },
-                dataType: "json",
-                success: function(response) {
-                    console.log(response);
-                    let tkid = $(element).val();
-                    $(`.peter-${site_id + tkid}`).html(response.table);
-                    $(`.tables-${site_id + tkid}`).dataTable();
-                    // $('.tables').each((index, element) => {
-                    //     $(element).dataTable();
-                    // });
-                }
+            $(element).on('click', () => {
+                $.ajax({
+                    type: "get",
+                    url: "ajax/programsOfWorks/get-wbs-achieved.php",
+                    data: {
+                        projid: projid,
+                        site_id: $(element).next().val(),
+                        output_id: $(element).next().next().val(),
+                        task_id: $(element).next().next().next().val(),
+                        subtask_id: $(element).next().next().next().next().val(),
+                        subtask_start_date: $(element).next().next().next().next().next().val(),
+                        subtask_end_date: $(element).next().next().next().next().next().next().val(),
+                        get_wbs: 'get_wbs'
+                    },
+                    dataType: "json",
+                    cache: false,
+                    success: function(response) {
+                        let tkid = $(element).val();
+                        $(`#tasks_wbs_table_body`).html(response.table);
+                    }
+                });
             });
         });
     })
