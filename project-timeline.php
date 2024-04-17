@@ -112,7 +112,7 @@ if ($permission) {
                                 ?>
                                         <fieldset class="scheduler-border">
                                             <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
-                                                SITE <?= $counter ?> : <?= $site ?>
+                                                SITE  <?= $counter ?> : <?= $site ?>
                                             </legend>
                                             <?php
                                             $query_Site_Output = $db->prepare("SELECT * FROM tbl_output_disaggregation  WHERE output_site=:site_id");

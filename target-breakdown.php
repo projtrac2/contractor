@@ -73,7 +73,7 @@
                                                                                             <th style="width:10%">Duration</th>
                                                                                             <th style="width:15%">Start Date</th>
                                                                                             <th style="width:15%">End Date</th>
-                                                                                            <th>Action</th>
+                                                                                            <th>Action </th>
                                                                                         </tr>
                                                                                     </thead>
                                                                                     <tbody>

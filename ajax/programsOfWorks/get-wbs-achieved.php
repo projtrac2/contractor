@@ -373,7 +373,7 @@ function get_annual_table($startYears, $site_id, $task_id,  $frequency, $output_
             </tr>
         </thead>
         <tbody>
-        ' . $tr . '
+        ' . $tr .  '
         </tbody>
     </table>';
 

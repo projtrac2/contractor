@@ -875,7 +875,7 @@ try {
                 $daily_task_start_date = date('Y-m-d', strtotime('+1 day', strtotime($date)));
                 if ($daily_task_start_date >= $extension_start) {
                     $tr .= '<tr>
-                        <td>' . $hash . '</td>
+                        <td>' . $hash . ' </td>
                         <td>' . $date_show . '</td>
                         <td>
                             <input type="number" placeholder="Enter Target" value="' . $target . '" class="form-control yearly-target" name="yearly-target[]"  min="0" step="0.01"/>

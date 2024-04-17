@@ -554,7 +554,6 @@ function get_monthly_table($startYears, $monthly, $site_id, $task_id, $frequency
             $formated_head_start = date('Y', strtotime($task_start_date));
             $formated_head_end = date('Y', strtotime($task_end_date));
             $tr_years .= '<th colspan=' . $spans . '>' . $formated_head_start . ' / ' . $formated_head_end . '</th>';
-            // loop below insert here
             for ($t = 0; $t < count($new_months); $t++) {
                 $start_date = $new_months[$t][0];
                 $end_date = $new_months[$t][1];
