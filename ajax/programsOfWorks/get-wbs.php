@@ -124,6 +124,7 @@ try {
                     $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date);
                     $body .= filter_body($start_date, $end_date, $target, $site_id, $task_id, $subtask_id, 1);
                 }
+
                 $body .= '<td>';
                 if ($work_program) {
                     $body .=
