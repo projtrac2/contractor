@@ -1,13 +1,42 @@
 <?php
-include_once('includes/auth-head.php');
-try {
-    if (isset($_SESSION['attempt_again'])) {
-        $now = time();
-        if ($now >= $_SESSION['attempt_again']) {
-            unset($_SESSION['attempt']);
-            unset($_SESSION['attempt_again']);
-        }
+include_once('./includes/controller.php');
+
+//check if can login again
+if (isset($_SESSION['attempt_again'])) {
+    $now = time();
+    if ($now >= $_SESSION['attempt_again']) {
+        unset($_SESSION['attempt']);
+        unset($_SESSION['attempt_again']);
     }
+}
+
+if (isset($_POST['sign-in'])) {
+    //set login attempt if not set
+    if (!isset($_SESSION['attempt'])) {
+        $_SESSION['attempt'] = 0;
+    }
+
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $contractor = $contractor_auth->login($email, $password);
+
+    //check if there are 3 attempts already
+    // if ($_SESSION['attempt'] == $company_settings->login_attempts) {
+    //     $_SESSION['errorMessage'] = 'Attempt limit reached';
+    //     $contractor_auth->suspicious_activity($email);
+    //     header("location:index.php");
+    //     return;
+    // } else {
+        if ($contractor) {
+            //unset our attempt
+            unset($_SESSION['attempt']);
+            //$_SESSION['MM_Contractor'] = $contractor->contrid;
+            if ($contractor->first_login) {
+                header("location: set-new-password.php");
+            } else {
+
+                // $_SESSION['avatar'] = $contractor->avatar;
+                // $_SESSION['contractor_name'] = $contractor->contractor_name;
 
     if (isset($_POST['sign-in'])) {
         if (validate_csrf_token($_POST['csrf_token'])) {

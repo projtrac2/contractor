@@ -79,6 +79,7 @@ if ($rows_sites > 0) {
                                                             <th style="width:10%">Duration</th>
                                                             <th style="width:15%">Start Date</th>
                                                             <th style="width:15%">End Date</th>
+                                                            <th>Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -92,6 +93,7 @@ if ($rows_sites > 0) {
                                                                 $tcounter++;
                                                                 $task_name = $row_rsTasks['task'];
                                                                 $task_id = $row_rsTasks['tkid'];
+                                                                $subtask_frequency = $row_rsTasks['frequency'];
                                                                 $unit =  $row_rsTasks['unit_of_measure'];
                                                                 $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
                                                                 $query_rsIndUnit->execute(array(":unit_id" => $unit));
@@ -117,6 +119,7 @@ if ($rows_sites > 0) {
                                                                     <td style="width:10%"><?= $duration ?> Days</td>
                                                                     <td style="width:15%"><?= $start_date ?></td>
                                                                     <td style="width:15%"><?= $end_date ?></td>
+                                                                    <td><button type="button" onclick="get_subtasks_wbs(<?=$output_id ?>, <?=$site_id ?>, <?=$msid?> , <?=$task_id?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" ><span class="glyphicon glyphicon-pencil"></span></button></td>
                                                                 </tr>
                                                         <?php
                                                             }
@@ -194,46 +197,59 @@ if ($total_Output > 0) {
                                         </h5>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:5%">#</th>
-                                            <th style="width:40%">Item</th>
-                                            <th style="width:15%">Unit of Measure</th>
-                                            <th style="width:10%">Duration</th>
-                                            <th style="width:15%">Start Date</th>
-                                            <th style="width:15%">End Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
-                                        $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $msid));
-                                        $totalRows_rsTasks = $query_rsTasks->rowCount();
-                                        if ($totalRows_rsTasks > 0) {
-                                            $tcounter = 0;
-                                            while ($row_rsTasks = $query_rsTasks->fetch()) {
-                                                $tcounter++;
-                                                $task_name = $row_rsTasks['task'];
-                                                $task_id = $row_rsTasks['tkid'];
-                                                $unit =  $row_rsTasks['unit_of_measure'];
-                                                $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
-                                                $query_rsIndUnit->execute(array(":unit_id" => $unit));
-                                                $row_rsIndUnit = $query_rsIndUnit->fetch();
-                                                $totalRows_rsIndUnit = $query_rsIndUnit->rowCount();
-                                                $unit_of_measure = $totalRows_rsIndUnit > 0 ? $row_rsIndUnit['unit'] : '';
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="direct_table<?= $output_id ?>">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:5%">#</th>
+                                                <th style="width:40%">Item</th>
+                                                <th style="width:15%">Unit of Measure</th>
+                                                <th style="width:10%">Duration</th>
+                                                <th style="width:15%">Start Date</th>
+                                                <th style="width:15%">End Date</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
+                                            $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $msid));
+                                            $totalRows_rsTasks = $query_rsTasks->rowCount();
+                                            if ($totalRows_rsTasks > 0) {
+                                                $tcounter = 0;
+                                                while ($row_rsTasks = $query_rsTasks->fetch()) {
+                                                    $tcounter++;
+                                                    $task_name = $row_rsTasks['task'];
+                                                    $task_id = $row_rsTasks['tkid'];
+                                                    $subtask_frequency = $row_rsTasks['frequency'];
+                                                    $unit =  $row_rsTasks['unit_of_measure'];
+                                                    $query_rsIndUnit = $db->prepare("SELECT * FROM  tbl_measurement_units WHERE id = :unit_id");
+                                                    $query_rsIndUnit->execute(array(":unit_id" => $unit));
+                                                    $row_rsIndUnit = $query_rsIndUnit->fetch();
+                                                    $totalRows_rsIndUnit = $query_rsIndUnit->rowCount();
+                                                    $unit_of_measure = $totalRows_rsIndUnit > 0 ? $row_rsIndUnit['unit'] : '';
 
-                                                $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
-                                                $query_rsTask_Start_Dates->execute(array(':task_id' => $msid, ':site_id' => 0, ":subtask_id" => $task_id));
-                                                $row_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
-                                                $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
-                                                $start_date = $end_date = $duration =  "";
-                                                if ($totalRows_rsTask_Start_Dates > 0) {
-                                                    $start_date = date("d M Y", strtotime($row_rsTask_Start_Dates['start_date']));
-                                                    $end_date = date("d M Y", strtotime($row_rsTask_Start_Dates['end_date']));
-                                                    $duration = number_format($row_rsTask_Start_Dates['duration']);
+                                                    $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
+                                                    $query_rsTask_Start_Dates->execute(array(':task_id' => $msid, ':site_id' => 0, ":subtask_id" => $task_id));
+                                                    $row_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
+                                                    $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
+                                                    $start_date = $end_date = $duration =  "";
+                                                    if ($totalRows_rsTask_Start_Dates > 0) {
+                                                        $start_date = date("d M Y", strtotime($row_rsTask_Start_Dates['start_date']));
+                                                        $end_date = date("d M Y", strtotime($row_rsTask_Start_Dates['end_date']));
+                                                        $duration = number_format($row_rsTask_Start_Dates['duration']);
+                                                    }
+                                            ?>
+                                                    <tr id="row<?= $tcounter ?>">
+                                                        <td style="width:5%"><?= $tcounter ?></td>
+                                                        <td style="width:40%"><?= $task_name ?></td>
+                                                        <td style="width:15%"><?= $unit_of_measure ?></td>
+                                                        <td style="width:10%"><?= $duration ?> Days</td>
+                                                        <td style="width:15%"><?= $start_date ?> </td>
+                                                        <td style="width:15%"><?= $end_date ?></td>
+                                                        <td><button type="button" onclick="get_subtasks_wbs(<?=$output_id ?>, <?=$site_id ?>, <?=$msid?> , <?=$task_id?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px" ><span class="glyphicon glyphicon-pencil"></span></button></td>
+                                                    </tr>
+                                            <?php
                                                 }
                                         ?>
                                                 <tr id="row<?= $tcounter ?>">
@@ -260,5 +276,5 @@ if ($total_Output > 0) {
         </fieldset>
 <?php
     }
-}
+
 ?>
