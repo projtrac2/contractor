@@ -210,7 +210,7 @@ if ($total_Output > 0) {
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody> 
                                             <?php
                                             $query_rsTasks = $db->prepare("SELECT * FROM tbl_task WHERE outputid=:output_id AND msid=:msid  ORDER BY parenttask");
                                             $query_rsTasks->execute(array(":output_id" => $output_id, ":msid" => $msid));
