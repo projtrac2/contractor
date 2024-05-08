@@ -1,12 +1,4 @@
-.m-footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  text-align: center;
-  background-color: black;
-  color: white;
-  width: 100%;
-}
+
 
 .m-alert {
   padding: 0.6vw;
@@ -34,14 +26,101 @@
   font-size: 16px;
 }
 
-#resend-btn:hover {
-  cursor: pointer;
+.m-email {
+  color: black;
+  border-radius: 5px !important;
+  border: none;
+  width: 70%;
+  font-size: 12px !important;
+  padding-top: 0.001vw !important;
+  padding-right: 0.001vw !important;
+  padding-bottom: 0.001vw !important;
+  padding-left: 2.1vw !important;
+}
+
+.m-password {
+  color: black;
+  border-radius: 5px !important;
+  padding-top: 0.001vw !important;
+  padding-right: 0.001vw !important;
+  padding-bottom: 0.001vw !important;
+  padding-left: 2.1vw !important;
+  border: none;
+  width: 70%;
+  font-size: 12px !important;
+}
+
+#submit-btn {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  padding-left: 2vw;
+  padding-right: 2vw;
+  padding-top: 0.5vw;
+  padding-bottom: 0.5vw;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-radius: 5px;
+}
+
+#forgot-password {
+  background-color: transparent;
+  color: white;
+  border: 1.5px solid #003366;
+  padding-left: 2vw;
+  padding-right: 2vw;
+  padding-top: 0.5vw;
+  padding-bottom: 0.5vw;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-radius: 5px;
+}
+
+.m-footer {
+  text-align: center;
+  background-color: black;
+  color: white;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  font-size: 8px;
+}
+
+.m-bg {
+  margin-top: 2%;
+  text-align: center;
+}
+
+.m-bg img {
+  width: 70%;
+}
+
+.glass-bg-resp {
+  text-align: center;
+}
+
+.glass-bg-resp h4 {
+  font-size: 12px;
+}
+
+.glass-morphism {
+  /* From https://css.glass */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 86%;
+  margin: 10% auto;
 }
 
 @media only screen and (max-height: 600px) {
   /* CSS rules for extra small devices */
   .m-padding {
-    padding-top: 4vh;
+    padding-top: 2vh;
   }
 }
 
@@ -65,5 +144,213 @@
   /* CSS rules for large devices */
   .m-padding {
     padding-top: 10vh;
+  }
+}
+
+/** sm */
+@media (min-width: 640px) {
+  .m-footer {
+    text-align: center;
+    background-color: black;
+    color: white;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    font-size: 10px;
+  }
+}
+
+/** md */
+@media (min-width: 768px) {
+  .m-footer {
+    text-align: center;
+    background-color: black;
+    color: white;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+  }
+
+  body {
+    background-image: url("./images/back-14.jpg");
+  }
+
+  .glass-bg-resp {
+    text-align: left;
+  }
+
+  .m-bg {
+    margin-top: 0px;
+    text-align: left;
+  }
+
+  .m-bg img {
+    width: 50%;
+  }
+
+  #submit-btn {
+    background-color: #22c55e;
+    color: white;
+    border: none;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 5px;
+  }
+
+  #forgot-password {
+    background-color: transparent;
+    color: white;
+    border: 1.5px solid #003366;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 5px;
+  }
+
+  .m-email {
+    color: black;
+    padding-top: 0.2vw !important;
+    padding-right: 0.2vw !important;
+    padding-bottom: 0.2vw !important;
+    padding-left: 1vw !important;
+    border-radius: 5px !important;
+    border: none;
+    width: 40%;
+    font-size: 16px !important;
+  }
+
+  .m-password {
+    color: black;
+    padding-top: 0.2vw !important;
+    padding-right: 0.2vw !important;
+    padding-bottom: 0.2vw !important;
+    padding-left: 1vw !important;
+    border-radius: 5px !important;
+    border: none;
+    width: 40%;
+    font-size: 16px !important;
+  }
+
+  .glass-bg-resp h4 {
+    font-size: 18px;
+  }
+
+  .glass-morphism {
+    background: transparent;
+    border-radius: 0px;
+    box-shadow: none;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    border: none;
+    width: 86%;
+    margin: 0px;
+    /* From https://css.glass */
+  }
+}
+
+/** lg */
+@media (min-width: 1024px) {
+  .glass-morphism {
+    background: transparent;
+    border-radius: 0px;
+    box-shadow: none;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    border: none;
+    width: 86%;
+    margin: 0px;
+    /* From https://css.glass */
+  }
+
+  .glass-bg-resp h4 {
+    font-size: 18px;
+  }
+
+  .m-footer {
+    text-align: center;
+    background-color: black;
+    color: white;
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    font-size: 14px;
+  }
+
+  body {
+    background-image: url("./images/back-14.jpg");
+  }
+
+  .glass-bg-resp {
+    text-align: left;
+  }
+
+  .m-bg {
+    margin-top: 0px;
+    text-align: left;
+  }
+
+  .m-bg img {
+    width: 50%;
+  }
+
+  #submit-btn {
+    background-color: #22c55e;
+    color: white;
+    border: none;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 5px;
+  }
+
+  #forgot-password {
+    background-color: transparent;
+    color: white;
+    border: 1.5px solid #003366;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 0.5vw;
+    padding-bottom: 0.5vw;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 5px;
+  }
+
+  .m-email {
+    color: black;
+    padding-top: 0.2vw !important;
+    padding-right: 0.2vw !important;
+    padding-bottom: 0.2vw !important;
+    padding-left: 1vw !important;
+    border-radius: 5px !important;
+    border: none;
+    width: 40%;
+    font-size: 16px !important;
+  }
+
+  .m-password {
+    color: black;
+    padding-top: 0.2vw !important;
+    padding-right: 0.2vw !important;
+    padding-bottom: 0.2vw !important;
+    padding-left: 1vw !important;
+    border-radius: 5px !important;
+    border: none;
+    width: 40%;
+    font-size: 16px !important;
   }
 }

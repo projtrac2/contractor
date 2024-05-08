@@ -65,34 +65,35 @@ try {
 ?>
     <div class="container">
         <div class="row">
-            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 m-padding">
-                <div style="margin-bottom: 8vh;">
-                    <img src="./images/logo-proj.png" alt="" srcset="" width="500">
+            <div class="col-lg-4 col-md-12 col-sm-12 m-padding">
+                <div class="glass-morphism">
+                    <div style="margin-bottom: 6vh;" class="m-bg glass-bg-resp">
+                        <img src="./images/logo-proj.png" alt="" srcset="" width="500">
+                    </div>
+                    <div style="margin-bottom: 4vh;" class="glass-bg-resp">
+                        <h4 style="color: #003366;">Login</h4>
+                    </div>
+                    <div class="glass-bg-resp">
+                        <form method="POST" id="loginusers">
+                            <div style="margin-bottom: 1vh;">
+                                <input class="m-email" name="email" type="email" id="email" placeholder="Email" required>
+                                <p style="color: #dc2626;"></p>
+                            </div>
+                            <div style="margin-bottom: 4vh;">
+                                <input class="m-password" name="password" type="password" id="password" placeholder="Password" required>
+                                <p style="color: #dc2626;"></p>
+                            </div>
+                            <input type="hidden" name="sign-in" value="sign-in">
+                            <div class="btn-flex">
+                                <button id="submit-btn" type="button">Sign In</button>
+                                <a href="forgot-password.php"><button type="button" id="forgot-password">Forgot Password</button></a>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
-                <div style="margin-bottom: 4vh;">
-                    <h4 style="color: #003366;"> Login</h4>
-                    <p style="color: black;">Login to your account.</p>
-                </div>
-                <form method="POST" id="loginusers">
-                    <div style="margin-bottom: 4vh;">
-                        <input name="email" type="email" id="email" placeholder="Email" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
-                        <p style="color: #dc2626;"></p>
-                    </div>
-                    <div style="margin-bottom: 4vh;">
-                        <input name="password" type="password" id="password" placeholder="Password" style="color:black; padding: 0.6vw; border-radius: 5px; border: none; width: 40%; font-size: 16px;" required>
-                        <p style="color: #dc2626;"></p>
-                    </div>
-                    <?= csrf_token_html(); ?>
-                    <input type="hidden" name="sign-in" value="sign-in">
-                    <div style="display: flex; gap: 2vw;">
-                        <button id="submit-btn" type="button" style="background-color: #22c55e; color: white; border: none; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Sign In</button>
-                        <a href="forgot-password.php">
-                            <button type="button" style="background-color: transparent; color: white; border: 1px solid #22c55e; padding-left: 2vw; padding-right: 2vw; padding-top: 0.5vw; padding-bottom: 0.5vw; font-size: 14px; font-weight: 600; letter-spacing: 1px; border-radius: 5px;">Forgot Password</button>
-                        </a>
-                    </div>
-                </form>
             </div>
-            <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+            <div class="col-lg-8 col-md-12 col-sm-12">
             </div>
         </div>
     </div>

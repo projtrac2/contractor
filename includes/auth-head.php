@@ -19,10 +19,11 @@ include_once('./includes/contractor-sessions.php');
     <script src="https://kit.fontawesome.com/6557f5a19c.js" crossorigin="anonymous"></script>
     <style>
         body {
-            background-image: url("./images/back-14.jpg");
+            background-image: url("./images/main-4.jpg");
             background-repeat: no-repeat;
             background-size: 100% 100%;
             min-height: 100vh;
+            padding: 0px !important;
         }
     </style>
     <link rel="stylesheet" href="assets/css/auth/auth.css">
