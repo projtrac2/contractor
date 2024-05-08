@@ -122,7 +122,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                                                                             <h5>
                                                                                                 <ul>
-                                                                                                    TASK <?= $task_counter ?>: <?= $milestone ?>
+                                                                                                    TASK <?= $task_counter ?>: <?= $milestone ?> <?php var_dump($Rows_rsTask_Start_Dates) ?>
                                                                                                     <div class="btn-group" style="float:right">
                                                                                                         <div class="btn-group" style="float:right">
                                                                                                             <button type="button" data-toggle="modal" data-target="#outputItemModal" data-backdrop="static" data-keyboard="false" onclick="get_tasks(<?= htmlspecialchars(json_encode($details)) ?>)" class="btn btn-success btn-sm" style="float:right; margin-top:-5px">
@@ -237,6 +237,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                         $query_rsTask_Start_Dates->execute(array(':task_id' => $msid, ':site_id' => 0));
                                                         $totalRows_rsTask_Start_Dates = $query_rsTask_Start_Dates->rowCount();
                                                         $edit = $totalRows_rsTask_Start_Dates > 1 ? 1 : 0;
+
                                                         $details = array("output_id" => $output_id, "site_id" => $site_id, 'task_id' => $msid, 'edit' => $edit);
                                                         $task_counter++;
                                                 ?>
@@ -251,7 +252,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                                                     <div class="btn-group" style="float:right">
                                                                                         <div class="btn-group" style="float:right">
                                                                                             <button type="button" data-toggle="modal" data-target="#outputItemModal" data-backdrop="static" data-keyboard="false" onclick="get_tasks(<?= htmlspecialchars(json_encode($details)) ?>)" class="btn btn-success btn-sm" style="float:right; margin-top:-5px">
-                                                                                                <?php echo $edit == 1 ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>' ?>
+                                                                                                <?php echo $totalRows_rsTask_Start_Dates > 0 ? '<span class="glyphicon glyphicon-pencil"></span>' : '<span class="glyphicon glyphicon-plus"></span>' ?>
                                                                                             </button>
                                                                                         </div>
                                                                                     </div>
@@ -402,7 +403,7 @@ if ($permission && isset($_GET['projid']) && !empty($_GET['projid'])) {
                                                                 stage_id:1,
                                                             }";
                                                     ?>
-                                                        <button type="button" onclick="proceed(<?= $data_entry_details ?>)" class="btn btn-success">Proceed</button>
+                                                        <button type="button" onclick="proceed(<?= $data_entry_details ?>)" class="btn btn-success"><?= $project_sub_stage > 1 ? "Amend" : 'Proceed' ?>Proceed</button>
                                                     <?php
                                                     }
                                                     ?>

@@ -8,7 +8,7 @@ try {
         $query_Site_score = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_project_monitoring_checklist_score where site_id=:site_id ");
         $query_Site_score->execute(array(":site_id" => $site_id));
         if ($start_date != "") {
-            $query_Site_score = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_project_monitoring_checklist_score where site_id=:site_id AND created_at>=:start_date ");
+            $query_Site_score = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_project_monitoring_checklist_score where site_id=:site_id AND created_at >=:start_date ");
             $query_Site_score->execute(array(":site_id" => $site_id, ":start_date" => $start_date));
             if ($end_date != '') {
                 $query_Site_score = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_project_monitoring_checklist_score where site_id=:site_id AND created_at>=:start_date AND created_at <= :end_date");
@@ -16,7 +16,6 @@ try {
             }
         }
         $row_site_score = $query_Site_score->fetch();
-
         return  !is_null($row_site_score['achieved']) ? true : false;
     }
 
@@ -43,7 +42,6 @@ try {
         global $db;
         $query_Site_score = $db->prepare("SELECT SUM(achieved) as achieved FROM tbl_project_monitoring_checklist_score where site_id=:site_id AND output_id=:output_id AND subtask_id=:subtask_id");
         $query_Site_score->execute(array(":site_id" => $site_id, ":output_id" => $output_id, ":subtask_id" => $task_id));
-        $rows_site_score = $query_Site_score->rowCount();
         $row_site_score = $query_Site_score->fetch();
         return ($row_site_score['achieved'] != null) ? $row_site_score['achieved'] : 0;
     }
@@ -64,8 +62,8 @@ try {
         $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : "";
         $end_date = isset($_GET['end_date']) && !empty($_GET['end_date']) ?  $_GET['end_date'] : '';
         $success = true;
-        $data = '
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">';
+        $data = '<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">';
+
         $query_Sites = $db->prepare("SELECT * FROM tbl_project_sites WHERE projid=:projid");
         $query_Sites->execute(array(":projid" => $projid));
         $rows_sites = $query_Sites->rowCount();
@@ -75,8 +73,6 @@ try {
                 $site_id = $row_Sites['site_id'];
                 $site = $row_Sites['site'];
                 $counter++;
-
-
                 if (get_site_achieved($site_id, $start_date, $end_date)) {
                     $data .= '
                     <fieldset class="scheduler-border">
@@ -92,7 +88,6 @@ try {
                             </div>
                         </div>
                     </div>';
-
                     $query_Site_Output = $db->prepare("SELECT * FROM tbl_output_disaggregation  WHERE output_site=:site_id");
                     $query_Site_Output->execute(array(":site_id" => $site_id));
                     $rows_Site_Output = $query_Site_Output->rowCount();
@@ -114,7 +109,6 @@ try {
                                     $query_rsTargetUsed->execute(array(":output_id" => $output_id));
                                     $Rows_rsTargetUsed = $query_rsTargetUsed->fetch();
                                     $output_achieved = $Rows_rsTargetUsed['achieved'] != null ? $Rows_rsTargetUsed['achieved'] : 0;
-
                                     $data .= '
                                     <fieldset class="scheduler-border">
                                         <legend class="scheduler-border" style="background-color:#c7e1e8; border-radius:3px">
@@ -137,10 +131,10 @@ try {
                                                         <thead>
                                                             <tr>
                                                                 <th style="width:5%">#</th>
-                                                                <th style="width:40%">Item</th>
-                                                                <th style="width:25%">Achieved</th>
-                                                                <th style="width:10%">Unit Cost (Ksh)</th>
-                                                                <th style="width:10%">Total Cost (Ksh)</th>
+                                                                <th style="width:50%">Item</th>
+                                                                <th style="width:25%">Measurement Unit</th>
+                                                                <th style="width:10%">Target</th>
+                                                                <th style="width:10%">Achieved</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>';
@@ -163,15 +157,15 @@ try {
                                                 $data .= '
                                                 <tr id="row' . $tcounter . '">
                                                     <td style="width:5%">' . $tcounter . '</td>
-                                                    <td style="width:35%">' . $description . '</td>
-                                                    <td style="width:35%">' . $measurement_unit . '</td>
-                                                    <td style="width:20%">' . number_format($units_no, 2)  . '</td>
+                                                    <td style="width:50%">' . $description . '</td>
+                                                    <td style="width:25%">' . $measurement_unit . '</td>
+                                                    <td style="width:10%">' . number_format($units_no, 2)  . '</td>
                                                     <td style="width:10%">' . number_format($achieved, 2) . '</td>
-                                                    <td style="width:10%">' . number_format($cost, 2) . '</td>
                                                 </tr>';
                                             }
                                         }
                                     }
+
                                     $data .= '
                                                             </tbody>
                                                         </table>
@@ -228,10 +222,10 @@ try {
                                     <thead>
                                         <tr>
                                             <th style="width:5%">#</th>
-                                            <th style="width:40%">Item</th>
-                                            <th style="width:25%">Achieved</th>
-                                            <th style="width:10%">Unit Cost (Ksh)</th>
-                                            <th style="width:10%">Total Cost (Ksh)</th>
+                                            <th style="width:50%">Item</th>
+                                            <th style="width:25%">Measurement Unit</th>
+                                            <th style="width:10%">Target</th>
+                                            <th style="width:10%">Achieved</th>
                                         </tr>
                                     </thead>
                                     <tbody>';
@@ -254,11 +248,10 @@ try {
                                     $data .= '
                                     <tr id="row' . $tcounter . '">
                                         <td style="width:5%">' . $tcounter . '</td>
-                                        <td style="width:35%">' . $description . '</td>
-                                        <td style="width:35%">' . $measurement_unit . '</td>
-                                        <td style="width:20%">' . number_format($units_no, 2)  . '</td>
+                                        <td style="width:50%">' . $description . '</td>
+                                        <td style="width:25%">' . $measurement_unit . '</td>
+                                        <td style="width:10%">' . number_format($units_no, 2)  . '</td>
                                         <td style="width:10%">' . number_format($achieved, 2) . '</td>
-                                        <td style="width:10%">' . number_format($cost, 2) . '</td>
                                     </tr>';
                                 }
                             }

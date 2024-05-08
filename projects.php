@@ -2,53 +2,9 @@
 require('includes/head.php');
 if ($permission) {
     try {
-        $query_rsProjects = $db->prepare("SELECT p.*, s.sector, g.projsector, g.projdept, g.directorate FROM tbl_projects p inner join tbl_programs g ON g.progid=p.progid inner join tbl_sectors s on g.projdept=s.stid WHERE p.deleted='0' AND p.projcontractor = :projcontractor AND projstage >= 8  ORDER BY p.projid DESC");
+        $query_rsProjects = $db->prepare("SELECT p.*, s.sector, g.projsector, g.projdept, g.directorate FROM tbl_projects p inner join tbl_programs g ON g.progid=p.progid inner join tbl_sectors s on g.projdept=s.stid WHERE p.deleted='0' AND p.projcontractor = :projcontractor AND projstage >= 17  ORDER BY p.projid DESC");
         $query_rsProjects->execute(array(":projcontractor" => $user_name));
         $totalRows_rsProjects = $query_rsProjects->rowCount();
-
-        function get_progress($progress, $projstatus)
-        {
-            $css_class = "progress-bar progress-bar-info progress-bar-striped active";
-            $progress_bar = $progress;
-            if ($progress == 100 && $projstatus == 5) {
-                $css_class = "progress-bar progress-bar-success progress-bar-striped active";
-                $progress_bar = 100;
-            } else if ($progress > 100) {
-                if ($projstatus == 5) {
-                    $css_class = "progress-bar progress-bar-success progress-bar-striped active";
-                    $progress_bar = 100;
-                } else {
-                    $css_class = "progress-bar progress-bar-info progress-bar-striped active";
-                    $progress_bar = 100;
-                }
-            } else if ($progress <  100 && $projstatus == 5) {
-                $css_class = "progress-bar progress-bar-success progress-bar-striped active";
-                $progress_bar = 100;
-            }
-
-            return  '
-            <div class="progress" style="height:20px; font-size:10px; color:black">
-                <div class="' . $css_class . '" role="progressbar" aria-valuenow="' . $progress_bar . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress_bar . '%; height:20px; font-size:10px; color:black">
-                    ' . $progress . '%
-                </div>
-            </div>';
-        }
-
-        function get_status($projstatus)
-        {
-            global $db;
-            $query_Projstatus =  $db->prepare("SELECT * FROM tbl_status WHERE statusid = :projstatus");
-            $query_Projstatus->execute(array(":projstatus" => $projstatus));
-            $row_Projstatus = $query_Projstatus->fetch();
-            $total_Projstatus = $query_Projstatus->rowCount();
-            $status = "";
-            if ($total_Projstatus > 0) {
-                $status_name = $row_Projstatus['statusname'];
-                $status_class = $row_Projstatus['class_name'];
-                $status = '<button type="button" class="' . $status_class . '" style="width:100%">' . $status_name . '</button>';
-            }
-            return $status;
-        }
 
         function get_issues($projid)
         {
@@ -66,6 +22,24 @@ if ($permission) {
             $query_issues->execute(array(":projid" => $projid));
             $count_issues = $query_issues->rowCount();
             return $count_issues > 0 ? true : false;
+        }
+
+        function get_activity($projid)
+        {
+            global $db;
+            $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid LIMIT 1");
+            $query_rsTask_Start_Dates->execute(array(':projid' => $projid));
+            $rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
+            return $rows_rsTask_Start_Dates ? true : false;
+        }
+
+        function get_breakdown($projid)
+        {
+            global $db;
+            $query_rsTargetBreakdown = $db->prepare("SELECT * FROM  tbl_project_target_breakdown WHERE projid=:projid ");
+            $query_rsTargetBreakdown->execute(array(':projid' => $projid));
+            $totalRows_rsTargetBreakdown = $query_rsTargetBreakdown->rowCount();
+            return $totalRows_rsTargetBreakdown > 0 ? true : false;
         }
 ?>
         <div class="container-fluid">
@@ -115,11 +89,6 @@ if ($permission) {
                                                 $proj_progress = calculate_project_progress($projid, $implementation);
                                                 $progress = number_format(calculate_project_progress($projid, $implementation), 2);
 
-                                                $query_rsTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE projid=:projid LIMIT 1");
-                                                $query_rsTask_Start_Dates->execute(array(':projid' => $projid));
-                                                $rows_rsTask_Start_Dates = $query_rsTask_Start_Dates->fetch();
-                                                $activity = $rows_rsTask_Start_Dates ? "Edit" : "Add";
-
                                                 $query_rsTender_start_Date = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid LIMIT 1");
                                                 $query_rsTender_start_Date->execute(array(':projid' => $projid));
                                                 $rows_rsTender_start_Date = $query_rsTender_start_Date->fetch();
@@ -128,6 +97,9 @@ if ($permission) {
                                                     $project_start_date =  $rows_rsTender_start_Date['startdate'];
                                                     $project_end_date =  $rows_rsTender_start_Date['enddate'];
                                                 }
+
+                                                $breakdown = get_breakdown($projid);
+                                                $activity = get_activity($projid);
 
                                                 $filter = true;
                                                 $today = date("Y-m-d");
@@ -158,7 +130,7 @@ if ($permission) {
                                                                     ?>
                                                                             <li>
                                                                                 <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                    <i class="fa fa-plus-square-o"></i> <?= $activity ?> Work Program
+                                                                                    <i class="fa fa-plus-square-o"></i> <?= $activity ? "Edit" : "Add" ?> Work Program
                                                                                 </a>
                                                                             </li>
                                                                         <?php
@@ -166,7 +138,7 @@ if ($permission) {
                                                                         ?>
                                                                             <li>
                                                                                 <a type="button" href="add-target-breakdown.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                    <i class="fa fa-plus-square-o"></i> <?= $breakdown ?> Activity Target Breakdown
+                                                                                    <i class="fa fa-plus-square-o"></i> <?= $breakdown ? "Edit" : "Add" ?> Activity Target Breakdown
                                                                                 </a>
                                                                             </li>
                                                                         <?php
@@ -198,6 +170,7 @@ if ($permission) {
                                                                     <?php
                                                                         }
                                                                     }
+
                                                                     ?>
                                                                 </ul>
                                                             </div>

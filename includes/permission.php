@@ -120,6 +120,51 @@ function calculate_output_progress($output_id)
 	return $output_progress;
 }
 
+
+function get_progress($progress, $projstatus)
+{
+	$css_class = "progress-bar progress-bar-info progress-bar-striped active";
+	$progress_bar = $progress;
+	if ($progress == 100 && $projstatus == 5) {
+		$css_class = "progress-bar progress-bar-success progress-bar-striped active";
+		$progress_bar = 100;
+	} else if ($progress > 100) {
+		if ($projstatus == 5) {
+			$css_class = "progress-bar progress-bar-success progress-bar-striped active";
+			$progress_bar = 100;
+		} else {
+			$css_class = "progress-bar progress-bar-info progress-bar-striped active";
+			$progress_bar = 100;
+		}
+	} else if ($progress <  100 && $projstatus == 5) {
+		$css_class = "progress-bar progress-bar-success progress-bar-striped active";
+		$progress_bar = 100;
+	}
+
+	return  '
+		<div class="progress" style="height:20px; font-size:10px; color:black">
+			<div class="' . $css_class . '" role="progressbar" aria-valuenow="' . $progress_bar . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $progress_bar . '%; height:20px; font-size:10px; color:black">
+				' . $progress . '%
+			</div>
+		</div>';
+}
+
+function get_status($status_id)
+{
+	global $db;
+	$query_Projstatus =  $db->prepare("SELECT * FROM tbl_status WHERE statusid = :status_id");
+	$query_Projstatus->execute(array(":status_id" => $status_id));
+	$row_Projstatus = $query_Projstatus->fetch();
+	$total_Projstatus = $query_Projstatus->rowCount();
+	$status = "";
+	if ($total_Projstatus > 0) {
+		$status_name = $row_Projstatus['statusname'];
+		$status_class = $row_Projstatus['class_name'];
+		$status = '<button type="button" class="' . $status_class . '" style="width:100%">' . $status_name . '</button>';
+	}
+	return $status;
+}
+
 function restriction()
 {
 	return "

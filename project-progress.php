@@ -353,3 +353,4 @@ if ($permission) {
 
 require('includes/footer.php');
 ?>
+<script src="assets/js/monitoring/progress.js"></script>
