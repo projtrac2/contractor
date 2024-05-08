@@ -1,4 +1,26 @@
 $(function () {
+    $(function () {
+        $('#login').on('click', (e) => {
+            e.preventDefault();
+
+            if (!$('#email').val()) {
+                $('#email').next().text('field required');
+                return;
+            } else {
+                $('#email').next().text('');
+            }
+
+            if (!$('#password').val()) {
+                $('#password').next().text('field required');
+                return;
+            } else {
+                $('#password').next().text('');
+            }
+            $('#loginusers').submit();
+        })
+    });
+
+
     $('#submit_otp').on('click', (e) => {
         e.preventDefault();
         if (!$('#otp_code').val()) {
@@ -15,9 +37,7 @@ $(function () {
         e.preventDefault();
         $('#resend-form').submit();
     })
-})
 
-$(function () {
     $('#submit-btn').on('click', (e) => {
         e.preventDefault();
         if (!$('#email').val()) {
@@ -28,10 +48,7 @@ $(function () {
         }
         $('#loginusers').submit();
     })
-})
 
-
-$(function () {
     $('#submit-btn').on('click', (e) => {
         e.preventDefault();
 

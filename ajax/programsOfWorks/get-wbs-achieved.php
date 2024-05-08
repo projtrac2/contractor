@@ -412,5 +412,6 @@ try {
         echo json_encode(array("success" => true, "structure" => $table, 'task' => $row_rsTask, "start_date" => $subtask_start_date, "end_date" => $subtask_end_date, "duration" => $subtask_duration));
     }
 } catch (PDOException $ex) {
+    var_dump($ex);
     customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

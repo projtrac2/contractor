@@ -96,7 +96,6 @@ try {
                 $header = "Semi 2";
             }
         }
-
         return $header;
     }
 
@@ -127,7 +126,7 @@ try {
                     $financial_year = get_financial_year($start_date);
                     $formated_date_start = date('d M Y', strtotime($start_date));
                     $formated_date_end = date('d M Y', strtotime($end_date));
-                    $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date, $frequency);
+                    $target = get_target($site_id, $task_id, $subtask_id, $start_date, $end_date);
                     $subtask_details = '';
                     if ($details_count == 1) {
                         $header = get_frequency_header($frequency, $subtask_start_date);
@@ -274,6 +273,7 @@ try {
         }
 
         $week_dates = [];
+        $duration  += 1;
         for ($j = 0; $j < $duration; $j++) {
             for ($i = 1; $i < 53; $i++) {
                 $week_array = getStartAndEndDate($i, $start_year);
@@ -386,7 +386,6 @@ try {
 
         $subtask_end_date = $subtask_start_date = $subtask_duration = '';
         if ($totalRows_rsProjects > 0) {
-            $frequency = $row_rsProjects['activity_monitoring_frequency'];
             $query_rsSubTask_Start_Dates = $db->prepare("SELECT * FROM tbl_program_of_works WHERE task_id=:task_id AND site_id=:site_id AND subtask_id=:subtask_id ");
             $query_rsSubTask_Start_Dates->execute(array(':task_id' => $task_id, ':site_id' => $site_id, ":subtask_id" => $subtask_id));
             $row_rsSubTask_Start_Dates = $query_rsSubTask_Start_Dates->fetch();
@@ -398,6 +397,7 @@ try {
                 $duration_details = get_duration($subtask_start_date, $subtask_end_date);
                 $duration = $duration_details['duration'];
                 $start_year = $duration_details['start_year'];
+                $frequency_id = $duration_details['frequency_id'];
                 $table =  get_structure($site_id, $subtask_id, $task_id, $frequency, $duration, $start_year, $subtask_start_date, $subtask_end_date);
             }
         }

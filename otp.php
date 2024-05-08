@@ -90,6 +90,8 @@ if (isset($_SESSION['MM_Contractor_Email'])) {
                 </div>
             </div>
         </div>
+
+
 <?php
         include_once('includes/auth-footer.php');
     } catch (PDOException $ex) {

@@ -31,7 +31,8 @@ $company_settings = $company_details->get_company_details();
 function customErrorHandler($errno, $errstr, $errfile, $errline)
 {
     $message = "Error: [$errno] $errstr - $errfile:$errline";
-    error_log($message . PHP_EOL, 3, "./log/error_log.log");
+    var_dump($message);
+    error_log($message . PHP_EOL, 3, "./logs/error_log.log");
 }
 
 set_error_handler("customErrorHandler");

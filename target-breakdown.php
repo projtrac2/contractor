@@ -103,7 +103,7 @@
                                                                         <td style="width:15%"><?= $frequency ?></td>
                                                                         <td style="width:15%">
                                                                             <button type="button" onclick="get_subtasks_wbs(<?= $output_id ?>, <?= $site_id ?>, <?= $msid ?> , <?= $task_id ?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px">
-                                                                                <span class="glyphicon  glyphicon-<?= $totalRows_rsTargetBreakdown > 0 ? 'pencil' : 'plus' ?>"></span>
+                                                                                <span class="glyphicon  glyphicon-eye-open"></span>
                                                                             </button>
                                                                         </td>
                                                                     </tr>
@@ -214,7 +214,7 @@
                                                             <td style="width:15%"><?= $frequency ?></td>
                                                             <td style="width:15%">
                                                                 <button type="button" onclick="get_subtasks_wbs(<?= $output_id ?>, <?= $site_id ?>, <?= $msid ?> , <?= $task_id ?>, <?= $subtask_frequency ?>)" data-toggle="modal" data-target="#outputItemModals" data-backdrop="static" data-keyboard="false" class="btn btn-success btn-sm" style=" margin-top:-5px">
-                                                                    <span class="glyphicon  glyphicon-<?= $totalRows_rsTargetBreakdown > 0 ? 'pencil' : 'plus' ?>"></span>
+                                                                    <span class="glyphicon  glyphicon-eye-open"></span>
                                                                 </button>
                                                             </td>
                                                         </tr>

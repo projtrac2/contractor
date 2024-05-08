@@ -149,7 +149,7 @@ if ($permission  && (isset($_GET['projid']) && !empty($_GET["projid"]))) {
                             if ($payment_plan == 1) {
                                 if (milestone_based($projid)) {
                             ?>
-                                    <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" data-target="#addFormModal" onclick="get_details(<?= $projid ?>, <?= $payment_plan ?>, '<?= htmlspecialchars($project_name) ?>', '<?= $contractor_number ?>', '<?= $complete ?>')" id="btnback">
+                                    <input type="button" VALUE="Request Payment" class="btn btn-primary pull-right" data-toggle="modal" data-target="#addFormModal" onclick="get_details(<?= $projid ?>, <?= $payment_plan ?>, '<?= htmlspecialchars($project_name) ?>', '<?= $contractor_number ?>')" id="btnback">
                                 <?php
                                 }
                             } else {
