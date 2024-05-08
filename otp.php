@@ -13,24 +13,24 @@ if (isset($_SESSION['MM_Contractor_Email'])) {
                         $_SESSION['MM_Contractor'] = $contractor->contrid;
                         $_SESSION['avatar'] = $contractor->avatar;
                         $_SESSION['contractor_name'] = $contractor->contractor_name;
-                        logActivity("otp code", "true");
+                        // logActivity("otp code", "true");
                         header("location: projects.php");
                         return;
                     } else {
-                        logActivity("otp code", "false");
+                        // logActivity("otp code", "false");
                         $_SESSION["successMessage"] = "Sorry your details are incorrect!";
                         header("location: otp.php");
                         return;
                     }
                 } else {
-                    logActivity("otp code", "false");
+                    // logActivity("otp code", "false");
                     $mail_otp_code = $contractor_auth->otp($contractor_email);
                     $_SESSION["successMessage"] = "Sorry Otp code has been expired a new code has been sent to your email!";
                     header("location: otp.php");
                     return;
                 }
             } else {
-                logActivity("otp code", "false");
+                // logActivity("otp code", "false");
                 $_SESSION["successMessage"] = "Sorry try again later!";
                 header("location: index.php");
                 return;

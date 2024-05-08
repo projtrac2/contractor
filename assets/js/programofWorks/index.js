@@ -31,7 +31,7 @@ $(document).ready(function () {
         });
     });
 
-    $("#add_project_frequency").submit(function (e) {
+    $("#add_project_frequency_data").submit(function (e) {
         e.preventDefault();
         if (calculate_total1()) {
             var form_data = $(this).serialize();
@@ -101,10 +101,10 @@ function add_project_frequency(details) {
 }
 
 function get_subtasks_wbs(output_id, site_id, task_id, subtask_id, frequency) {
-    $("#t_output_id").val(output_id);
-    $("#t_site_id").val(site_id);
-    $("#t_task_id").val(task_id);
-    $("#t_subtask_id").val(subtask_id);
+    $("#output_id").val(output_id);
+    $("#site_id").val(site_id);
+    $("#task_id").val(task_id);
+    $("#subtask_id").val(subtask_id);
     // if (subtask_id != '' && site_id != '') {
     $.ajax({
         type: "get",
@@ -235,7 +235,7 @@ function calculate_end_date(task_id) {
     }
 }
 
-function approve_project(details) {
+function proceed(details) {
     swal({
         title: "Are you sure?",
         text: `You want to submit program of works for ${details.project_name} !`,
@@ -251,7 +251,10 @@ function approve_project(details) {
                     data: {
                         approve_stage: "approve_stage",
                         projid: details.projid,
-                        csrf_token: details.csrf_token,
+                        workflow_stage: details.workflow_stage,
+                        sub_stage: details.sub_stage,
+                        stage_id: details.stage_id,
+                        csrf_token: $("#csrf_token").val(),
                     },
                     dataType: "json",
                     success: function (response) {

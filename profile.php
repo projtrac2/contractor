@@ -332,6 +332,7 @@ if ($permission) {
         <!-- end body  -->
 <?php
     } catch (PDOException $ex) {
+        var_dump($ex);
         customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
     }
 } else {

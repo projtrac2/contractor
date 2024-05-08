@@ -125,16 +125,19 @@ try {
     }
 
     if (isset($_POST['approve_stage'])) {
-        $results = false;
+        $success = false;
         if (validate_csrf_token($_POST['csrf_token'])) {
             $projid = $_POST['projid'];
-            $sql = $db->prepare("UPDATE tbl_projects SET proj_substage=:proj_substage WHERE  projid=:projid");
-            $result  = $sql->execute(array(":proj_substage" => 3, ":projid" => $projid));
-            $results =  $mail->send_master_data_email($projid, 6, '');
+            $workflow_stage = $_POST['workflow_stage'];
+            $sub_stage = $_POST['sub_stage'];
+            $stage_id = $_POST['stage_id'];
+            $sql = $db->prepare("UPDATE tbl_projects SET stage_id=:stage_id, projstage=:workflow_stage, proj_substage=:proj_substage WHERE  projid=:projid");
+            $success  = $sql->execute(array(":stage_id" => $stage_id, ":workflow_stage" => $workflow_stage, ":proj_substage" => $sub_stage, ":projid" => $projid));
         }
-        logActivity("submit", "$results");
-        echo json_encode(array('success' => $result));
+        logActivity("submit", "$success");
+        echo json_encode(array('success' => $success));
     }
 } catch (PDOException $ex) {
+    var_dump($ex);
     customErrorHandler($ex->getCode(), $ex->getMessage(), $ex->getFile(), $ex->getLine());
 }

@@ -11,7 +11,7 @@ session_start();
 // Function to generate HTML with CSRF token input
 function csrf_token_html()
 {
-    return   '<input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">';
+    return   '<input type="hidden" name="csrf_token" id="csrf_token" value="' . $_SESSION['csrf_token'] . '">';
 }
 
 // Validate CSRF token

@@ -130,10 +130,8 @@ if ($permission) {
                                                     $project_end_date =  $rows_rsTender_start_Date['enddate'];
                                                 }
 
-                                                $filter = false;
+                                                $filter = true;
                                                 $today = date("Y-m-d");
-                                                $filter = (($projstage == 8 && (($sub_stage == 1 || $project_start_date <= $today) || ($sub_stage == 2))) || ($projstage == 9)) ? true : false;
-
 
                                                 if ($filter) {
                                         ?>
@@ -156,12 +154,20 @@ if ($permission) {
                                                                 </button>
                                                                 <ul class="dropdown-menu">
                                                                     <?php
-                                                                    if ($projstage == 8) {
-                                                                        if ($sub_stage > 0) {
+                                                                    if ($projstage == 17) {
+                                                                        if ($sub_stage < 4) {
                                                                     ?>
                                                                             <li>
                                                                                 <a type="button" href="add-work-program.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
                                                                                     <i class="fa fa-plus-square-o"></i> <?= $activity ?> Work Program
+                                                                                </a>
+                                                                            </li>
+                                                                        <?php
+                                                                        } else if ($sub_stage == 8) {
+                                                                        ?>
+                                                                            <li>
+                                                                                <a type="button" href="add-target-breakdown.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
+                                                                                    <i class="fa fa-plus-square-o"></i> <?= $breakdown ?> Activity Target Breakdown
                                                                                 </a>
                                                                             </li>
                                                                         <?php
@@ -170,7 +176,7 @@ if ($permission) {
                                                                         ?>
                                                                         <li>
                                                                             <a type="button" href="payment.php?projid=<?= $projid_hashed ?>" id="addFormModalBtn">
-                                                                                <i class="fa fa-money text-warning"></i> Payment Requests
+                                                                                <i class="fa fa-money text-warning"></i> Payment
                                                                             </a>
                                                                         </li>
                                                                         <?php

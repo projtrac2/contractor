@@ -43,7 +43,7 @@ function logActivity($action, $outcome)
     $ip_address = $_SERVER['REMOTE_ADDR'];
     $sql = $db->prepare("INSERT INTO tbl_audit_log (user_id,user_type,page_url,action,outcome,ip_address) VALUES (:user_id,:user_type,:page_url,:action,:outcome,:ip_address)");
     $results = $sql->execute(array(':user_id' => $user_name, ":user_type" => 2, ":page_url" => $current_page_url, ":action" => $action, ':outcome' => $outcome, ':ip_address' => $ip_address));
-    return $results;
+    return true;
 }
 
 
