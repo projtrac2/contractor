@@ -67,16 +67,13 @@ if ($permission) {
                         <div class="row clearfix">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
                                 <ul class="list-group">
-                                    <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
-                                    <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
-                                    <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
-                                    <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
-                                    <li class="list-group-item"><strong>Project Progress: </strong>
-                                        <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                            <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                                <?= $percent2 ?>%
-                                            </div>
-                                        </div>
+                                    <li class="list-group-item list-group-item list-group-item-action active"> Project: <?= $projname ?> </li>
+                                    <li class="list-group-item">
+                                        <strong> Code: </strong> <?= $projcode ?>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <strong> Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <strong> End Date: </strong><?= date('d M Y', strtotime($end_date)); ?>
                                     </li>
                                 </ul>
                             </div>
@@ -626,7 +623,7 @@ $data =  get_output_chart($projid);
             $(element).on('click', () => {
                 $.ajax({
                     type: "get",
-                    url: "ajax/programsOfWorks/get-wbs-achieved.php",
+                    url: "ajax/programsOfWorks/get-wbs-achieved",
                     data: {
                         projid: projid,
                         site_id: $(element).next().val(),
@@ -642,6 +639,15 @@ $data =  get_output_chart($projid);
                     success: function(response) {
                         let tkid = $(element).val();
                         $(`#tasks_wbs_table_body`).html(response.table);
+
+                        $("#tasks_wbs_table_body").html(response.structure);
+                        var subtask = response.task;
+                        $("#subtask_start_date").html(response.start_date);
+                        $("#subtask_duration").html(response.duration);
+                        $("#subtask_end_date").html(response.end_date);
+                        $("#subtask_target").html(subtask.units_no + ' ' + subtask.unit);
+                        $("#subtask_name").html(subtask.task);
+                        $("#total_target").val(subtask.units_no);
                     }
                 });
             });

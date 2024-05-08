@@ -110,8 +110,7 @@ if ($permission) {
                                                 $projname = $row_rsProjects['projname'];
                                                 $projcode = $row_rsProjects['projcode'];
                                                 $projstatus = $row_rsProjects['projstatus'];
-                                                $project_start_date =  $row_rsProjects['projstartdate'];
-                                                $project_end_date =  $row_rsProjects['projenddate'];
+                                                $project_start_date =  $project_end_date = "";
                                                 $projcontractor =  $row_rsProjects['projcategory'];
                                                 $proj_progress = calculate_project_progress($projid, $implementation);
                                                 $progress = number_format(calculate_project_progress($projid, $implementation), 2);

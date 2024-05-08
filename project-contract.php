@@ -12,7 +12,6 @@ if ($permission && (isset($_GET['proj']) && !empty($_GET["proj"]))) {
         $row_rsMyP = $query_rsMyP->fetch();
         $rows_rsMyP = $query_rsMyP->rowCount();
 
-
         $query_rsTender = $db->prepare("SELECT * FROM tbl_tenderdetails WHERE projid=:projid");
         $query_rsTender->execute(array(":projid" => $projid));
         $row_rsTender = $query_rsTender->fetch();
@@ -139,17 +138,8 @@ if ($permission && (isset($_GET['proj']) && !empty($_GET["proj"]))) {
                             <div class="row clearfix">
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
                                     <ul class="list-group">
-                                        <li class="list-group-item list-group-item list-group-item-action active">Project Name: <?= $projname ?> </li>
-                                        <li class="list-group-item"><strong>Project Code: </strong> <?= $projcode ?> </li>
-                                        <li class="list-group-item"><strong>Project Start Date: </strong> <?= date('d M Y', strtotime($start_date)); ?> </li>
-                                        <li class="list-group-item"><strong>Project End Date: </strong><?= date('d M Y', strtotime($end_date)); ?> </li>
-                                        <li class="list-group-item"><strong>Project Progress: </strong>
-                                            <div class="progress" style="height:23px; margin-bottom:1px; margin-top:1px; color:black">
-                                                <div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="<?= $percent2 ?>" aria-valuemin="0" aria-valuemax="100" style="width: <?= $percent2 ?>%; margin:auto; padding-left: 10px; padding-top: 3px; text-align:left; color:black">
-                                                    <?= $percent2 ?>%
-                                                </div>
-                                            </div>
-                                        </li>
+                                        <li class="list-group-item list-group-item list-group-item-action active"> Project: <?= $projname ?> </li>
+                                        <li class="list-group-item"><strong> Code: </strong> <?= $projcode ?> </li>
                                     </ul>
                                 </div>
                             </div>
